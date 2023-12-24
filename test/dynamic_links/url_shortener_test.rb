@@ -5,6 +5,11 @@ class DynamicLinks::UrlShortenerTest < ActiveSupport::TestCase
     @url_shortener = DynamicLinks::UrlShortener.new
   end
 
+  test "valid_url? returns true for a valid URL" do
+    url = "https://example.com"
+    assert @url_shortener.valid_url?(url)
+  end
+
   test "shorten returns a string" do
     url = "https://example.com"
     short_url = @url_shortener.shorten(url)

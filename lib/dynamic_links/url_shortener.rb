@@ -3,6 +3,13 @@ module DynamicLinks
     MIN_LENGTH = 5
     BASE62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".freeze
 
+    def valid_url?(url)
+      uri = URI.parse(url)
+      uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+    rescue URI::InvalidURIError
+      false
+    end
+
     # @param url [String] The URL to shorten
     # @param min_length [Integer] The minimum length of the short URL
     # we use this parameter to increase the length of the short URL

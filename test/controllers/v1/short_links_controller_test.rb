@@ -2,7 +2,7 @@ require "test_helper"
 
 class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTest
   test "should get create" do
-    post '/v1/shortLinks'
+    post '/v1/shortLinks', params: { url: 'https://example.com' }
     expected_body_response = {
       shortLink: 'http://link',
       previewLink: 'http://xxx.goo.gl/foo?preview',

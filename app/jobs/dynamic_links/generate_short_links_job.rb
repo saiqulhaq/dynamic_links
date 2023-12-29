@@ -22,8 +22,8 @@ module DynamicLinks
 
     def generate_unique_short_code
       loop do
-        code = # TODO generate a short code using specified strategy
-        break code unless ShortenedUrl.exists?(short_url: code)
+        # code = # TODO generate a short code using specified strategy
+        # break code unless ShortenedUrl.exists?(short_url: code)
       end
     end
   end

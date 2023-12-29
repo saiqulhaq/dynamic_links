@@ -10,7 +10,8 @@
 #
 # Indexes
 #
-#  index_dynamic_links_clients_on_api_key  (api_key)
+#  index_dynamic_links_clients_on_api_key  (api_key) UNIQUE
+#  index_dynamic_links_clients_on_name     (name) UNIQUE
 #
 
 one:

@@ -4,6 +4,7 @@ PATH
     dynamic_links (0.1.0)
       nanoid (~> 2.0)
       rails (>= 5)
+      redis (>= 4)
 
 GEM
   remote: https://rubygems.org/
@@ -180,6 +181,10 @@ GEM
     rake (13.1.0)
     rdoc (6.6.2)
       psych (>= 4.0.0)
+    redis (5.0.8)
+      redis-client (>= 0.17.0)
+    redis-client (0.19.1)
+      connection_pool
     reline (0.4.1)
       io-console (~> 0.5)
     ruby2_keywords (0.0.5)

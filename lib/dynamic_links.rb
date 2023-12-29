@@ -5,6 +5,7 @@ require "dynamic_links/shortening_strategies/base_strategy"
 require "dynamic_links/shortening_strategies/sha256_strategy"
 require "dynamic_links/shortening_strategies/md5_strategy"
 require "dynamic_links/shortening_strategies/crc32_strategy"
+require "dynamic_links/shortening_strategies/nano_id_strategy"
 
 module DynamicLinks; end
 

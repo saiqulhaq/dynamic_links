@@ -2,7 +2,7 @@ require "dynamic_links/version"
 require "dynamic_links/engine"
 require "dynamic_links/strategy_factory"
 require "dynamic_links/shortening_strategies/base_strategy"
-require "dynamic_links/shortening_strategies/base62_strategy"
+require "dynamic_links/shortening_strategies/sha256_strategy"
 require "dynamic_links/shortening_strategies/md5_strategy"
 
 module DynamicLinks; end
@@ -21,7 +21,5 @@ module DynamicLinks
     rescue URI::InvalidURIError
       false
     end
-
-
   end
 end

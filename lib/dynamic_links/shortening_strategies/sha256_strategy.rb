@@ -1,6 +1,6 @@
 module DynamicLinks
   module ShorteningStrategies
-    class Base62Strategy < BaseStrategy
+    class SHA256Strategy < BaseStrategy
       MIN_LENGTH = 5
 
       BASE62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".freeze

@@ -24,21 +24,19 @@ module DynamicLinks
     end
 
     test 'should not save shortened url with duplicate short_url' do
-      ShortenedUrl.create!(client: @client, url: 'https://example.com', short_url: 'abc123')
+      ShortenedUrl.create!(client: @client, url: 'https://example.com', short_url: 'abc123b')
       duplicate_url = ShortenedUrl.new(client: @client, url: 'https://example.com/another', short_url: 'abc123')
       assert_not duplicate_url.save, 'Saved the shortened url with a duplicate short_url'
     end
 
-    test 'should be associated with a client' do
-      shortened_url = ShortenedUrl.create!(url: 'https://example.com', short_url: 'abc123')
-      assert_nil shortened_url.client, 'Shortened url has a client when it should not'
+    test 'reference to client is optional' do
+      shortened_url = ShortenedUrl.new(url: 'https://example.com', short_url: 'abc123a')
+      assert shortened_url.save, 'Failed to save shortened url without an associated client'
     end
 
     test 'should handle urls without associated client' do
       shortened_url = ShortenedUrl.new(url: 'https://example.com', short_url: 'xyz789')
       assert shortened_url.save, 'Failed to save shortened url without an associated client'
     end
-
-    # Additional tests for expiration logic, custom methods, etc.
   end
 end

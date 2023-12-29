@@ -13,10 +13,10 @@
 #  index_dynamic_links_clients_on_api_key  (api_key)
 #
 
-service_a:
-  name: Client 1
-  api_key: API_KEY_1
+one:
+  name: "Test Client One"
+  api_key: "api_key_one"
 
-service_b:
-  name: Client 2
-  api_key: API_KEY_2
+two:
+  name: "Test Client Two"
+  api_key: "api_key_two"

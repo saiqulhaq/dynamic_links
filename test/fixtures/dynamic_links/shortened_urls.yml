@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  client: one
+  url: "https://example.com/one"
+  short_url: "abc123"
+
+two:
+  client: two
+  url: "https://example.com/two"
+  short_url: "def456"
+
+three:
+  client: one
+  url: "https://example.com/three"
+  short_url: "ghi789"
+

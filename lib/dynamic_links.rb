@@ -9,7 +9,6 @@ module DynamicLinks; end
 
 strategy = DynamicLinks::StrategyFactory.get_strategy(:md5)
 short_url = strategy.shorten("https://example.com")
-puts short_url
 
 module DynamicLinks
   class UrlShortener

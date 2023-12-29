@@ -4,7 +4,7 @@ module DynamicLinks
       case strategy_name
       when :md5
         ShorteningStrategies::MD5Strategy.new
-      when :base62
+      when :sha256
         ShorteningStrategies::SHA256Strategy.new
       # Other strategies...
       else

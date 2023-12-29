@@ -19,13 +19,13 @@ module DynamicLinks
     end
 
     test 'should save valid shortened url' do
-      shortened_url = ShortenedUrl.new(client: @client, url: 'https://example.com', short_url: 'abc123')
+      shortened_url = ShortenedUrl.new(client: @client, url: 'https://example.com', short_url: 'abc123ss')
       assert shortened_url.save, 'Failed to save valid shortened url'
     end
 
     test 'should not save shortened url with duplicate short_url' do
       ShortenedUrl.create!(client: @client, url: 'https://example.com', short_url: 'abc123b')
-      duplicate_url = ShortenedUrl.new(client: @client, url: 'https://example.com/another', short_url: 'abc123')
+      duplicate_url = ShortenedUrl.new(client: @client, url: 'https://example.com/another', short_url: 'abc123b')
       assert_not duplicate_url.save, 'Saved the shortened url with a duplicate short_url'
     end
 

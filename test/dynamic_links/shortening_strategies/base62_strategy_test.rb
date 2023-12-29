@@ -1,13 +1,8 @@
 require "test_helper"
 
-class DynamicLinks::UrlShortenerTest < ActiveSupport::TestCase
+class DynamicLinks::ShorteningStrategies::Base62StrategyTest < ActiveSupport::TestCase
   def setup
-    @url_shortener = DynamicLinks::UrlShortener.new
-  end
-
-  test "valid_url? returns true for a valid URL" do
-    url = "https://example.com"
-    assert @url_shortener.valid_url?(url)
+    @url_shortener = DynamicLinks::ShorteningStrategies::Base62Strategy.new
   end
 
   test "shorten returns a string" do
@@ -39,34 +34,34 @@ class DynamicLinks::UrlShortenerTest < ActiveSupport::TestCase
     url = ""
     short_url = @url_shortener.shorten(url)
     assert_not_nil short_url
-    assert short_url.length >= DynamicLinks::UrlShortener::MIN_LENGTH
+    assert short_url.length >= DynamicLinks::ShorteningStrategies::Base62Strategy::MIN_LENGTH
   end
 
   test "shorten handles a very long URL" do
     url = "https://example.com/" + "a" * 500
     short_url = @url_shortener.shorten(url)
     assert_kind_of String, short_url
-    assert short_url.length >= DynamicLinks::UrlShortener::MIN_LENGTH
+    assert short_url.length >= DynamicLinks::ShorteningStrategies::Base62Strategy::MIN_LENGTH
   end
 
   test "shorten handles non-URL strings" do
     url = "this is not a valid URL"
     short_url = @url_shortener.shorten(url)
     assert_kind_of String, short_url
-    assert short_url.length >= DynamicLinks::UrlShortener::MIN_LENGTH
+    assert short_url.length >= DynamicLinks::ShorteningStrategies::Base62Strategy::MIN_LENGTH
   end
 
   test "shorten handles URL with query parameters" do
     url = "https://example.com?param1=value1&param2=value2"
     short_url = @url_shortener.shorten(url)
     assert_kind_of String, short_url
-    assert short_url.length >= DynamicLinks::UrlShortener::MIN_LENGTH
+    assert short_url.length >= DynamicLinks::ShorteningStrategies::Base62Strategy::MIN_LENGTH
   end
 
   test "shorten handles URL with special characters" do
     url = "https://example.com/path?query=特殊文字#fragment"
     short_url = @url_shortener.shorten(url)
     assert_kind_of String, short_url
-    assert short_url.length >= DynamicLinks::UrlShortener::MIN_LENGTH
+    assert short_url.length >= DynamicLinks::ShorteningStrategies::Base62Strategy::MIN_LENGTH
   end
 end

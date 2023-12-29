@@ -1,10 +1,6 @@
 module DynamicLinks
   module ShorteningStrategies
     class SHA256Strategy < BaseStrategy
-      MIN_LENGTH = 5
-
-      BASE62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".freeze
-
       # @param url [String] The URL to shorten
       # @param min_length [Integer] The minimum length of the short URL
       # we use this parameter to increase the length of the short URL
@@ -18,21 +14,6 @@ module DynamicLinks
 
         # Ensure the short URL is at least #{min_length} characters
         short_url.ljust(min_length, '0')
-      end
-
-
-      private
-
-      # Convert an integer into a Base62 string
-      def base62_encode(integer)
-        return '0' if integer == 0
-
-        result = ''
-        while integer > 0
-          result.prepend(BASE62_CHARS[integer % 62])
-          integer /= 62
-        end
-        result
       end
     end
   end

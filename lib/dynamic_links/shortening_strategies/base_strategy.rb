@@ -1,0 +1,28 @@
+module DynamicLinks
+  module ShorteningStrategies
+    class BaseStrategy
+      MIN_LENGTH = 5
+
+      BASE62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".freeze
+
+      def shorten(url)
+        raise NotImplementedError, "You must implement the shorten method"
+      end
+
+      private
+
+      # Convert an integer into a Base62 string
+      def base62_encode(integer)
+        return '0' if integer == 0
+
+        result = ''
+        while integer > 0
+          result.prepend(BASE62_CHARS[integer % 62])
+          integer /= 62
+        end
+        result
+      end
+    end
+  end
+end
+

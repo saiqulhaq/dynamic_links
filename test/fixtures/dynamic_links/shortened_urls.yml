@@ -1,0 +1,33 @@
+# == Schema Information
+#
+# Table name: dynamic_links_shortened_urls
+#
+#  id         :bigint           not null, primary key
+#  client_id  :bigint
+#  url        :string(2083)     not null
+#  short_url  :string(10)       not null
+#  expires_at :datetime
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#
+# Indexes
+#
+#  index_dynamic_links_shortened_urls_on_client_id  (client_id)
+#  index_dynamic_links_shortened_urls_on_short_url  (short_url) UNIQUE
+#
+
+one:
+  client: one
+  url: "https://example.com/one"
+  short_url: "abc123"
+
+two:
+  client: two
+  url: "https://example.com/two"
+  short_url: "def456"
+
+three:
+  client: one
+  url: "https://example.com/three"
+  short_url: "ghi789"
+

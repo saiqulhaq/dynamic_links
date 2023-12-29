@@ -18,18 +18,12 @@ class DynamicLinks::V1::ShortLinksController < ApplicationController
     # shorten url
     short_url = url_shortener.shorten(url)
     # save to db (not implemented yet)
-    short_link = ShortLink.create!(url: url, short_url: short_url)
+    # short_link = ShortLink.create!(url: url, short_url: short_url)
     # render json
     render json: {
       shortLink: short_link.short_url,
       previewLink: "#{short_link.short_url}?preview}",
       warning: []
     }, status: :created
-  end
-
-  private
-
-  def url_shortener
-    @url_shortener ||= DynamicLinks::UrlShortener.new
   end
 end

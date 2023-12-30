@@ -6,7 +6,12 @@ module DynamicLinks
         ShorteningStrategies::MD5Strategy.new
       when :sha256
         ShorteningStrategies::SHA256Strategy.new
-      # Other strategies...
+      when :crc32
+        ShorteningStrategies::CRC32Strategy.new
+      when :nano_id
+        ShorteningStrategies::NanoIdStrategy.new
+      when :redis_counter
+        ShorteningStrategies::RedisCounterStrategy.new
       else
         raise "Unknown strategy: #{strategy_name}"
       end

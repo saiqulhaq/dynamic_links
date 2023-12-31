@@ -7,21 +7,24 @@ require "dynamic_links/shortening_strategies/md5_strategy"
 require "dynamic_links/shortening_strategies/crc32_strategy"
 require "dynamic_links/shortening_strategies/nano_id_strategy"
 require "dynamic_links/shortening_strategies/redis_counter_strategy"
-
-module DynamicLinks; end
-
-strategy = DynamicLinks::StrategyFactory.get_strategy(:md5)
-short_url = strategy.shorten("https://example.com")
+require "dynamic_links/configuration"
 
 module DynamicLinks
-  class UrlShortener
-    MIN_LENGTH = 5
+  class << self
+    attr_writer :configuration
 
-    def valid_url?(url)
-      uri = URI.parse(url)
-      uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
-    rescue URI::InvalidURIError
-      false
+    def configuration
+      @configuration ||= Configuration.new
     end
+
+    def configure
+      yield(configuration)
+    end
+  end
+
+  def self.shorten_url(url)
+    strategy_class = "DynamicLinks::ShorteningStrategies::#{configuration.shortening_strategy.to_s.camelize}Strategy".constantize
+    strategy = strategy_class.new
+    strategy.shorten(url)
   end
 end

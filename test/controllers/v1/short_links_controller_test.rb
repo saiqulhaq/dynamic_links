@@ -23,5 +23,6 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
       assert_equal content_type, @response.content_type
       assert_equal expected_body_response, JSON.parse(response.body)
     end
+    assert_mock dynamic_links_mock
   end
 end

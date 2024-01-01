@@ -7,21 +7,42 @@ require "dynamic_links/shortening_strategies/md5_strategy"
 require "dynamic_links/shortening_strategies/crc32_strategy"
 require "dynamic_links/shortening_strategies/nano_id_strategy"
 require "dynamic_links/shortening_strategies/redis_counter_strategy"
-
-module DynamicLinks; end
-
-strategy = DynamicLinks::StrategyFactory.get_strategy(:md5)
-short_url = strategy.shorten("https://example.com")
+require "dynamic_links/shortening_strategies/mock_strategy"
+require "dynamic_links/configuration"
 
 module DynamicLinks
-  class UrlShortener
-    MIN_LENGTH = 5
+  class << self
+    attr_writer :configuration
 
-    def valid_url?(url)
-      uri = URI.parse(url)
-      uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
-    rescue URI::InvalidURIError
-      false
+    def configuration
+      @configuration ||= Configuration.new
     end
+
+    def configure
+      yield(configuration)
+    end
+  end
+
+  def self.shorten_url(url)
+    begin
+      strategy_class = "DynamicLinks::ShorteningStrategies::#{configuration.shortening_strategy.to_s.camelize}Strategy".constantize
+      strategy = strategy_class.new
+    rescue NameError
+      raise "Invalid shortening strategy: #{configuration.shortening_strategy}"
+    rescue ArgumentError
+      raise "#{strategy_class} needs to be initialized with arguments"
+    end
+    strategy.shorten(url)
+  end
+
+  # mimic Firebase Dynamic Links API
+  def self.generate_short_url(original_url)
+    short_link = shorten_url(original_url)
+
+    {
+      shortLink: short_link,
+      previewLink: "#{short_link}?preview=true",
+      warning: []
+    }
   end
 end

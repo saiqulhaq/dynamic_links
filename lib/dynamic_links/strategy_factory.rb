@@ -12,6 +12,8 @@ module DynamicLinks
         ShorteningStrategies::NanoIdStrategy.new
       when :redis_counter
         ShorteningStrategies::RedisCounterStrategy.new
+      when :mock
+        ShorteningStrategies::MockStrategy.new
       else
         raise "Unknown strategy: #{strategy_name}"
       end

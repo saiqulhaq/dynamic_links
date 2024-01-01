@@ -17,7 +17,7 @@ class DynamicLinksTest < ActiveSupport::TestCase
 
   test "shorten_url invokes the correct strategy and shortens URL" do
     DynamicLinks.configure do |config|
-      config.shortening_strategy = :Mock
+      config.shortening_strategy = :mock
     end
 
     strategy_mock = Minitest::Mock.new
@@ -32,7 +32,7 @@ class DynamicLinksTest < ActiveSupport::TestCase
 
   test "generate_short_url returns the correct structure" do
     DynamicLinks.configure do |config|
-      config.shortening_strategy = :Mock
+      config.shortening_strategy = :mock
     end
 
     expected_response = {

@@ -23,21 +23,16 @@ module DynamicLinks
     end
   end
 
-  @strategy_classes_mutex = Mutex.new
-
   def self.shorten_url(url)
-    @strategy_classes ||= {}
-    strategy_key = configuration.shortening_strategy.to_s
+    strategy_key = configuration.shortening_strategy
 
     begin
-      @strategy_classes_mutex.synchronize do
-        @strategy_classes[strategy_key] ||= "DynamicLinks::ShorteningStrategies::#{strategy_key.camelize}Strategy".constantize
-      end
-      strategy = @strategy_classes[strategy_key].new
-    rescue NameError
-      raise "Invalid shortening strategy: #{strategy_key}"
+      strategy = StrategyFactory.get_strategy(strategy_key)
+    rescue RuntimeError => e
+      # This will catch the 'Unknown strategy' error from the factory
+      raise "Invalid shortening strategy: #{strategy_key}. Error: #{e.message}"
     rescue ArgumentError
-      raise "#{@strategy_classes[strategy_key]} needs to be initialized with arguments"
+      raise "#{strategy_key} strategy needs to be initialized with arguments"
     rescue => e
       raise "Unexpected error while initializing the strategy: #{e.message}"
     end

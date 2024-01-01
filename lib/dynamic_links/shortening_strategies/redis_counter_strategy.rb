@@ -2,10 +2,9 @@ require 'redis'
 
 module DynamicLinks
   module ShorteningStrategies
+    # There is no guarantee of the length of the shortened URL
     class RedisCounterStrategy < BaseStrategy
       REDIS_COUNTER_KEY = "dynamic_links:counter".freeze
-      MIN_LENGTH = 12
-      MAX_LENGTH = 15 # this one is just a guess
 
       def initialize
         # TODO: use pool of connections

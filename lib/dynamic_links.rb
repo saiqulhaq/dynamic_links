@@ -7,6 +7,7 @@ require "dynamic_links/shortening_strategies/md5_strategy"
 require "dynamic_links/shortening_strategies/crc32_strategy"
 require "dynamic_links/shortening_strategies/nano_id_strategy"
 require "dynamic_links/shortening_strategies/redis_counter_strategy"
+require "dynamic_links/shortening_strategies/mock_strategy"
 require "dynamic_links/configuration"
 
 module DynamicLinks
@@ -26,5 +27,16 @@ module DynamicLinks
     strategy_class = "DynamicLinks::ShorteningStrategies::#{configuration.shortening_strategy.to_s.camelize}Strategy".constantize
     strategy = strategy_class.new
     strategy.shorten(url)
+  end
+
+  # mimic Firebase Dynamic Links API
+  def self.generate_short_url(original_url)
+    short_link = shorten_url(original_url)
+
+    {
+      shortLink: short_link,
+      previewLink: "#{short_link}?preview=true",
+      warning: []
+    }
   end
 end

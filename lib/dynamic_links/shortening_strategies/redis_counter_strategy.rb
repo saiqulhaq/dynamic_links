@@ -2,8 +2,8 @@ require 'redis'
 
 module DynamicLinks
   module ShorteningStrategies
-    # There is no guarantee of the length of the shortened URL
     class RedisCounterStrategy < BaseStrategy
+      MIN_LENGTH = 12
       REDIS_COUNTER_KEY = "dynamic_links:counter".freeze
 
       def initialize
@@ -14,12 +14,11 @@ module DynamicLinks
       # Shortens the given URL using a Redis counter
       # @param url [String] The URL to shorten
       # @return [String] The shortened URL, 12 characters long
-      def shorten(url)
-        # Increment the counter in Redis
+      def shorten(url, min_length: MIN_LENGTH)
         counter = @redis.incr(REDIS_COUNTER_KEY)
 
-        # Convert the counter value to a Base62 string
-        base62_encode("#{counter}#{url.hash.abs}".to_i)
+        short_url = base62_encode("#{counter}#{url.hash.abs}".to_i)
+        short_url.ljust(min_length, '0')
       end
     end
   end

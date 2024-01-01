@@ -23,7 +23,7 @@ module DynamicLinks
     end
   end
 
-  def self.shorten_url(url)
+  def self.shorten_url(url, client)
     strategy_key = configuration.shortening_strategy
 
     begin
@@ -37,12 +37,15 @@ module DynamicLinks
       raise "Unexpected error while initializing the strategy: #{e.message}"
     end
 
-    strategy.shorten(url)
+    short_url = strategy.shorten(url)
+
+    short_url_record = ShortenedUrl.create!(client: client, url: url, short_url: short_url)
+    "#{client.scheme}://#{client.hostname}/#{short_url}"
   end
 
   # mimic Firebase Dynamic Links API
-  def self.generate_short_url(original_url)
-    short_link = shorten_url(original_url)
+  def self.generate_short_url(original_url, client)
+    short_link = shorten_url(original_url, client)
 
     {
       shortLink: short_link,

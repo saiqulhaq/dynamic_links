@@ -17,7 +17,11 @@
 one:
   name: "Test Client One"
   api_key: "api_key_one"
+  hostname: client-one.com
+  scheme: https
 
 two:
   name: "Test Client Two"
   api_key: "api_key_two"
+  hostname: client-two.com
+  scheme: http

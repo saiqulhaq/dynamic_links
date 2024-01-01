@@ -40,7 +40,7 @@ module DynamicLinks
     short_url = strategy.shorten(url)
 
     short_url_record = ShortenedUrl.create!(client: client, url: url, short_url: short_url)
-    "#{client.scheme}://#{client.hostname}/#{short_url}"
+    URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
   end
 
   # mimic Firebase Dynamic Links API

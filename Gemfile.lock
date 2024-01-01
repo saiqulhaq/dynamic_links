@@ -2,9 +2,7 @@ PATH
   remote: .
   specs:
     dynamic_links (0.1.0)
-      nanoid (~> 2.0)
       rails (>= 5)
-      redis (>= 4)
 
 GEM
   remote: https://rubygems.org/
@@ -214,8 +212,10 @@ DEPENDENCIES
   annotate
   dotenv-rails
   dynamic_links!
+  nanoid (~> 2.0)
   pg (>= 0.18, < 2.0)
   puma
+  redis (>= 4)
   sprockets-rails
 
 BUNDLED WITH

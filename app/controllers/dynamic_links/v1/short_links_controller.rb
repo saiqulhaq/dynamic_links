@@ -1,14 +1,12 @@
 class DynamicLinks::V1::ShortLinksController < ApplicationController
   def create
     url = params.require(:url)
-    # validate url
-    # if !url_shortener.valid_url?(url)
-    #   render json: { error: 'invalid url' }, status: :bad_request
-    #   return
-    # end
+    client = DynamicLinks::Client.find_by(api_key: params.require(:api_key))
+    unless client
+      render json: { error: 'invalid api key' }, status: :unauthorized
+      return
+    end
 
-    # shorten url
-    # save to db (not implemented yet)
-    render json: DynamicLinks.generate_short_url(url), status: :created
+    render json: DynamicLinks.generate_short_url(url, client), status: :created
   end
 end

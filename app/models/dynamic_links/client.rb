@@ -15,7 +15,11 @@
 #
 module DynamicLinks
   class Client < ApplicationRecord
+    VALID_SCHEMES = ['http', 'https'].freeze
+
     validates :name, presence: true, uniqueness: true
     validates :api_key, presence: true, uniqueness: true
+    validates :hostname, presence: true, uniqueness: true
+    validates :scheme, presence: true, inclusion: { in: VALID_SCHEMES }
   end
 end

@@ -11,11 +11,11 @@ class CreateDynamicLinksShortenedUrls < ActiveRecord::Migration[7.1]
       # 2083 is the maximum length of a URL according to the RFC 2616
       t.string :url, null: false, limit: 2083
       # 12 is the maximum length of a short URL if we use the RedisCounterStrategy
-      t.string :short_url, null: false, limit: DynamicLinks::ShorteningStrategies::RedisCounterStrategy::MAX_LENGTH
+      t.string :short_url, null: false, limit: 20
       t.datetime :expires_at
       t.timestamps
     end
 
-    add_index :dynamic_links_shortened_urls, :short_url, unique: true
+    add_index :dynamic_links_shortened_urls, [:client_id, :short_url], unique: true
   end
 end

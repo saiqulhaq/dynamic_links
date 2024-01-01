@@ -1,28 +1,27 @@
 require "test_helper"
 
 class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTest
-  test "should get create" do
-    expected_short_link = 'shortened_url'
+  setup do
+    @client = dynamic_links_clients(:one)  # Assuming you have a fixture for DynamicLinks::Client
+  end
 
-    dynamic_links_mock = Minitest::Mock.new
-    dynamic_links_mock.expect :call, expected_short_link, ['https://example.com']
+  test "should create a shortened URL" do
+    url = 'https://example.com'
+    api_key = @client.api_key
+    expected_short_link = "#{@client.scheme}://#{@client.hostname}/shortened_url"
+    expected_response = {
+      shortLink: expected_short_link,
+      previewLink: "#{expected_short_link}?preview=true",
+      warning: []
+    }.as_json
 
-    DynamicLinks.stub :shorten_url, dynamic_links_mock do
-      post '/v1/shortLinks', params: { url: 'https://example.com' }
-
-      dynamic_links_mock.verify
-
-      expected_body_response = {
-        shortLink: expected_short_link,
-        previewLink: "#{expected_short_link}?preview=true",
-        warning: []
-      }.as_json
+    DynamicLinks.stub :generate_short_url, expected_response do
+      post '/v1/shortLinks', params: { url: url, api_key: api_key }
 
       assert_response :success
       content_type = "application/json; charset=utf-8"
       assert_equal content_type, @response.content_type
-      assert_equal expected_body_response, JSON.parse(response.body)
+      assert_equal expected_response, JSON.parse(@response.body)
     end
-    assert_mock dynamic_links_mock
   end
 end

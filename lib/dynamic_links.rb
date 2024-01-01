@@ -23,12 +23,16 @@ module DynamicLinks
     end
   end
 
+  @strategy_classes_mutex = Mutex.new
+
   def self.shorten_url(url)
     @strategy_classes ||= {}
     strategy_key = configuration.shortening_strategy.to_s
 
     begin
-      @strategy_classes[strategy_key] ||= "DynamicLinks::ShorteningStrategies::#{strategy_key.camelize}Strategy".constantize
+      @strategy_classes_mutex.synchronize do
+        @strategy_classes[strategy_key] ||= "DynamicLinks::ShorteningStrategies::#{strategy_key.camelize}Strategy".constantize
+      end
       strategy = @strategy_classes[strategy_key].new
     rescue NameError
       raise "Invalid shortening strategy: #{strategy_key}"

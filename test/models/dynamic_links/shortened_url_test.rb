@@ -55,5 +55,24 @@ module DynamicLinks
       shortened_url = ShortenedUrl.new(url: 'https://example.com', short_url: 'xyz789')
       assert shortened_url.save, 'Failed to save shortened url without an associated client'
     end
+
+    test 'should allow the same short_url for different clients' do
+      client_one = dynamic_links_clients(:one)
+      client_two = dynamic_links_clients(:two)
+
+      url_one = DynamicLinks::ShortenedUrl.create!(client: client_one, url: 'https://example.com', short_url: 'foobar')
+      url_two = DynamicLinks::ShortenedUrl.new(client: client_two, url: 'https://example.org', short_url: 'foobar')
+
+      assert url_two.valid?, 'ShortenedUrl with duplicate short_url but different client should be valid'
+    end
+
+    test 'should not allow the same short_url for the same client' do
+      client = dynamic_links_clients(:one)
+
+      DynamicLinks::ShortenedUrl.create!(client: client, url: 'https://example.com', short_url: 'xyz789')
+      duplicate_url = DynamicLinks::ShortenedUrl.new(client: client, url: 'https://example.org', short_url: 'xyz789')
+
+      assert_not duplicate_url.valid?, 'ShortenedUrl with duplicate short_url for the same client should not be valid'
+    end
   end
 end

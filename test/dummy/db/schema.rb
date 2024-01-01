@@ -33,8 +33,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_01_102216) do
     t.datetime "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["client_id", "short_url"], name: "index_dynamic_links_shortened_urls_on_client_id_and_short_url", unique: true
     t.index ["client_id"], name: "index_dynamic_links_shortened_urls_on_client_id"
-    t.index ["short_url"], name: "index_dynamic_links_shortened_urls_on_short_url", unique: true
   end
 
   add_foreign_key "dynamic_links_shortened_urls", "dynamic_links_clients", column: "client_id"

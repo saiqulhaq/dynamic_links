@@ -24,8 +24,14 @@ module DynamicLinks
   end
 
   def self.shorten_url(url)
-    strategy_class = "DynamicLinks::ShorteningStrategies::#{configuration.shortening_strategy.to_s.camelize}Strategy".constantize
-    strategy = strategy_class.new
+    begin
+      strategy_class = "DynamicLinks::ShorteningStrategies::#{configuration.shortening_strategy.to_s.camelize}Strategy".constantize
+      strategy = strategy_class.new
+    rescue NameError
+      raise "Invalid shortening strategy: #{configuration.shortening_strategy}"
+    rescue ArgumentError
+      raise "#{strategy_class} needs to be initialized with arguments"
+    end
     strategy.shorten(url)
   end
 

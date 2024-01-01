@@ -2,6 +2,15 @@ require "test_helper"
 require "minitest/mock"
 
 class DynamicLinksTest < ActiveSupport::TestCase
+  def setup
+    @original_strategy = DynamicLinks.configuration.shortening_strategy
+  end
+
+  def teardown
+    # Reset the configuration after each test
+    DynamicLinks.configuration.shortening_strategy = @original_strategy
+  end
+
   test "it has a version number" do
     assert DynamicLinks::VERSION
   end

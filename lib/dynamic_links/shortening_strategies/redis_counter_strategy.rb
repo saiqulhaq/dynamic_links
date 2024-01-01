@@ -1,8 +1,13 @@
-require 'redis'
 
 module DynamicLinks
   module ShorteningStrategies
     class RedisCounterStrategy < BaseStrategy
+      begin
+        require 'redis'
+      rescue LoadError
+        raise 'Missing dependency: Please add "redis" to your Gemfile to use RedisCounterStrategy.'
+      end
+
       MIN_LENGTH = 12
       REDIS_COUNTER_KEY = "dynamic_links:counter".freeze
 

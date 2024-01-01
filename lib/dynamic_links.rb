@@ -24,14 +24,19 @@ module DynamicLinks
   end
 
   def self.shorten_url(url)
+    strategy_key = configuration.shortening_strategy
+
     begin
-      strategy_class = "DynamicLinks::ShorteningStrategies::#{configuration.shortening_strategy.to_s.camelize}Strategy".constantize
-      strategy = strategy_class.new
-    rescue NameError
-      raise "Invalid shortening strategy: #{configuration.shortening_strategy}"
+      strategy = StrategyFactory.get_strategy(strategy_key)
+    rescue RuntimeError => e
+      # This will catch the 'Unknown strategy' error from the factory
+      raise "Invalid shortening strategy: #{strategy_key}. Error: #{e.message}"
     rescue ArgumentError
-      raise "#{strategy_class} needs to be initialized with arguments"
+      raise "#{strategy_key} strategy needs to be initialized with arguments"
+    rescue => e
+      raise "Unexpected error while initializing the strategy: #{e.message}"
     end
+
     strategy.shorten(url)
   end
 

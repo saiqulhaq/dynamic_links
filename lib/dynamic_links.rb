@@ -31,6 +31,8 @@ module DynamicLinks
       raise "Invalid shortening strategy: #{configuration.shortening_strategy}"
     rescue ArgumentError
       raise "#{strategy_class} needs to be initialized with arguments"
+    rescue => e
+      raise "Unexpected error while initializing the strategy: #{e.message}"
     end
     strategy.shorten(url)
   end

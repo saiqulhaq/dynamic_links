@@ -4,7 +4,7 @@ DynamicLinks is a flexible URL shortening Ruby gem, designed to provide various 
 
 ## Usage
 
-To use DynamicLinks, you need to configure the shortening strategy in an initializer or before you start shortening URLs.
+To use DynamicLinks, you need to configure the shortening strategy and other settings in an initializer or before you start shortening URLs.
 
 ### Configuration
 
@@ -12,7 +12,11 @@ In your Rails initializer or similar setup code, configure DynamicLinks like thi
 
 ```ruby
 DynamicLinks.configure do |config|
-  config.shortening_strategy = :MD5
+  config.shortening_strategy = :MD5  # Default strategy
+  config.redis_config = { host: 'localhost', port: 6379 }  # Redis configuration
+  config.redis_pool_size = 10  # Redis connection pool size
+  config.redis_pool_timeout = 3  # Redis connection pool timeout in seconds
+  config.enable_rest_api = true  # Enable or disable REST API feature
 end
 ```
 
@@ -33,7 +37,7 @@ Depending on the strategy you choose, you may need to install additional depende
 ### Optional Dependencies
 
 - For `NanoIdStrategy`, add `gem 'nanoid', '~> 2.0'` to your Gemfile.
-- For `RedisCounterStrategy`, add `gem 'redis', '>= 4'` to your Gemfile.
+- For `RedisCounterStrategy`, ensure Redis is available and configured. Redis strategy requires `connection_pool` gem too.
 
 Ensure you bundle these dependencies along with the DynamicLinks gem if you plan to use these strategies.
 

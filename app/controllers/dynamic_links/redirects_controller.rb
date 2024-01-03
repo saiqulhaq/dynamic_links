@@ -5,17 +5,10 @@ module DynamicLinks
       link = ShortenedUrl.find_by(short_url: short_url)
 
       if link
-        redirect_to link.url, status: :found
+        redirect_to link.url, status: :found, allow_other_host: true
       else
-        render_not_found
+        raise ActiveRecord::RecordNotFound
       end
-    end
-
-    private
-
-    def render_not_found
-      # Render a 404 page or similar
-      render file: 'public/404.html', status: :not_found, layout: false
     end
   end
 end

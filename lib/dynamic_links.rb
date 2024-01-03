@@ -26,24 +26,25 @@ module DynamicLinks
   end
 
   def self.shorten_url(url, client)
+    raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
+
     strategy_key = configuration.shortening_strategy
 
-    begin
-      strategy = StrategyFactory.get_strategy(strategy_key)
-      raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
-      short_url = strategy.shorten(url)
-
-      short_url_record = ShortenedUrl.create!(client: client, url: url, short_url: short_url)
-      URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
-
+    strategy = begin
+      StrategyFactory.get_strategy(strategy_key)
     rescue RuntimeError => e
       # This will catch the 'Unknown strategy' error from the factory
       raise "Invalid shortening strategy: #{strategy_key}. Error: #{e.message}"
     rescue ArgumentError
       raise "#{strategy_key} strategy needs to be initialized with arguments"
-    rescue => e
+    rescue StandardError => e
       raise "Unexpected error while initializing the strategy: #{e.message}"
     end
+
+    short_url = strategy.shorten(url)
+
+    short_url_record = ShortenedUrl.create!(client: client, url: url, short_url: short_url)
+    URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
   end
 
   # mimic Firebase Dynamic Links API

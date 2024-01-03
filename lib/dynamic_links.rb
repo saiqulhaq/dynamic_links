@@ -1,5 +1,7 @@
 require "dynamic_links/version"
 require "dynamic_links/engine"
+require "dynamic_links/error_classes"
+require "dynamic_links/validator"
 require "dynamic_links/strategy_factory"
 require "dynamic_links/shortening_strategies/base_strategy"
 require "dynamic_links/shortening_strategies/sha256_strategy"
@@ -28,6 +30,12 @@ module DynamicLinks
 
     begin
       strategy = StrategyFactory.get_strategy(strategy_key)
+      raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
+      short_url = strategy.shorten(url)
+
+      short_url_record = ShortenedUrl.create!(client: client, url: url, short_url: short_url)
+      URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
+
     rescue RuntimeError => e
       # This will catch the 'Unknown strategy' error from the factory
       raise "Invalid shortening strategy: #{strategy_key}. Error: #{e.message}"
@@ -36,11 +44,6 @@ module DynamicLinks
     rescue => e
       raise "Unexpected error while initializing the strategy: #{e.message}"
     end
-
-    short_url = strategy.shorten(url)
-
-    short_url_record = ShortenedUrl.create!(client: client, url: url, short_url: short_url)
-    URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
   end
 
   # mimic Firebase Dynamic Links API

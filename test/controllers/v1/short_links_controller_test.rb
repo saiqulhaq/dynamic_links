@@ -18,10 +18,22 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     DynamicLinks.stub :generate_short_url, expected_response do
       post '/v1/shortLinks', params: { url: url, api_key: api_key }
 
-      assert_response :success
-      content_type = "application/json; charset=utf-8"
-      assert_equal content_type, @response.content_type
+      assert_response :created
+      assert_equal "application/json; charset=utf-8", @response.content_type
       assert_equal expected_response, JSON.parse(@response.body)
     end
   end
+
+  test "should respond with unauthorized for invalid API key" do
+    post '/v1/shortLinks', params: { url: 'https://example.com', api_key: 'invalid' }
+    assert_response :unauthorized
+  end
+
+  test "should respond with bad request for invalid URL" do
+    DynamicLinks.stub :generate_short_url, ->(_url, _client) { raise DynamicLinks::InvalidURIError } do
+      post '/v1/shortLinks', params: { url: 'invalid_url', api_key: @client.api_key }
+      assert_response :bad_request
+    end
+  end
 end
+

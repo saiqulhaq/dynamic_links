@@ -1,8 +1,9 @@
 require "test_helper"
+require_relative './../../../lib/dynamic_links/strategy_factory'
 
 class DynamicLinks::ShorteningStrategies::RedisCounterStrategyTest < ActiveSupport::TestCase
   def setup
-    @url_shortener = DynamicLinks::ShorteningStrategies::RedisCounterStrategy.new
+    @url_shortener = DynamicLinks::StrategyFactory.get_strategy(:redis_counter)
   end
 
   test "shorten returns a string" do

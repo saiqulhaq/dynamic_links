@@ -1,8 +1,9 @@
 require "test_helper"
+require_relative './../../../lib/dynamic_links/strategy_factory'
 
 class DynamicLinks::ShorteningStrategies::NanoIDStrategyTest < ActiveSupport::TestCase
   def setup
-    @url_shortener = DynamicLinks::ShorteningStrategies::NanoIDStrategy.new
+    @url_shortener = DynamicLinks::StrategyFactory.get_strategy(:nano_id)
   end
 
   test "shorten returns a string" do

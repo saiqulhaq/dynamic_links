@@ -9,13 +9,31 @@ module DynamicLinks
       when :crc32
         ShorteningStrategies::CRC32Strategy.new
       when :nano_id
-        ShorteningStrategies::NanoIdStrategy.new
+        ensure_nanoid_available
+        ShorteningStrategies::NanoIDStrategy.new
       when :redis_counter
+        ensure_redis_available
         ShorteningStrategies::RedisCounterStrategy.new
       when :mock
         ShorteningStrategies::MockStrategy.new
       else
         raise "Unknown strategy: #{strategy_name}"
+      end
+    end
+
+    def self.ensure_nanoid_available
+      begin
+        require 'nanoid'
+      rescue LoadError
+        raise 'Missing dependency: Please add "nanoid" to your Gemfile to use NanoIdStrategy.'
+      end
+    end
+
+    def self.ensure_redis_available
+      begin
+        require 'redis'
+      rescue LoadError
+        Rails.logger.warn 'Missing dependency: Please add "redis" to your Gemfile to use RedisCounterStrategy.'
       end
     end
   end

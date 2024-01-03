@@ -1,19 +1,21 @@
-
 module DynamicLinks
   module ShorteningStrategies
+    # usage:
+    # Using default configuration from DynamicLinks configuration
+    # default_strategy = DynamicLinks::ShorteningStrategies::RedisCounterStrategy.new
+    #
+    # Using a custom configuration
+    # custom_redis_config = { host: 'custom-host', port: 6380 }
+    # custom_strategy = DynamicLinks::ShorteningStrategies::RedisCounterStrategy.new(custom_redis_config)
     class RedisCounterStrategy < BaseStrategy
-      begin
-        require 'redis'
-      rescue LoadError
-        raise 'Missing dependency: Please add "redis" to your Gemfile to use RedisCounterStrategy.'
-      end
-
       MIN_LENGTH = 12
       REDIS_COUNTER_KEY = "dynamic_links:counter".freeze
 
-      def initialize
+      def initialize(redis_config = nil)
+        super()
+        redis_config = redis_config.presence || DynamicLinks.configuration.redis_config
         # TODO: use pool of connections
-        @redis = Redis.new
+        @redis = Redis.new(redis_config)
       end
 
       # Shortens the given URL using a Redis counter

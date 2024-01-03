@@ -13,19 +13,26 @@ module DynamicLinks
 
       def initialize(redis_config = nil)
         super()
-        redis_config = redis_config.presence || DynamicLinks.configuration.redis_config
-        # TODO: use pool of connections
-        @redis = Redis.new(redis_config)
+        pool_size = DynamicLinks.configuration.redis_pool_size
+        pool_timeout = DynamicLinks.configuration.redis_pool_timeout
+
+        @redis = ConnectionPool.new(size: pool_size, timeout: pool_timeout) do
+          redis_config = redis_config.presence || DynamicLinks.configuration.redis_config
+          Redis.new(redis_config)
+        end
       end
 
       # Shortens the given URL using a Redis counter
       # @param url [String] The URL to shorten
       # @return [String] The shortened URL, 12 characters long
       def shorten(url, min_length: MIN_LENGTH)
-        counter = @redis.incr(REDIS_COUNTER_KEY)
-
-        short_url = base62_encode("#{counter}#{url.hash.abs}".to_i)
-        short_url.ljust(min_length, '0')
+        short_url = nil
+        @redis.with do |conn|
+          counter = conn.incr(REDIS_COUNTER_KEY)
+          short_url = base62_encode("#{counter}#{url.hash.abs}".to_i)
+          short_url.ljust(min_length, '0')
+        end
+        short_url
       end
     end
   end

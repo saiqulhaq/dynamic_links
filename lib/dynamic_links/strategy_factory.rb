@@ -33,7 +33,13 @@ module DynamicLinks
       begin
         require 'redis'
       rescue LoadError
-        Rails.logger.warn 'Missing dependency: Please add "redis" to your Gemfile to use RedisCounterStrategy.'
+        raise 'Missing dependency: Please add "redis" to your Gemfile to use RedisCounterStrategy.'
+      end
+
+      begin
+        require 'connection_pool'
+      rescue LoadError
+        raise 'Missing dependency: Please add "connection_pool" to your Gemfile to use RedisCounterStrategy.'
       end
     end
   end

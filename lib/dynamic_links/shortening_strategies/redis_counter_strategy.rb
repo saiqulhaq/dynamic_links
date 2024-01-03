@@ -22,6 +22,10 @@ module DynamicLinks
         end
       end
 
+      def always_growing?
+        true  # This strategy always generates a new shortened URL
+      end
+
       # Shortens the given URL using a Redis counter
       # @param url [String] The URL to shorten
       # @return [String] The shortened URL, 12 characters long

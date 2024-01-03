@@ -2,6 +2,8 @@
 
 DynamicLinks is a flexible URL shortening Ruby gem, designed to provide various strategies for URL shortening, similar to Firebase Dynamic Links.
 
+By default, encoding strategies such as MD5 will generate the same short URL for the same input URL. This behavior ensures consistency and prevents the creation of multiple records for identical URLs. For scenarios requiring unique short URLs for each request, strategies like RedisCounterStrategy can be used, which generate a new short URL every time, regardless of the input URL.
+
 ## Usage
 
 To use DynamicLinks, you need to configure the shortening strategy and other settings in an initializer or before you start shortening URLs.

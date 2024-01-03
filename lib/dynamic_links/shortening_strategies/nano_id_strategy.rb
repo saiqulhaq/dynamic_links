@@ -9,6 +9,10 @@ module DynamicLinks
       def shorten(url, min_length: MIN_LENGTH)
         ::Nanoid.generate(size: min_length)
       end
+
+      def always_growing?
+        true  # This strategy always generates a new shortened URL
+      end
     end
   end
 end

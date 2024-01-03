@@ -1,5 +1,5 @@
 DynamicLinks.configure do |config|
-  config.shortening_strategy = :MD5
+  config.shortening_strategy = :md5
   config.enable_rest_api = true
 
   config.redis_config = {

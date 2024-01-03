@@ -25,6 +25,7 @@ class DynamicLinksTest < ActiveSupport::TestCase
     expected_short_path = 'shortened_url'
     full_short_url = "#{@client.scheme}://#{@client.hostname}/#{expected_short_path}"
     strategy_mock.expect :shorten, expected_short_path, ['https://example.com']
+    strategy_mock.expect :always_growing?, false
 
     DynamicLinks::ShorteningStrategies::MockStrategy.stub :new, strategy_mock do
       assert_equal full_short_url, DynamicLinks.shorten_url('https://example.com', @client)

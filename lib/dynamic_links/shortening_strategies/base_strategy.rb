@@ -9,6 +9,12 @@ module DynamicLinks
         raise NotImplementedError, "You must implement the shorten method"
       end
 
+      # Determines if the strategy always generates a new shortened URL
+      # @return [Boolean]
+      def always_growing?
+        false  # Default behavior is not to always grow
+      end
+
       private
 
       # Convert an integer into a Base62 string

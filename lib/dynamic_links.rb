@@ -41,10 +41,22 @@ module DynamicLinks
       raise "Unexpected error while initializing the strategy: #{e.message}"
     end
 
-    short_url = strategy.shorten(url)
+    if strategy.always_growing?
+      short_url = strategy.shorten(url)
 
-    short_url_record = ShortenedUrl.create!(client: client, url: url, short_url: short_url)
-    URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
+      short_url_record = ShortenedUrl.create!(client: client, url: url, short_url: short_url)
+      return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
+    end
+
+    # If no existing record or always growing, generate new short URL
+    short_url = strategy.shorten(url)
+    record = ShortenedUrl.find_or_initialize_by(client: client, short_url: short_url)
+    if record.new_record?
+      record.url = url
+      record.save!
+      record
+    end
+    return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
   end
 
   # mimic Firebase Dynamic Links API

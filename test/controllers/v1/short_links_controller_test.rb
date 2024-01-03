@@ -2,7 +2,13 @@ require "test_helper"
 
 class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @client = dynamic_links_clients(:one)  # Assuming you have a fixture for DynamicLinks::Client
+    @client = dynamic_links_clients(:one)
+    @original_rest_api_setting = DynamicLinks.configuration.enable_rest_api
+  end
+
+  teardown do
+    # Reset the configuration after each test
+    DynamicLinks.configuration.enable_rest_api = @original_rest_api_setting
   end
 
   test "should create a shortened URL" do
@@ -35,5 +41,12 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
       assert_response :bad_request
     end
   end
-end
 
+  test "should not allow short URL creation when REST API is disabled" do
+    DynamicLinks.configuration.enable_rest_api = false
+
+    post '/v1/shortLinks', params: { url: 'https://example.com', api_key: @client.api_key }
+    assert_response :forbidden
+    assert_includes @response.body, 'REST API feature is disabled'
+  end
+end

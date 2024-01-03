@@ -26,13 +26,12 @@ module DynamicLinks
       # @param url [String] The URL to shorten
       # @return [String] The shortened URL, 12 characters long
       def shorten(url, min_length: MIN_LENGTH)
-        short_url = nil
         @redis.with do |conn|
           counter = conn.incr(REDIS_COUNTER_KEY)
           short_url = base62_encode("#{counter}#{url.hash.abs}".to_i)
-          short_url.ljust(min_length, '0')
+          short_url = short_url.ljust(min_length, '0')
+          short_url
         end
-        short_url
       end
     end
   end

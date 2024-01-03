@@ -1,5 +1,7 @@
 require "dynamic_links/version"
 require "dynamic_links/engine"
+require "dynamic_links/error_classes"
+require "dynamic_links/validator"
 require "dynamic_links/strategy_factory"
 require "dynamic_links/shortening_strategies/base_strategy"
 require "dynamic_links/shortening_strategies/sha256_strategy"
@@ -24,16 +26,18 @@ module DynamicLinks
   end
 
   def self.shorten_url(url, client)
+    raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
+
     strategy_key = configuration.shortening_strategy
 
-    begin
-      strategy = StrategyFactory.get_strategy(strategy_key)
+    strategy = begin
+      StrategyFactory.get_strategy(strategy_key)
     rescue RuntimeError => e
       # This will catch the 'Unknown strategy' error from the factory
       raise "Invalid shortening strategy: #{strategy_key}. Error: #{e.message}"
     rescue ArgumentError
       raise "#{strategy_key} strategy needs to be initialized with arguments"
-    rescue => e
+    rescue StandardError => e
       raise "Unexpected error while initializing the strategy: #{e.message}"
     end
 

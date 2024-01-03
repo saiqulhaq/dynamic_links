@@ -1,26 +1,29 @@
 ---
-name: Lint Code Base
+name: Lint
 
-on:
-  push:
-    branches-ignore: [main]
-  pull_request:
-    branches: [main]
+on:  # yamllint disable-line rule:truthy
+  push: null
+  pull_request: null
 
 jobs:
-  linter:
-    name: Lint Code Base
+  build:
+    name: Lint
     runs-on: ubuntu-latest
-    timeout-minutes: 180
-    container: ruby:3
+
+    permissions:
+      contents: read
+      packages: read
+      # To report GitHub Actions status checks
+      statuses: write
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Lint Code Base
-        uses: github/super-linter@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Super-linter
+        uses: super-linter/super-linter@v5.7.2  # x-release-please-version
         env:
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: develop
+          DEFAULT_BRANCH: main
+          # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+...

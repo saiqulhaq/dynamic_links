@@ -27,7 +27,7 @@ class DynamicLinks::ShorteningStrategies::NanoIDStrategyTest < ActiveSupport::Te
 
   test "shorten returns a string of at least 7 characters" do
     url = "https://example.com"
-    result = @url_shortener.shorten(url, size: 7)
+    result = @url_shortener.shorten(url, min_length: 7)
     assert result.length >= 7
   end
 

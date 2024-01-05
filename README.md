@@ -63,6 +63,11 @@ Or install it yourself as:
 $ gem install dynamic_links
 ```
 
+## Performance
+
+Shorten an URL using Ruby:
+Shorten an URL using API:
+
 ## Contributing
 
 We welcome contributions to DynamicLinks! Please read the contributing guidelines to get started.

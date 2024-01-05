@@ -3,6 +3,7 @@ require "dynamic_links/engine"
 require "dynamic_links/error_classes"
 require "dynamic_links/validator"
 require "dynamic_links/strategy_factory"
+require "dynamic_links/cache_store"
 require "dynamic_links/shortening_strategies/base_strategy"
 require "dynamic_links/shortening_strategies/sha256_strategy"
 require "dynamic_links/shortening_strategies/md5_strategy"
@@ -25,38 +26,30 @@ module DynamicLinks
     end
   end
 
-  def self.shorten_url(url, client)
+  def self.shorten_url(url, client, async: DynamicLinks.configuration.async_processing)
     raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
 
-    strategy_key = configuration.shortening_strategy
+    strategy_key = DynamicLinks.configuration.shortening_strategy
+    strategy = StrategyFactory.get_strategy(strategy_key)
 
-    strategy = begin
-      StrategyFactory.get_strategy(strategy_key)
-    rescue RuntimeError => e
-      # This will catch the 'Unknown strategy' error from the factory
-      raise "Invalid shortening strategy: #{strategy_key}. Error: #{e.message}"
-    rescue ArgumentError
-      raise "#{strategy_key} strategy needs to be initialized with arguments"
-    rescue StandardError => e
-      raise "Unexpected error while initializing the strategy: #{e.message}"
-    end
-
-    if strategy.always_growing?
-      short_url = strategy.shorten(url)
-
-      short_url_record = ShortenedUrl.create!(client: client, url: url, short_url: short_url)
-      return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
-    end
-
-    # If no existing record or always growing, generate new short URL
     short_url = strategy.shorten(url)
-    record = ShortenedUrl.find_or_initialize_by(client: client, short_url: short_url)
-    if record.new_record?
-      record.url = url
-      record.save!
-      record
+
+    if async
+      if !DynamicLinks.configuration.cache_store_enabled?
+        raise ConfigurationError, 'Cache store is not configured'
+      end
+
+      # Store data in Redis/Memcached and enqueue background job
+      cache_store = DynamicLinks::CacheStore.new(DynamicLinks.configuration.cache_store_config)
+      cache_key = "shorten_url:#{client.id}:#{short_url}"
+      cache_store.write(cache_key, { url: url, short_url: short_url })
+
+      ShortenUrlJob.perform_later(cache_key, client.id)
+      return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
+    else
+      # Synchronous processing
+      process_url_synchronously(url, short_url, client, strategy)
     end
-    return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
   end
 
   # mimic Firebase Dynamic Links API
@@ -68,5 +61,18 @@ module DynamicLinks
       previewLink: "#{short_link}?preview=true",
       warning: []
     }
+  end
+
+  private
+
+  def self.process_url_synchronously(url, short_url, client, strategy)
+    if strategy.always_growing?
+      ShortenedUrl.create!(client: client, url: url, short_url: short_url)
+    else
+      record = ShortenedUrl.find_or_initialize_by(client: client, short_url: short_url)
+      record.url = url if record.new_record?
+      record.save!
+    end
+    URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
   end
 end

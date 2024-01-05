@@ -16,15 +16,24 @@ module DynamicLinks
                end
     end
 
+    # if config type is Redis, then the options are:
+    # :ex => Integer: Set the specified expire time, in seconds.
+    # :px => Integer: Set the specified expire time, in milliseconds.
+    # :exat => Integer : Set the specified Unix time at which the key will expire, in seconds.
+    # :pxat => Integer : Set the specified Unix time at which the key will expire, in milliseconds.
+    # :nx => true: Only set the key if it does not already exist.
+    # :xx => true: Only set the key if it already exist.
+    # :keepttl => true: Retain the time to live associated with the key.
+    # :get => true: Return the old string stored at key, or nil if key did not exist.
     def write(key, value, options = {})
       case @store
       when Redis
-        # Use Redis transaction commands
-        @store.multi do |multi|
-          multi.set(key, value, options)
+        if options == {}
+          @store.set(key, value)
+        else
+          @store.set(key, value, options)
         end
       when Memcached
-        # Use Memcached CAS command
         @store.cas(key, value, options)
       end
     end

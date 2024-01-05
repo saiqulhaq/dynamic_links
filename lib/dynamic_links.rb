@@ -40,11 +40,10 @@ module DynamicLinks
       end
 
       # Store data in Redis/Memcached and enqueue background job
-      cache_store = DynamicLinks::CacheStore.new(DynamicLinks.configuration.cache_store_config)
       cache_key = "shorten_url:#{client.id}:#{short_url}"
-      cache_store.write(cache_key, { url: url, short_url: short_url })
+      DynamicLinks.configuration.cache_store.write(cache_key, { url: url, short_url: short_url })
 
-      ShortenUrlJob.perform_later(cache_key, client.id)
+      ShortenUrlJob.perform_later(client, url, short_url)
       return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
     else
       # Synchronous processing

@@ -21,6 +21,10 @@ module DynamicLinks
       !@cache_store_config[:type].nil?
     end
 
+    def cache_store
+      @cache_store ||= DynamicLinks::CacheStore.new(@cache_store_config)
+    end
+
     class RedisConfig
       attr_accessor :config, :pool_size, :pool_timeout
 

@@ -186,6 +186,11 @@ GEM
     reline (0.4.2)
       io-console (~> 0.5)
     ruby2_keywords (0.0.5)
+    sidekiq (7.2.0)
+      concurrent-ruby (< 2)
+      connection_pool (>= 2.3.0)
+      rack (>= 2.2.4)
+      redis-client (>= 0.14.0)
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
@@ -216,6 +221,7 @@ DEPENDENCIES
   pg (>= 0.18, < 2.0)
   puma
   redis (>= 4)
+  sidekiq
   sprockets-rails
 
 BUNDLED WITH

@@ -9,7 +9,7 @@ module DynamicLinks
     DEFAULT_ENABLE_REST_API = true
     DEFAULT_DB_INFRA_STRATEGY = :standard
     DEFAULT_ASYNC_PROCESSING = false
-    DEFAULT_REDIS_COUNTER_CONFIG = -> { RedisConfig.new }
+    DEFAULT_REDIS_COUNTER_CONFIG = RedisConfig.new
     DEFAULT_CACHE_STORE_CONFIG = { type: nil, redis_config: {}, memcached_config: {} }
 
     # Usage: DynamicLinks.configure do |config|
@@ -32,7 +32,7 @@ module DynamicLinks
       @async_processing = DEFAULT_ASYNC_PROCESSING
 
       # config for RedisCounterStrategy
-      @redis_counter_config = DEFAULT_REDIS_COUNTER_CONFIG.call
+      @redis_counter_config = DEFAULT_REDIS_COUNTER_CONFIG
       @cache_store_config = DEFAULT_CACHE_STORE_CONFIG
     end
 
@@ -46,17 +46,30 @@ module DynamicLinks
                            raise ConfigurationError, 'Cache store is not configured'
                          end
 
-                         config = cache_store_config
-                         case config[:type]
+                         case cache_store_config[:type]
                          when :redis
-                           require 'redis'
-                           DynamicLinks::RedisCacheStore.new(config[:redis_config])
+                           create_redis_cache_store(cache_store_config[:redis_config])
                          when :memcached
-                           DynamicLinks::MemcachedCacheStore.new(config[:memcached_config])
+                           create_memcached_cache_store(cache_store_config[:memcached_config])
                          else
-                           raise DynamicLinks::UnknownCacheStoreType, "Unsupported cache store type: #{config[:type]}"
+                           raise DynamicLinks::UnknownCacheStoreType, "Unsupported cache store type: #{cache_store_config[:type]}"
                          end
                        end
+    end
+
+    private
+
+    def create_redis_cache_store(config)
+      require 'redis'
+      DynamicLinks::RedisCacheStore.new(config)
+    rescue LoadError
+      raise DynamicLinks::MissingDependency, "Please install the 'redis' gem to use Redis as cache store"
+    end
+
+    def create_memcached_cache_store(config)
+      DynamicLinks::MemcachedCacheStore.new(config)
+    rescue LoadError
+      raise DynamicLinks::MissingDependency, "Please install the 'memcached' gem to use Memcached as cache store"
     end
   end
 end

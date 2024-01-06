@@ -9,11 +9,6 @@ class DynamicLinksTest < ActiveSupport::TestCase
     @client = dynamic_links_clients(:one)
   end
 
-  # clear cache store every run
-  def before_all
-    DynamicLinks.configuration.cache_store.clear
-  end
-
   # Reset the configuration after each test
   def teardown
     DynamicLinks.configuration.shortening_strategy = @original_strategy
@@ -70,6 +65,8 @@ class DynamicLinksTest < ActiveSupport::TestCase
       config.async_processing = async
       config.cache_store_config = cache_store_config
     end
+
+    DynamicLinks.configuration.cache_store.clear if async
 
     strategy_mock = Minitest::Mock.new
     expected_short_path = 'shortened_url'

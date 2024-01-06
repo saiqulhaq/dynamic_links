@@ -68,7 +68,7 @@ class DynamicLinksTest < ActiveSupport::TestCase
     cache_store_mock.expect :write, nil, [cache_key, { url: 'https://example.com', short_url: expected_short_path }]
 
     DynamicLinks::ShorteningStrategies::MockStrategy.stub :new, strategy_mock do
-      DynamicLinks::CacheStore.stub :new, cache_store_mock do
+      DynamicLinks.configuration.stub :cache_store, cache_store_mock do
         assert_equal full_short_url, DynamicLinks.shorten_url('https://example.com', @client)
       end
     end

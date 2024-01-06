@@ -12,7 +12,10 @@ gem 'pg', '>= 0.18', '< 2.0'
 
 gem 'sprockets-rails'
 
+# for dummy app
 gem 'sidekiq'
+
+gem 'simplecov', require: false, group: :test
 
 # Start debugger with binding.b [https://github.com/ruby/debug]
 # gem "debug", ">= 1.0.0"

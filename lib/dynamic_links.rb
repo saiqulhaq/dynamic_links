@@ -98,7 +98,7 @@ module DynamicLinks
     if strategy.always_growing?
       ShortenedUrl.create!(client: client, url: url, short_url: short_url)
     else
-      ShortenedUrl.create_or_update(client, short_url, url)
+      ShortenedUrl.find_or_create(client, short_url, url)
     end
     URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
   end

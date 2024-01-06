@@ -5,7 +5,7 @@ module DynamicLinks
     queue_as :default
 
     def perform(client, url, short_url, lock_key)
-      ShortenedUrl.create_or_update(client, short_url, url)
+      ShortenedUrl.find_or_create(client, short_url, url)
 
       # delete the lock key
       DynamicLinks.configuration.cache_store.delete(lock_key)

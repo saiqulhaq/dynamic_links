@@ -1,3 +1,5 @@
+# @author Saiqul Haq <saiqulhaq@gmail.com>
+
 if ENV['RAILS_ENV'] == 'test'
   require 'simplecov'
 
@@ -53,21 +55,30 @@ module DynamicLinks
 
     strategy_key = DynamicLinks.configuration.shortening_strategy
     strategy = StrategyFactory.get_strategy(strategy_key)
-
     short_url = strategy.shorten(url)
 
     if async
-      # Store data in cache and enqueue background job
-      cache_key = "shorten_url:#{client.id}:#{short_url}"
-      DynamicLinks.configuration.cache_store.write(cache_key, { url: url, short_url: short_url })
+      lock_key = "lock:shorten_url:#{short_url}"
+      cache_store = DynamicLinks.configuration.cache_store
 
-      ShortenUrlJob.perform_later(client, url, short_url)
-      return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
+      if cache_store.read(lock_key)
+        # Return the short url if it is already in the cache
+        return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
+      end
+
+      # Set a lock and store data in cache
+      cache_store.write(lock_key, 'locked', { expires_in: 10.minutes })
+      cache_key = "shorten_url:#{client.id}:#{short_url}"
+      cache_store.write(cache_key, { url: url, short_url: short_url })
+
+      ShortenUrlJob.perform_later(client, url, short_url, lock_key)
+      URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
     else
       # Synchronous processing
       process_url_synchronously(url, short_url, client, strategy)
     end
   end
+
 
   # mimic Firebase Dynamic Links API
   def self.generate_short_url(original_url, client)

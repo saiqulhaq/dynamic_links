@@ -11,5 +11,9 @@ module DynamicLinks
     def delete(key)
       raise NotImplementedError
     end
+
+    def clear
+      raise NotImplementedError
+    end
   end
 end

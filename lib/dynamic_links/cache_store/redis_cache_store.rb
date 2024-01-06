@@ -16,7 +16,7 @@ module DynamicLinks
     # :keepttl => true: Retain the time to live associated with the key.
     # :get => true: Return the old string stored at key, or nil if key did not exist.
     def write(key, value, options = {})
-      options.empty? ? @redis.set(key, value) : @redis.set(key, value, options)
+      @redis.set(key, value, ex: options[:expires_in])
     end
 
     def read(key)
@@ -25,6 +25,10 @@ module DynamicLinks
 
     def delete(key)
       @redis.del(key)
+    end
+
+    def clear
+      @redis.flushall
     end
   end
 end

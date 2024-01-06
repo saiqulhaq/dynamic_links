@@ -9,6 +9,11 @@ class DynamicLinksTest < ActiveSupport::TestCase
     @client = dynamic_links_clients(:one)
   end
 
+  # clear cache store every run
+  def before_all
+    DynamicLinks.configuration.cache_store.clear
+  end
+
   # Reset the configuration after each test
   def teardown
     DynamicLinks.configuration.shortening_strategy = @original_strategy
@@ -24,10 +29,16 @@ class DynamicLinksTest < ActiveSupport::TestCase
     simulate_shorten_url(:mock, false)
   end
 
-  test "shorten_url invokes the correct strategy and shortens URL asynchronously" do
+  test "shorten_url invokes the correct strategy and shortens URL asynchronously with condition lock key is empty" do
     simulate_shorten_url(:mock, true, {
-      type: :redis, redis_config: {}
-    })
+      type: :redis, redis_config: { host: 'redis', port: 6379 }
+    }, false)
+  end
+
+  test "shorten_url invokes the correct strategy and shortens URL asynchronously with condition lock key is not empty" do
+    simulate_shorten_url(:mock, true, {
+      type: :redis, redis_config: { host: 'redis', port: 6379 }
+    }, true)
   end
 
   test "generate_short_url returns the correct structure" do
@@ -50,7 +61,10 @@ class DynamicLinksTest < ActiveSupport::TestCase
 
   private
 
-  def simulate_shorten_url(strategy, async, cache_store_config = { type: nil, redis_config: {}, memcached_config: {} })
+  def simulate_shorten_url(strategy,
+                           async,
+                           cache_store_config = DynamicLinks::Configuration::DEFAULT_CACHE_STORE_CONFIG,
+                           lock_key_exists = false)
     DynamicLinks.configure do |config|
       config.shortening_strategy = strategy
       config.async_processing = async
@@ -65,11 +79,22 @@ class DynamicLinksTest < ActiveSupport::TestCase
 
     cache_store_mock = Minitest::Mock.new
     cache_key = "shorten_url:#{@client.id}:#{expected_short_path}"
-    cache_store_mock.expect :write, nil, [cache_key, { url: 'https://example.com', short_url: expected_short_path }]
+    lock_key = "lock:shorten_url:#{expected_short_path}"
+    cache_store_mock.expect :read, lock_key_exists, [lock_key]
+    if lock_key_exists
+      DynamicLinks::ShorteningStrategies::MockStrategy.stub :new, strategy_mock do
+        DynamicLinks.configuration.stub :cache_store, cache_store_mock do
+          assert_equal full_short_url, DynamicLinks.shorten_url('https://example.com', @client)
+        end
+      end
+    else
+      cache_store_mock.expect :write, nil, [lock_key, 'locked', { expires_in: 10.minutes }]
+      cache_store_mock.expect :write, nil, [cache_key, { url: 'https://example.com', short_url: expected_short_path }]
 
-    DynamicLinks::ShorteningStrategies::MockStrategy.stub :new, strategy_mock do
-      DynamicLinks.configuration.stub :cache_store, cache_store_mock do
-        assert_equal full_short_url, DynamicLinks.shorten_url('https://example.com', @client)
+      DynamicLinks::ShorteningStrategies::MockStrategy.stub :new, strategy_mock do
+        DynamicLinks.configuration.stub :cache_store, cache_store_mock do
+          assert_equal full_short_url, DynamicLinks.shorten_url('https://example.com', @client)
+        end
       end
     end
 

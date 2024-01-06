@@ -17,8 +17,7 @@ module DynamicLinks
 
         configuration = redis_config.nil? ? DynamicLinks.configuration.redis_counter_config : DynamicLinks::Configuration::RedisConfig.new(redis_config)
         @redis = ConnectionPool.new(size: configuration.pool_size, timeout: configuration.pool_timeout) do
-          redis_config = configuration.config
-          Redis.new(redis_config)
+          Redis.new(configuration.config)
         end
       end
 

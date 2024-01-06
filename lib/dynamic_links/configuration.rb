@@ -1,42 +1,46 @@
 module DynamicLinks
+  # @author Saiqul Haq <saiqulhaq@gmail.com>
   class Configuration
     attr_accessor :shortening_strategy, :enable_rest_api, :db_infra_strategy,
-                  :async_processing, :cache_store,
-                  :redis_counter_config,
-                  :cache_store_config
+                  :async_processing, :redis_counter_config, :cache_store_config
+
+    DEFAULT_SHORTENING_STRATEGY = :MD5
+    DEFAULT_ENABLE_REST_API = true
+    DEFAULT_DB_INFRA_STRATEGY = :standard
+    DEFAULT_ASYNC_PROCESSING = false
+    DEFAULT_REDIS_COUNTER_CONFIG = -> { RedisConfig.new }
+    DEFAULT_CACHE_STORE_CONFIG = { type: nil, redis_config: {}, memcached_config: {} }
 
     def initialize
-      @shortening_strategy = :MD5  # Default strategy
-      @enable_rest_api = true  # Enable REST API by default
-      @db_infra_strategy = :standard  # Default DB infrastructure strategy (:standard, :citus)
-      @async_processing = false
+      @shortening_strategy = DEFAULT_SHORTENING_STRATEGY
+      @enable_rest_api = DEFAULT_ENABLE_REST_API
+      @db_infra_strategy = DEFAULT_DB_INFRA_STRATEGY
+      @async_processing = DEFAULT_ASYNC_PROCESSING
 
       # config for RedisCounterStrategy
-      @redis_counter_config = RedisConfig.new
-
-      @cache_store_config = { type: nil, redis_config: {}, memcached_config: {} }
+      @redis_counter_config = DEFAULT_REDIS_COUNTER_CONFIG.call
+      @cache_store_config = DEFAULT_CACHE_STORE_CONFIG
     end
 
     def cache_store_enabled?
-      !@cache_store_config[:type].nil?
+      [:redis, :memcached].include?(@cache_store_config[:type])
     end
 
     def cache_store
-      @cache_store ||= DynamicLinks::CacheStore.new(@cache_store_config)
-    end
+      @cache_store ||= begin
+                         unless cache_store_enabled?
+                           raise ConfigurationError, 'Cache store is not configured'
+                         end
 
-    class RedisConfig
-      attr_accessor :config, :pool_size, :pool_timeout
-
-      def initialize
-        # Default to an empty hash, can be overridden
-        @config = {
-          # host: 'localhost',
-          # port: 6379
-        }
-        @pool_size = 5          # Default pool size
-        @pool_timeout = 5       # Default timeout in seconds
-      end
+                         case config[:type]
+                         when :redis
+                           DynamicLinks::RedisCacheStore.new(config[:redis_config])
+                         when :memcached
+                           DynamicLinks::MemcachedCacheStore.new(config[:memcached_config])
+                         else
+                           raise DynamicLinks::UnknownCacheStoreType, "Unsupported cache store type: #{config[:type]}"
+                         end
+                       end
     end
   end
 end

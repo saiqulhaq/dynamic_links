@@ -27,6 +27,7 @@ module DynamicLinks
       return record if record.persisted?
 
       record.url = url
+      # TODO Handle issue when failed to save record
       record.save!
     end
   end

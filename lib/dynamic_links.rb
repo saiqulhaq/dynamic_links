@@ -22,8 +22,8 @@ end
 require "dynamic_links/version"
 require "dynamic_links/engine"
 require "dynamic_links/error_classes"
-require "dynamic_links/configuration"
 require "dynamic_links/redis_config"
+require "dynamic_links/configuration"
 require "dynamic_links/validator"
 require "dynamic_links/strategy_factory"
 require 'dynamic_links/cache_store/base_cache_store'
@@ -93,7 +93,6 @@ module DynamicLinks
 
   private
 
-  # TODO Handle issue when failed to save record
   def self.process_url_synchronously(url, short_url, client, strategy)
     if strategy.always_growing?
       ShortenedUrl.create!(client: client, url: url, short_url: short_url)

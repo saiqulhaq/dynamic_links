@@ -11,14 +11,13 @@ module DynamicLinks
       MIN_LENGTH = 12
       REDIS_COUNTER_KEY = "dynamic_links:counter".freeze
 
+      # @param redis_config [Hash]
       def initialize(redis_config = nil)
         super()
-        pool_size = DynamicLinks.configuration.redis_pool_size
-        pool_timeout = DynamicLinks.configuration.redis_pool_timeout
 
-        @redis = ConnectionPool.new(size: pool_size, timeout: pool_timeout) do
-          redis_config = redis_config.presence || DynamicLinks.configuration.redis_config
-          Redis.new(redis_config)
+        configuration = redis_config.nil? ? DynamicLinks.configuration.redis_counter_config : DynamicLinks::Configuration::RedisConfig.new(redis_config)
+        @redis = ConnectionPool.new(size: configuration.pool_size, timeout: configuration.pool_timeout) do
+          Redis.new(configuration.config)
         end
       end
 

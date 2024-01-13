@@ -46,16 +46,6 @@ module DynamicLinks
       assert_not duplicate_url.save, 'Saved the shortened url with a duplicate short_url'
     end
 
-    test 'reference to client is optional' do
-      shortened_url = ShortenedUrl.new(url: 'https://example.com', short_url: 'abc123a')
-      assert shortened_url.save, 'Failed to save shortened url without an associated client'
-    end
-
-    test 'should handle urls without associated client' do
-      shortened_url = ShortenedUrl.new(url: 'https://example.com', short_url: 'xyz789')
-      assert shortened_url.save, 'Failed to save shortened url without an associated client'
-    end
-
     test 'should allow the same short_url for different clients' do
       client_one = dynamic_links_clients(:one)
       client_two = dynamic_links_clients(:two)

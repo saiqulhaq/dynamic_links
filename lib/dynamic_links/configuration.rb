@@ -12,17 +12,18 @@ module DynamicLinks
     DEFAULT_REDIS_COUNTER_CONFIG = RedisConfig.new
     DEFAULT_CACHE_STORE_CONFIG = { type: nil, redis_config: {}, memcached_config: {} }
 
-    # Usage: DynamicLinks.configure do |config|
-    #          config.shortening_strategy = :MD5 # or other strategy name, see StrategyFactory for available strategies
-    #          config.enable_rest_api = true # or false. when false, the API requests will be rejected
-    #          config.db_infra_strategy = :standard # or :sharding. if sharding is used, then xxx
-    #          config.async_processing = false # or true. if true, the shortening process will be done asynchronously using ActiveJob
-    #          config.redis_counter_config = RedisConfig.new # see RedisConfig documentation for more details
-    #          if you use Redis
-    #          config.cache_store_config = { type: :redis, redis_config: { host: 'localhost', port: 6379 } }
-    #          if you use Memcached
-    #          config.cache_store_config = { type: :memcached, memcached_config: { host: 'localhost', port: 6379 } }
-    #        end
+    # Usage:
+    #     DynamicLinks.configure do |config|
+    #       config.shortening_strategy = :MD5 # or other strategy name, see StrategyFactory for available strategies
+    #       config.enable_rest_api = true # or false. when false, the API requests will be rejected
+    #       config.db_infra_strategy = :standard # or :sharding. if sharding is used, then xxx
+    #       config.async_processing = false # or true. if true, the shortening process will be done asynchronously using ActiveJob
+    #       config.redis_counter_config = RedisConfig.new # see RedisConfig documentation for more details
+    #       # if you use Redis
+    #       config.cache_store_config = { type: :redis, redis_config: { host: 'localhost', port: 6379 } }
+    #       # if you use Memcached
+    #       config.cache_store_config = { type: :memcached, memcached_config: { host: 'localhost', port: 6379 } }
+    #     end
     #
     # @return [Configuration]
     def initialize

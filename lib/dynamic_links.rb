@@ -36,6 +36,8 @@ require "dynamic_links/shortening_strategies/crc32_strategy"
 require "dynamic_links/shortening_strategies/nano_id_strategy"
 require "dynamic_links/shortening_strategies/redis_counter_strategy"
 require "dynamic_links/shortening_strategies/mock_strategy"
+require "dynamic_links/async/locker"
+require "dynamic_links/shortener"
 
 module DynamicLinks
   class << self
@@ -53,32 +55,13 @@ module DynamicLinks
   def self.shorten_url(url, client, async: DynamicLinks.configuration.async_processing)
     raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
 
-    strategy_key = DynamicLinks.configuration.shortening_strategy
-    strategy = StrategyFactory.get_strategy(strategy_key)
-    short_url = strategy.shorten(url)
-
+    shortener = Shortener.new
     if async
-      lock_key = "lock:shorten_url:#{short_url}"
-      cache_store = DynamicLinks.configuration.cache_store
-
-      if cache_store.read(lock_key)
-        # Return the short url if it is already in the cache
-        return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
-      end
-
-      # Set a lock and store data in cache
-      cache_store.write(lock_key, 'locked', { expires_in: 10.minutes })
-      cache_key = "shorten_url:#{client.id}:#{short_url}"
-      cache_store.write(cache_key, { url: url, short_url: short_url })
-
-      ShortenUrlJob.perform_later(client, url, short_url, lock_key)
-      URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
+      shortener.shorten_async(client, url)
     else
-      # Synchronous processing
-      process_url_synchronously(url, short_url, client, strategy)
+      shortener.shorten(client, url)
     end
   end
-
 
   # mimic Firebase Dynamic Links API
   def self.generate_short_url(original_url, client)
@@ -89,16 +72,5 @@ module DynamicLinks
       previewLink: "#{short_link}?preview=true",
       warning: []
     }
-  end
-
-  private
-
-  def self.process_url_synchronously(url, short_url, client, strategy)
-    if strategy.always_growing?
-      ShortenedUrl.create!(client: client, url: url, short_url: short_url)
-    else
-      ShortenedUrl.find_or_create(client, short_url, url)
-    end
-    URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
   end
 end

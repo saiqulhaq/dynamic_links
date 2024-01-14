@@ -1,5 +1,5 @@
 module DynamicLinks
-  # This job generates short links in the background
+  # This job generates short links in the background for KGS strategy
   # It is intended to be run periodically
   # We can find available short links by querying the database with query:
   # ShortenedUrl.where(available: true)

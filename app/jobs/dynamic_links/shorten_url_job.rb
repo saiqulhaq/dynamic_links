@@ -1,6 +1,7 @@
 # @author Saiqul Haq <saiqulhaq@gmail.com>
 
 module DynamicLinks
+  # This job is used to create a shortened url
   class ShortenUrlJob < ApplicationJob
     queue_as :default
 

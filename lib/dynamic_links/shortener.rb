@@ -30,7 +30,7 @@ module DynamicLinks
         short_url: short_url
       }
 
-      locker.lock(client, lock_key, content)
+      locker.lock(lock_key, content)
       async_worker.perform_later(client, url, short_url, lock_key)
       URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
     end

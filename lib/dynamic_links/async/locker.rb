@@ -8,11 +8,6 @@ module DynamicLinks
         "lock:shorten_url#{client.id}:#{url_to_lock_key(url)}"
       end
 
-      # allow dependency injection
-      def cache_store(store = DynamicLinks.configuration.cache_store)
-        @cache_store ||= store
-      end
-
       def lock(lock_key, content)
         cache_store.set(lock_key, content, ex: 60, nx: true)
         lock_key
@@ -24,6 +19,11 @@ module DynamicLinks
 
       def read(lock_key)
         cache_store.read(lock_key)
+      end
+
+      # @api private
+      def cache_store(store = DynamicLinks.configuration.cache_store)
+        @cache_store ||= store
       end
 
       private

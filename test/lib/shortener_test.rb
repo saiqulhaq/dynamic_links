@@ -5,7 +5,7 @@ require "minitest/mock"
 class DynamicLinks::ShortenerTest < ActiveSupport::TestCase
   setup do
     @shortener = DynamicLinks::Shortener.new
-    @client = dynamic_links_clients(:one) # Assuming a fixture
+    @client = dynamic_links_clients(:one)
     @url = 'https://example.com'
 
     # Mocks for dependencies
@@ -34,6 +34,47 @@ class DynamicLinks::ShortenerTest < ActiveSupport::TestCase
 
     @strategy_mock.verify
     @storage_mock.verify
+  end
+
+  test "shorten method invokes correct strategy and creates short URL synchronously" do
+    expected_short_url = 'shortened_url'
+    @strategy_mock.expect :shorten, expected_short_url, [@url]
+    @strategy_mock.expect :always_growing?, false
+    @storage_mock.expect :find_or_create, nil, [@client, expected_short_url, @url]
+
+    @shortener.stub :strategy, @strategy_mock do
+      @shortener.stub :storage, @storage_mock do
+        result = @shortener.shorten(@client, @url)
+        assert_equal "https://#{@client.hostname}/#{expected_short_url}", result
+      end
+    end
+
+    @strategy_mock.verify
+    @storage_mock.verify
+  end
+
+  test "shorten_async method processes URL asynchronously when lock key is not present" do
+    expected_short_url = 'shortened_url'
+    @strategy_mock.expect :shorten, expected_short_url, [@url]
+    lock_key = "lock:shorten_url:#{Digest::SHA256.hexdigest(@url)}"
+
+    @locker_mock.expect :generate_key, lock_key, [@client, @url]
+    @locker_mock.expect :locked?, false, [lock_key]
+    @locker_mock.expect :lock, nil, [lock_key, {url: @url, short_url: expected_short_url}]
+    @async_worker_mock.expect :perform_later, nil, [@client, @url, expected_short_url, lock_key]
+
+    @shortener.stub :strategy, @strategy_mock do
+      @shortener.stub :locker, @locker_mock do
+        @shortener.stub :async_worker, @async_worker_mock do
+          result = @shortener.shorten_async(@client, @url)
+          assert_equal "https://#{@client.hostname}/#{expected_short_url}", result
+        end
+      end
+    end
+
+    @strategy_mock.verify
+    @locker_mock.verify
+    @async_worker_mock.verify
   end
 
   test "shorten_async method enqueues a job and returns a shortened URL" do

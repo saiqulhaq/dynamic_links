@@ -30,6 +30,7 @@ module DynamicLinks
       record.url = url
       # TODO Handle issue when failed to save record
       record.save!
+      record
     end
   end
 end

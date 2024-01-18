@@ -80,6 +80,10 @@ class DynamicLinks::ShortenedUrlTest < ActiveSupport::TestCase
       assert_equal @client, result.client
       assert_equal @url, result.url
       assert_equal @short_url, result.short_url
+      # Call find_or_create again and ensure the count doesn't change
+      assert_no_difference 'DynamicLinks::ShortenedUrl.count' do
+        result = DynamicLinks::ShortenedUrl.find_or_create(@client, @short_url, @url)
+      end
     end
   end
 end

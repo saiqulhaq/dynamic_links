@@ -4,11 +4,12 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
   setup do
     @client = dynamic_links_clients(:one)
     @original_rest_api_setting = DynamicLinks.configuration.enable_rest_api
+    @original_db_infra_strategy = DynamicLinks.configuration.db_infra_strategy
   end
 
   teardown do
-    # Reset the configuration after each test
     DynamicLinks.configuration.enable_rest_api = @original_rest_api_setting
+    DynamicLinks.configuration.db_infra_strategy = @original_db_infra_strategy
   end
 
   test "should create a shortened URL" do
@@ -48,5 +49,21 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     post '/v1/shortLinks', params: { url: 'https://example.com', api_key: @client.api_key }
     assert_response :forbidden
     assert_includes @response.body, 'REST API feature is disabled'
+  end
+
+  test "should use MultiTenant.with when db_infra_strategy is :citus" do
+    DynamicLinks.configuration.db_infra_strategy = :citus
+    ::MultiTenant.expects(:with).with(@client).once
+    url = 'https://example.com/'
+    api_key = @client.api_key
+    post '/v1/shortLinks', params: { url: url, api_key: api_key }
+  end
+
+  test "should not use MultiTenant.with when db_infra_strategy is not :citus" do
+    DynamicLinks.configuration.db_infra_strategy = :standard
+    url = 'https://example.com/'
+    api_key = @client.api_key
+    ::MultiTenant.expects(:with).with(@client).never
+    post '/v1/shortLinks', params: { url: url, api_key: api_key }
   end
 end

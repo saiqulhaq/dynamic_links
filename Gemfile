@@ -15,7 +15,10 @@ gem 'sprockets-rails'
 # for dummy app
 gem 'sidekiq'
 
-gem 'simplecov', require: false, group: :test
+group :test do
+  gem 'simplecov', require: false
+  gem 'mocha'
+end
 
 # Start debugger with binding.b [https://github.com/ruby/debug]
 # gem "debug", ">= 1.0.0"

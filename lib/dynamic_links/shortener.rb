@@ -18,21 +18,15 @@ module DynamicLinks
     def shorten_async(client, url)
       lock_key = locker.generate_key(client, url)
 
-      if locker.locked?(lock_key)
-        short_url = locker.read(lock_key)
-        # Return the short url if it is already in the cache
-        return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
+      locker.lock_if_absent(lock_key) do
+        short_url = strategy.shorten(url)
+        content = {
+          url: url,
+          short_url: short_url
+        }
+
+        async_worker.perform_later(client, url, short_url, lock_key)
       end
-
-      short_url = strategy.shorten(url)
-      content = {
-        url: url,
-        short_url: short_url
-      }
-
-      locker.lock(lock_key, content)
-      async_worker.perform_later(client, url, short_url, lock_key)
-      URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
     end
 
     # @api private

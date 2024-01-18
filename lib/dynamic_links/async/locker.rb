@@ -8,17 +8,22 @@ module DynamicLinks
         "lock:shorten_url#{client.id}:#{url_to_lock_key(url)}"
       end
 
-      def lock(lock_key, content)
-        cache_store.set(lock_key, content, ex: 60, nx: true)
-        lock_key
+      def lock_if_absent(lock_key, expires_in: 60, &block)
+        locked = cache_store.set(lock_key, 1, ex: expires_in, nx: true)
+
+        if locked
+          begin
+            yield
+          ensure
+            unlock(lock_key)
+          end
+        end
+
+        locked
       end
 
-      def locked?(lock_key)
-        cache_store.read(lock_key).present?
-      end
-
-      def read(lock_key)
-        cache_store.read(lock_key)
+      def unlock(lock_key)
+        cache_store.del(lock_key)
       end
 
       # @api private

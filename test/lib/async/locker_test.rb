@@ -4,63 +4,44 @@ require "minitest/mock"
 # @author Saiqul Haq <saiqulhaq@gmail.com>
 class DynamicLinks::Async::LockerTest < ActiveSupport::TestCase
   setup do
+    @locker = DynamicLinks::Async::Locker.new
     @client = dynamic_links_clients(:one)
     @url = 'https://example.com'
-    @locker = DynamicLinks::Async::Locker.new
-    @cache_mock = Minitest::Mock.new
+    @lock_key = @locker.generate_key(@client, @url)
+    @cache_store = mock()
+    @locker.stubs(:cache_store).returns(@cache_store)
   end
 
-  test "generate_key returns a consistent key for a given client and url" do
-    expected_key = "lock:shorten_url#{@client.id}:#{Digest::SHA256.hexdigest(@url)}"
-    assert_equal expected_key, @locker.generate_key(@client, @url)
+  test 'should acquire lock if absent and execute block' do
+    @cache_store.expects(:set).with(@lock_key, 1, ex: 60, nx: true).returns(true)
+    @cache_store.expects(:del).with(@lock_key).returns(1)
+
+    result = @locker.lock_if_absent(@lock_key) do
+      'block result'
+    end
+
+    assert_equal true, result
   end
 
-  test "lock sets a value in cache store with expiration and returns lock key" do
-    lock_key = @locker.generate_key(@client, @url)
-    content = { url: @url, short_url: 'shortened_url' }
-    options = { ex: 60, nx: true }
+  test 'should raise LockAcquisitionError if unable to acquire lock' do
+    @cache_store.expects(:set).with(@lock_key, 1, ex: 60, nx: true).returns(false)
 
-    @cache_mock.expect(:set, true) do |arg1, arg2, arg3|
-      arg1 == lock_key && arg2 == content && arg3 == options
+    assert_raises DynamicLinks::Async::Locker::LockAcquisitionError do
+      @locker.lock_if_absent(@lock_key) do
+        'block result'
+      end
     end
-
-    @locker.stub :cache_store, @cache_mock do
-      assert_equal lock_key, @locker.lock(lock_key, content)
-    end
-
-    @cache_mock.verify
   end
 
-  test "locked? returns true if key is present in cache store" do
-    lock_key = @locker.generate_key(@client, @url)
-    @cache_mock.expect :read, 'value', [lock_key]
+  test 'should raise LockReleaseError if unable to release lock' do
+    @cache_store.expects(:set).with(@lock_key, 1, ex: 60, nx: true).returns(true)
+    @cache_store.expects(:del).with(@lock_key).returns(0)
 
-    @locker.stub :cache_store, @cache_mock do
-      assert @locker.locked?(lock_key)
+    assert_raises DynamicLinks::Async::Locker::LockReleaseError do
+      @locker.lock_if_absent(@lock_key) do
+        'block result'
+      end
     end
-
-    @cache_mock.verify
-  end
-
-  test "locked? returns false if key is not present in cache store" do
-    lock_key = @locker.generate_key(@client, @url)
-    @cache_mock.expect :read, nil, [lock_key]
-
-    @locker.stub :cache_store, @cache_mock do
-      refute @locker.locked?(lock_key)
-    end
-
-    @cache_mock.verify
-  end
-
-  test "read returns the value from cache store for a given key" do
-    lock_key = @locker.generate_key(@client, @url)
-    expected_value = { url: @url, short_url: 'shortened_url' }
-    @cache_mock.expect :read, expected_value, [lock_key]
-    @locker.stub :cache_store, @cache_mock do
-      assert_equal expected_value, @locker.read(lock_key)
-    end
-
-    @cache_mock.verify
   end
 end
+

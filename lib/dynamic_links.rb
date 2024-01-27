@@ -21,6 +21,7 @@ end
 
 require "dynamic_links/version"
 require "dynamic_links/engine"
+require "dynamic_links/logger"
 require "dynamic_links/error_classes"
 require "dynamic_links/redis_config"
 require "dynamic_links/configuration"

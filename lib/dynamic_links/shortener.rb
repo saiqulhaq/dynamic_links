@@ -1,5 +1,5 @@
-# @author Saiqul Haq <saiqulhaq@gmail.com>
 module DynamicLinks
+  # @author Saiqul Haq <saiqulhaq@gmail.com>
   class Shortener
     # @param client [Client] the client that owns the url
     # @param url [String] the url to be shortened

@@ -12,6 +12,10 @@ class DynamicLinks::Async::LockerTest < ActiveSupport::TestCase
     @locker.stubs(:cache_store).returns(@cache_store)
   end
 
+  def teardown
+    mocha_teardown
+  end
+
   test 'should acquire lock if absent and execute block' do
     @cache_store.expects(:write).with(@lock_key, 1, ex: 60, nx: true).returns(true)
 

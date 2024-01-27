@@ -1,6 +1,18 @@
 module DynamicLinks
   # @author Saiqul Haq <saiqulhaq@gmail.com>
   class Shortener
+    attr_reader :locker, :strategy, :storage, :async_worker
+
+    def initialize(locker: DynamicLinks::Async::Locker.new,
+                   strategy: StrategyFactory.get_strategy(DynamicLinks.configuration.shortening_strategy),
+                   storage: ShortenedUrl,
+                   async_worker: ShortenUrlJob)
+      @locker = locker
+      @strategy = strategy
+      @storage = storage
+      @async_worker = async_worker
+    end
+
     # @param client [Client] the client that owns the url
     # @param url [String] the url to be shortened
     # @return [String] the shortened url
@@ -13,8 +25,13 @@ module DynamicLinks
         storage.find_or_create(client, short_url, url)
       end
       URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
+    rescue => e
+      DynamicLinks::Logger.log_error("Error shortening URL: #{e.message}")
+      raise e
     end
 
+    # @param client [Client] the client that owns the url
+    # @param url [String] the url to be shortened
     def shorten_async(client, url)
       lock_key = locker.generate_key(client, url)
 
@@ -27,26 +44,9 @@ module DynamicLinks
 
         async_worker.perform_later(client, url, short_url, lock_key)
       end
-    end
-
-    # @api private
-    def locker(klass = DynamicLinks::Async::Locker)
-      @locker ||= klass.new
-    end
-
-    # @api private
-    def strategy(strategy_key = DynamicLinks.configuration.shortening_strategy)
-      @strategy ||= StrategyFactory.get_strategy(strategy_key)
-    end
-
-    # @api private
-    def storage(model = ShortenedUrl)
-      @shortened_url_model ||= model
-    end
-
-    # @api private
-    def async_worker(klass = ShortenUrlJob)
-      @async_worker ||= klass
+    rescue => e
+      DynamicLinks::Logger.log_error("Error shortening URL asynchronously: #{e.message}")
+      raise e
     end
   end
 end

@@ -34,8 +34,10 @@ module DynamicLinks
         locked
       end
 
+      # Deletes an entry in the cache. Returns true if an entry is deleted and false otherwise.
+      # @return [Boolean]
       def unlock(lock_key)
-        cache_store.delete(lock_key) > 0
+        cache_store.delete(lock_key)
       end
 
       # @api private

@@ -3,7 +3,6 @@ require_relative '../test/dummy/config/environment.rb'
 
 DynamicLinks.configure do |config|
   config.shortening_strategy = :md5
-  config.cache_store_config = { type: :redis, redis_config: { host: 'redis' } }
 end
 
 # Dummy client setup

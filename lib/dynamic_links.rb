@@ -27,9 +27,6 @@ require "dynamic_links/redis_config"
 require "dynamic_links/configuration"
 require "dynamic_links/validator"
 require "dynamic_links/strategy_factory"
-require 'dynamic_links/cache_store/base_cache_store'
-require 'dynamic_links/cache_store/redis_cache_store'
-require 'dynamic_links/cache_store/memcached_cache_store'
 require "dynamic_links/shortening_strategies/base_strategy"
 require "dynamic_links/shortening_strategies/sha256_strategy"
 require "dynamic_links/shortening_strategies/md5_strategy"

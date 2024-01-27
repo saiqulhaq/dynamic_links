@@ -12,6 +12,4 @@ DynamicLinks.configure do |config|
     port: ENV['REDIS_PORT'] || 6379,
     db: ENV['REDIS_DB'] || 0,
   }
-
-  config.cache_store_config = { type: :redis, redis_config: { host: 'redis', port: 6379 } }
 end

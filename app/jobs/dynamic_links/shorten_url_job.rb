@@ -10,9 +10,9 @@ module DynamicLinks
 
       begin
         if strategy.always_growing?
-          storage.create(client: client, url: url, short_url: short_url)
+          storage.create!(client: client, url: url, short_url: short_url)
         else
-          storage.find_or_create(client, short_url, url)
+          storage.find_or_create!(client, short_url, url)
         end
         locker.unlock(lock_key)
         DynamicLinks::Logger.log_info("Lock key #{lock_key} deleted after ShortenUrlJob")

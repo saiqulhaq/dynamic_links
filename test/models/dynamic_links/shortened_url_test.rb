@@ -69,20 +69,20 @@ class DynamicLinks::ShortenedUrlTest < ActiveSupport::TestCase
 
   test "find_or_create returns existing record if it exists" do
     existing_record = DynamicLinks::ShortenedUrl.create!(client: @client, url: @url, short_url: @short_url)
-    result = DynamicLinks::ShortenedUrl.find_or_create(@client, @short_url, @url)
+    result = DynamicLinks::ShortenedUrl.find_or_create!(@client, @short_url, @url)
     assert_equal existing_record, result, "Expected to return the existing record"
   end
 
   test "find_or_create creates and returns a new record if it doesn't exist" do
     assert_difference 'DynamicLinks::ShortenedUrl.count', 1 do
-      result = DynamicLinks::ShortenedUrl.find_or_create(@client, @short_url, @url)
+      result = DynamicLinks::ShortenedUrl.find_or_create!(@client, @short_url, @url)
       assert_not_nil result, "Expected a new ShortenedUrl record to be created"
       assert_equal @client, result.client
       assert_equal @url, result.url
       assert_equal @short_url, result.short_url
       # Call find_or_create again and ensure the count doesn't change
       assert_no_difference 'DynamicLinks::ShortenedUrl.count' do
-        DynamicLinks::ShortenedUrl.find_or_create(@client, @short_url, @url)
+        DynamicLinks::ShortenedUrl.find_or_create!(@client, @short_url, @url)
       end
     end
   end

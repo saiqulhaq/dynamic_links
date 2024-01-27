@@ -22,7 +22,7 @@ module DynamicLinks
       if strategy.always_growing?
         storage.create!(client: client, url: url, short_url: short_url)
       else
-        storage.find_or_create(client, short_url, url)
+        storage.find_or_create!(client, short_url, url)
       end
       URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
     rescue => e

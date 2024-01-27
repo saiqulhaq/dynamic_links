@@ -16,19 +16,28 @@ module DynamicLinks
       @locker.lock(@lock_key)
     end
 
-    test 'perform should create or find a shortened URL' do
+    test 'perform should create a shortened URL if startegy#always_growing? is true' do
       @strategy.stubs(:always_growing?).returns(true)
-      ShortenedUrl.stubs(:create)
-      ShortenedUrl.stubs(:find_or_create)
+      ShortenedUrl.stubs(:create!)
 
       @job.perform(@client, @url, "#{@short_url}11", @lock_key)
 
       assert @locker.locked?(@lock_key).nil?
     end
 
+    test 'perform should find_or_create a shortened URL if startegy#always_growing? is false' do
+      @strategy.stubs(:always_growing?).returns(false)
+      ShortenedUrl.stubs(:find_or_create!)
+
+      @job.perform(@client, @url, "#{@short_url}12", @lock_key)
+
+      assert @locker.locked?(@lock_key).nil?
+    end
+
+
     test 'perform should log error and re-raise exception on failure' do
       @strategy.stubs(:always_growing?).returns(true)
-      ShortenedUrl.stubs(:create).raises(StandardError.new('Creation failed'))
+      ShortenedUrl.stubs(:create!).raises(StandardError.new('Creation failed'))
       DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/Error in ShortenUrlJob/))
 
       assert_raises StandardError do

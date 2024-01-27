@@ -23,7 +23,7 @@ module DynamicLinks
     validates :url, presence: true
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
 
-    def self.find_or_create(client, short_url, url)
+    def self.find_or_create!(client, short_url, url)
       record = find_or_initialize_by(client: client, short_url: short_url)
       return record if record.persisted?
 

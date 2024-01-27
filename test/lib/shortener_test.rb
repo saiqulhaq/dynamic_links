@@ -37,7 +37,7 @@ module DynamicLinks
 
     test 'shorten_async should enqueue a job to shorten the URL' do
       lock_key = 'lock_key'
-      @locker.stubs(:generate_key).returns(lock_key)
+      @locker.stubs(:generate_lock_key).returns(lock_key)
       @locker.stubs(:lock_if_absent).yields
       @strategy.stubs(:shorten).returns(@short_url)
       @async_worker.expects(:perform_later).with(@client, @url, @short_url, lock_key)
@@ -46,7 +46,7 @@ module DynamicLinks
     end
 
     test 'shorten_async should handle exceptions and log errors' do
-      @locker.stubs(:generate_key).returns('lock_key')
+      @locker.stubs(:generate_lock_key).returns('lock_key')
       @locker.stubs(:lock_if_absent).raises(StandardError.new('async shortening failed'))
       DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/Error shortening URL asynchronously/))
 

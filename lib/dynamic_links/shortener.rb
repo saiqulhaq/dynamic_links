@@ -33,7 +33,7 @@ module DynamicLinks
     # @param client [Client] the client that owns the url
     # @param url [String] the url to be shortened
     def shorten_async(client, url)
-      lock_key = locker.generate_key(client, url)
+      lock_key = locker.generate_lock_key(client, url)
 
       locker.lock_if_absent(lock_key) do
         short_url = strategy.shorten(url)

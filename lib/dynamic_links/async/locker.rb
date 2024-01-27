@@ -5,14 +5,22 @@ module DynamicLinks
       LockAcquisitionError = Class.new(StandardError)
       LockReleaseError = Class.new(StandardError)
 
-      def generate_key(client, url)
+      def generate_lock_key(client, url)
         "lock:shorten_url#{client.id}:#{url_to_lock_key(url)}"
+      end
+
+      def locked?(lock_key)
+        cache_store.read(lock_key)
+      end
+
+      def lock(lock_key, expires_in: 60)
+        cache_store.write(lock_key, 1, ex: expires_in, nx: true)
       end
 
       def lock_if_absent(lock_key, expires_in: 60, &block)
         locked = false
         begin
-          locked = cache_store.set(lock_key, 1, ex: expires_in, nx: true)
+          locked = lock(lock_key, expires_in: expires_in)
           unless locked
             raise LockAcquisitionError, "Unable to acquire lock for key: #{lock_key}"
           end
@@ -21,17 +29,13 @@ module DynamicLinks
         rescue => e
           DynamicLinks::Logger.log_info("Locking error: #{e.message}")
           raise e
-        ensure
-          if locked && !unlock(lock_key)
-            raise LockReleaseError, "Unable to release lock for key: #{lock_key}"
-          end
         end
 
         locked
       end
 
       def unlock(lock_key)
-        cache_store.del(lock_key) > 0
+        cache_store.delete(lock_key) > 0
       end
 
       # @api private

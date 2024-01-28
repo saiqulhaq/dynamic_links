@@ -44,10 +44,10 @@ module DynamicLinks
 
     test 'perform should log error and re-raise exception on failure' do
       @strategy.stubs(:always_growing?).returns(true)
-      ShortenedUrl.stubs(:create!).raises(StandardError.new('Creation failed'))
+      ShortenedUrl.stubs(:create!).raises(ShorteningFailed.new('Creation failed'))
       DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/Error in ShortenUrlJob/))
 
-      assert_raises StandardError do
+      assert_raises ShorteningFailed do
         @job.perform(@client, @url, "#{@short_url}123", @lock_key)
       end
 

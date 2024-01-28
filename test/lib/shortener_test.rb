@@ -27,10 +27,10 @@ module DynamicLinks
     end
 
     test 'shorten should handle exceptions and log errors' do
-      @strategy.stubs(:shorten).raises(StandardError.new('shortening failed'))
+      @strategy.stubs(:shorten).raises(ShorteningFailed.new('shortening failed'))
       DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/Error shortening URL/))
 
-      assert_raises StandardError do
+      assert_raises ShorteningFailed do
         @shortener.shorten(@client, @url)
       end
     end
@@ -47,10 +47,10 @@ module DynamicLinks
 
     test 'shorten_async should handle exceptions and log errors' do
       @locker.stubs(:generate_lock_key).returns('lock_key')
-      @locker.stubs(:lock_if_absent).raises(StandardError.new('async shortening failed'))
+      @locker.stubs(:lock_if_absent).raises(ShorteningFailed.new('async shortening failed'))
       DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/Error shortening URL asynchronously/))
 
-      assert_raises StandardError do
+      assert_raises ShorteningFailed do
         @shortener.shorten_async(@client, @url)
       end
     end

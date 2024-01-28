@@ -8,8 +8,8 @@ DynamicLinks.configure do |config|
   config.redis_counter_config.pool_size = 5
   config.redis_counter_config.pool_timeout = 5
   config.redis_counter_config.config = {
-    host: ENV['REDIS_HOST'] || 'localhost',
-    port: ENV['REDIS_PORT'] || 6379,
-    db: ENV['REDIS_DB'] || 0,
+    host: ENV.fetch('REDIS_HOST', 'localhost'),
+    port: ENV.fetch('REDIS_PORT', 6379).to_i,
+    db: ENV.fetch('REDIS_DB', 0).to_i,
   }
 end

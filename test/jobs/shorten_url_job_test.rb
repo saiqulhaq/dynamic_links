@@ -25,7 +25,7 @@ module DynamicLinks
       @job.perform(@client, @url, "#{@short_url}11", @lock_key)
     end
 
-    test 'perform should find_or_create a shortened URL if startegy#always_growing? is false' do
+    test 'perform should find_or_create a shortened URL if strategy#always_growing? is false' do
       @strategy.stubs(:always_growing?).returns(false)
       @job.stubs(:storage).returns(@storage)
 

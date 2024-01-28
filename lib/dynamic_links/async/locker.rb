@@ -25,14 +25,11 @@ module DynamicLinks
       # @param [Integer] expires_in, default is 60 seconds
       # @param [Block] block, the block to be executed if lock is acquired
       # @return [Boolean]
-      def lock_if_absent(lock_key, expires_in: 60, race_condition_ttl: 10.seconds, &block)
+      def lock_if_absent(lock_key, expires_in: 60, &block)
         is_locked = false
         begin
-          cache_store.fetch(lock_key, race_condition_ttl: race_condition_ttl) do |_key, options|
-            options.expires_in = expires_in
-            is_locked = true
-            yield if block_given?
-          end
+          is_locked = cache_store.increment(lock_key, 1, expires_in: expires_in) == 1
+          yield if is_locked && block_given?
 
           unless is_locked
             raise LockAcquisitionError, "Unable to acquire lock for key: #{lock_key}"

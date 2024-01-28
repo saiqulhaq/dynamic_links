@@ -40,7 +40,7 @@ module DynamicLinks
       end
 
       test 'lock_if_absent should raise LockAcquisitionError if lock is already present' do
-        @cache_store.write(@lock_key, true)
+        @cache_store.write(@lock_key, 1)
         assert_raises(Locker::LockAcquisitionError) do
           @locker.lock_if_absent(@lock_key) { 'block result' }
         end

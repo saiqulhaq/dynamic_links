@@ -22,6 +22,5 @@ module DynamicLinks
     validates :hostname, presence: true, uniqueness: true
     validates :scheme, presence: true, inclusion: { in: VALID_SCHEMES }
     validates :hostname, format: { with: /\A[a-z0-9]([a-z0-9\-]{,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]{,61}[a-z0-9])?)*\z/i, message: 'must be a valid hostname' }
-    validates :scheme, format: { with: /\Ahttps?\z/i, message: 'must be a valid scheme' }
   end
 end

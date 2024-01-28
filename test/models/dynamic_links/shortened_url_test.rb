@@ -84,6 +84,10 @@ class DynamicLinks::ShortenedUrlTest < ActiveSupport::TestCase
       assert_no_difference 'DynamicLinks::ShortenedUrl.count' do
         DynamicLinks::ShortenedUrl.find_or_create!(@client, @short_url, @url)
       end
+
+      ActiveRecord::Base.transaction do
+        DynamicLinks::ShortenedUrl.lock.find_or_create!(@client, @short_url, @url)
+      end
     end
   end
 

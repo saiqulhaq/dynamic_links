@@ -16,20 +16,5 @@ class CreateDynamicLinksShortenedUrls < ActiveRecord::Migration[7.1]
       t.datetime :expires_at
       t.timestamps
     end
-
-    if DynamicLinks.configuration.db_infra_strategy == :citus
-      # execute SQL to remove primary key constraint
-      execute <<-SQL
-        ALTER TABLE dynamic_links_shortened_urls
-        DROP CONSTRAINT dynamic_links_shortened_urls_pkey;
-      SQL
-
-      execute <<-SQL
-        ALTER TABLE dynamic_links_shortened_urls
-        ADD PRIMARY KEY (id, client_id);
-      SQL
-      create_distributed_table :dynamic_links_shortened_urls, :client_id
-    end
-    add_index :dynamic_links_shortened_urls, [:client_id, :short_url], unique: true
   end
 end

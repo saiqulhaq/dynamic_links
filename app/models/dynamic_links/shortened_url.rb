@@ -24,12 +24,18 @@ module DynamicLinks
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
 
     def self.find_or_create!(client, short_url, url)
-      record = find_or_initialize_by(client: client, short_url: short_url)
-      return record if record.persisted?
-
-      record.url = url
-      record.save!
-      record
+      transaction do
+        record = find_or_initialize_by(client: client, short_url: short_url)
+        if record.new_record?
+          record.url = url
+          record.save!
+        end
+        record
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      # Log the error and re-raise if needed or return a meaningful error message
+      DynamicLinks::Logger.log_error("ShortenedUrl creation failed: #{e.message}")
+      raise e
     end
   end
 end

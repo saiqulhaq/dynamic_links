@@ -86,4 +86,42 @@ class DynamicLinks::ShortenedUrlTest < ActiveSupport::TestCase
       end
     end
   end
+
+  test 'should validate presence of url' do
+    shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, short_url: @short_url)
+    assert_not shortened_url.valid?
+    assert_includes shortened_url.errors[:url], "can't be blank"
+  end
+
+  test 'should validate presence of short_url' do
+    shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url)
+    assert_not shortened_url.valid?
+    assert_includes shortened_url.errors[:short_url], "can't be blank"
+  end
+
+  test 'should validate uniqueness of short_url scoped to client_id' do
+    existing_record = DynamicLinks::ShortenedUrl.create!(client: @client, url: @url, short_url: @short_url)
+    new_record = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: @short_url)
+    assert_not new_record.valid?
+    assert_includes new_record.errors[:short_url], "has already been taken"
+  end
+
+  test 'find_or_create! should find existing record' do
+    existing_record = DynamicLinks::ShortenedUrl.create!(client: @client, url: @url, short_url: @short_url)
+    found_record = DynamicLinks::ShortenedUrl.find_or_create!(@client, @short_url, @url)
+    assert_equal existing_record, found_record
+  end
+
+  test 'find_or_create! should create new record if not exists' do
+    assert_difference 'DynamicLinks::ShortenedUrl.count', 1 do
+      DynamicLinks::ShortenedUrl.find_or_create!(@client, @short_url, @url)
+    end
+  end
+
+  test 'find_or_create! should raise error and log if save fails' do
+    DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/ShortenedUrl creation failed/))
+    assert_raises ActiveRecord::RecordInvalid do
+      DynamicLinks::ShortenedUrl.find_or_create!(@client, nil, @url)
+    end
+  end
 end

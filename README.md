@@ -82,18 +82,14 @@ rails test
 
 ```bash
 export CITUS_ENABLED=true
-rails db:setup 
+rails db:setup
 rails db:test:prepare
 rails test
 ```
 
 Note:
 Make sure the Citus extension already enabled on the installed PostgreSQL
-We don't manage it on Rails. I have spent hours to understand
-
-> /usr/local/bundle/gems/activerecord-7.1.2/lib/active_record/connection_adapters/postgresql_adapter.rb:894:in `exec_params': ERROR:  schema columnar is not a member of extension "citus_columnar" (PG::ObjectNotInPrerequisiteState)
-> DETAIL:  An extension may only use CREATE ... IF NOT EXISTS to skip object creation if the conflicting object is one that it already owns.
-
+We don't manage it on Rails.
 
 ## License
 

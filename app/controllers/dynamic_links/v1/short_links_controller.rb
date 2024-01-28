@@ -16,6 +16,9 @@ module DynamicLinks
       end
     rescue DynamicLinks::InvalidURIError
       render json: { error: 'Invalid URL' }, status: :bad_request
+    rescue => e
+      DynamicLinks::Logger.log_error(e)
+      render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
     end
 
     private

@@ -55,5 +55,17 @@ module DynamicLinks
       duplicate_client = Client.new(name: 'Test Client', api_key: 'test_api_key1', hostname: 'example2.com', scheme: 'https')
       assert_not duplicate_client.save, 'Saved client with a duplicate name'
     end
+
+    test 'should not save client with duplicate hostname' do
+      hostname = 'sub.hostname.com'
+      Client.create!(name: 'Test Client', api_key: 'test_api_key', hostname: hostname, scheme: 'https')
+      assert_raises ActiveRecord::RecordInvalid do
+        Client.create!(name: 'Test Client', api_key: 'another api key', hostname: hostname, scheme: 'https')
+      end
+    end
+
+    test 'should not save client with invalid hostname' do
+      refute Client.new(name: 'Test Client', api_key: 'test_api_key', hostname: 'invalid hostname', scheme: 'https').save
+    end
   end
 end

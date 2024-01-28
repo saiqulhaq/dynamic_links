@@ -17,7 +17,7 @@ module DynamicLinks
       @locker.cache_store.write(@lock_key, true)
     end
 
-    test 'perform should create a shortened URL if startegy#always_growing? is true' do
+    test 'perform should create a shortened URL if strategy#always_growing? is true' do
       @strategy.stubs(:always_growing?).returns(true)
       @job.stubs(:storage).returns(@storage)
 

@@ -25,10 +25,8 @@ module DynamicLinks
 
     def self.find_or_create!(client, short_url, url)
       transaction do
-        record = find_or_initialize_by(client: client, short_url: short_url)
-        if record.new_record?
+        record = find_or_create_by!(client: client, short_url: short_url) do |record|
           record.url = url
-          record.save!
         end
         record
       end

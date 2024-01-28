@@ -39,11 +39,11 @@ module DynamicLinks
         assert @locker.locked?(@lock_key), 'Lock should be not released after block execution'
       end
 
-      test 'lock_if_absent should raise LockAcquisitionError if lock is already present' do
+      test 'lock_if_absent should not called the given block if lock is already present' do
         @cache_store.write(@lock_key, 1)
-        assert_raises(Locker::LockAcquisitionError) do
-          @locker.lock_if_absent(@lock_key) { 'block result' }
-        end
+        value = 100
+        @locker.lock_if_absent(@lock_key) { value = 200 }
+        assert_equal 100, value, 'Block should not have been executed'
       end
 
       test 'unlock should delete the lock key and return true' do

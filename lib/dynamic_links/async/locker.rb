@@ -32,7 +32,7 @@ module DynamicLinks
           yield if is_locked && block_given?
 
           unless is_locked
-            raise LockAcquisitionError, "Unable to acquire lock for key: #{lock_key}"
+            DynamicLinks::Logger.log_info "Unable to acquire lock for key: #{lock_key}"
           end
         rescue => e
           DynamicLinks::Logger.log_error("Locking error: #{e.message}")

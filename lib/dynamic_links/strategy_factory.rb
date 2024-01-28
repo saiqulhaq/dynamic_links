@@ -1,5 +1,8 @@
 module DynamicLinks
   class StrategyFactory
+    VALID_SHORTENING_STRATEGIES = [:md5, :sha256, :crc32,
+                                   :nano_id, :redis_counter, :mock].freeze
+
     def self.get_strategy(strategy_name)
       case strategy_name
       when :md5

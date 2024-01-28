@@ -30,7 +30,7 @@ module DynamicLinks
     end
 
     def multi_tenant(client, db_infra_strategy = DynamicLinks.configuration.db_infra_strategy)
-      if db_infra_strategy == :citus
+      if db_infra_strategy == :sharding
         MultiTenant.with(client) do
           yield
         end

@@ -1,6 +1,6 @@
 class FixCitusIndex < ActiveRecord::Migration[7.1]
   def change
-    if DynamicLinks.configuration.db_infra_strategy == :citus
+    if DynamicLinks.configuration.db_infra_strategy == :sharding
       # execute SQL to remove primary key constraint
       execute <<-SQL
         ALTER TABLE dynamic_links_shortened_urls

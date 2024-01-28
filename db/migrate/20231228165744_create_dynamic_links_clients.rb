@@ -9,7 +9,7 @@ class CreateDynamicLinksClients < ActiveRecord::Migration[7.1]
       t.timestamps
     end
 
-    if DynamicLinks.configuration.db_infra_strategy == :citus
+    if DynamicLinks.configuration.db_infra_strategy == :sharding
       create_reference_table(:dynamic_links_clients)
     end
 

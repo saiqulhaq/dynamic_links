@@ -65,4 +65,8 @@ class DynamicLinks::ShorteningStrategies::NanoIDStrategyTest < ActiveSupport::Te
     assert_kind_of String, short_url
     assert short_url.length >= DynamicLinks::ShorteningStrategies::NanoIDStrategy::MIN_LENGTH
   end
+
+  test "#always_growing? should returns true" do
+    assert @url_shortener.always_growing?
+  end
 end

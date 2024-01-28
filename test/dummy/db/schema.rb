@@ -10,24 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_01_102216) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_28_030419) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "dynamic_links_clients", force: :cascade do |t|
     t.string "name", null: false
     t.string "api_key", null: false
+    t.string "scheme", default: "https", null: false
+    t.string "hostname", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "hostname", null: false
-    t.string "scheme", default: "https", null: false
     t.index ["api_key"], name: "index_dynamic_links_clients_on_api_key", unique: true
     t.index ["hostname"], name: "index_dynamic_links_clients_on_hostname", unique: true
-    t.index ["name"], name: "index_dynamic_links_clients_on_name", unique: true
+    t.index ["name"], name: "index_dynamic_links_clients_on_name"
   end
 
-  create_table "dynamic_links_shortened_urls", force: :cascade do |t|
-    t.bigint "client_id"
+  create_table "dynamic_links_shortened_urls", primary_key: ["id", "client_id"], force: :cascade do |t|
+    t.bigserial "id", null: false
+    t.bigint "client_id", null: false
     t.string "url", limit: 2083, null: false
     t.string "short_url", limit: 20, null: false
     t.datetime "expires_at"

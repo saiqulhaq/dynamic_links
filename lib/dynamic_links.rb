@@ -1,6 +1,30 @@
+# @author Saiqul Haq <saiqulhaq@gmail.com>
+
+if ENV['RAILS_ENV'] == 'test'
+  require 'simplecov'
+
+  SimpleCov.start do
+    load_profile "test_frameworks"
+
+    add_filter %r{^/config/}
+    add_filter %r{^/db/}
+
+    add_group "Controllers", "app/controllers"
+    add_group "Channels", "app/channels"
+    add_group "Models", "app/models"
+    add_group "Mailers", "app/mailers"
+    add_group "Helpers", "app/helpers"
+    add_group "Jobs", %w[app/jobs app/workers]
+    add_group "DynamicLinks", "lib/"
+  end
+end
+
 require "dynamic_links/version"
 require "dynamic_links/engine"
+require "dynamic_links/logger"
 require "dynamic_links/error_classes"
+require "dynamic_links/redis_config"
+require "dynamic_links/configuration"
 require "dynamic_links/validator"
 require "dynamic_links/strategy_factory"
 require "dynamic_links/shortening_strategies/base_strategy"
@@ -10,7 +34,8 @@ require "dynamic_links/shortening_strategies/crc32_strategy"
 require "dynamic_links/shortening_strategies/nano_id_strategy"
 require "dynamic_links/shortening_strategies/redis_counter_strategy"
 require "dynamic_links/shortening_strategies/mock_strategy"
-require "dynamic_links/configuration"
+require "dynamic_links/async/locker"
+require "dynamic_links/shortener"
 
 module DynamicLinks
   class << self
@@ -25,38 +50,15 @@ module DynamicLinks
     end
   end
 
-  def self.shorten_url(url, client)
+  def self.shorten_url(url, client, async: DynamicLinks.configuration.async_processing)
     raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
 
-    strategy_key = configuration.shortening_strategy
-
-    strategy = begin
-      StrategyFactory.get_strategy(strategy_key)
-    rescue RuntimeError => e
-      # This will catch the 'Unknown strategy' error from the factory
-      raise "Invalid shortening strategy: #{strategy_key}. Error: #{e.message}"
-    rescue ArgumentError
-      raise "#{strategy_key} strategy needs to be initialized with arguments"
-    rescue StandardError => e
-      raise "Unexpected error while initializing the strategy: #{e.message}"
+    shortener = Shortener.new
+    if async
+      shortener.shorten_async(client, url)
+    else
+      shortener.shorten(client, url)
     end
-
-    if strategy.always_growing?
-      short_url = strategy.shorten(url)
-
-      short_url_record = ShortenedUrl.create!(client: client, url: url, short_url: short_url)
-      return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
-    end
-
-    # If no existing record or always growing, generate new short URL
-    short_url = strategy.shorten(url)
-    record = ShortenedUrl.find_or_initialize_by(client: client, short_url: short_url)
-    if record.new_record?
-      record.url = url
-      record.save!
-      record
-    end
-    return URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
   end
 
   # mimic Firebase Dynamic Links API

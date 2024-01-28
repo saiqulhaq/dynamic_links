@@ -17,9 +17,23 @@
 #
 module DynamicLinks
   class ShortenedUrl < ApplicationRecord
-    belongs_to :client, optional: true
+    belongs_to :client
+    multi_tenant :client if respond_to?(:multi_tenant)
 
     validates :url, presence: true
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
+
+    def self.find_or_create!(client, short_url, url)
+      transaction do
+        record = find_or_create_by!(client: client, short_url: short_url) do |record|
+          record.url = url
+        end
+        record
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      # Log the error and re-raise if needed or return a meaningful error message
+      DynamicLinks::Logger.log_error("ShortenedUrl creation failed: #{e.message}")
+      raise e
+    end
   end
 end

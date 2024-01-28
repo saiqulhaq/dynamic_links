@@ -11,9 +11,14 @@ module DynamicLinks
         return
       end
 
-      render json: DynamicLinks.generate_short_url(url, client), status: :created
+      multi_tenant(client) do
+        render json: DynamicLinks.generate_short_url(url, client), status: :created
+      end
     rescue DynamicLinks::InvalidURIError
       render json: { error: 'Invalid URL' }, status: :bad_request
+    rescue => e
+      DynamicLinks::Logger.log_error(e)
+      render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
     end
 
     private
@@ -21,6 +26,16 @@ module DynamicLinks
     def check_rest_api_enabled
       unless DynamicLinks.configuration.enable_rest_api
         render json: { error: 'REST API feature is disabled' }, status: :forbidden
+      end
+    end
+
+    def multi_tenant(client, db_infra_strategy = DynamicLinks.configuration.db_infra_strategy)
+      if db_infra_strategy == :sharding
+        MultiTenant.with(client) do
+          yield
+        end
+      else
+        yield
       end
     end
   end

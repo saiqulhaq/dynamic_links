@@ -2,17 +2,44 @@ require 'test_helper'
 
 module DynamicLinks
   class ConfigurationTest < ActiveSupport::TestCase
-    def setup
-      @config = DynamicLinks::Configuration.new
+    setup do
+      @config = Configuration.new
     end
 
-    test "should initialize with default shortening_strategy" do
-      assert_equal :MD5, @config.shortening_strategy, 'Default shortening_strategy is not set to :MD5'
+    test 'should raise error for invalid shortening_strategy' do
+      assert_raises ArgumentError do
+        @config.shortening_strategy = :invalid_strategy
+      end
     end
 
-    test "should allow setting a different shortening_strategy" do
-      @config.shortening_strategy = :CRC32
-      assert_equal :CRC32, @config.shortening_strategy, 'Unable to set a different shortening_strategy'
+    test 'should raise error for invalid enable_rest_api' do
+      assert_raises ArgumentError do
+        @config.enable_rest_api = 'not a boolean'
+      end
+    end
+
+    test 'should raise error for invalid db_infra_strategy' do
+      assert_raises ArgumentError do
+        @config.db_infra_strategy = :invalid_strategy
+      end
+    end
+
+    test 'should raise error for invalid async_processing' do
+      assert_raises ArgumentError do
+        @config.async_processing = 'not a boolean'
+      end
+    end
+
+    test 'should raise error for invalid redis_counter_config' do
+      assert_raises ArgumentError do
+        @config.redis_counter_config = 'not a RedisConfig'
+      end
+    end
+
+    test 'should raise error for invalid cache_store' do
+      assert_raises ArgumentError do
+        @config.cache_store = 'not a Cache::Store'
+      end
     end
   end
 end

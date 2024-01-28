@@ -1,7 +1,7 @@
 module DynamicLinks
   # @author Saiqul Haq <saiqulhaq@gmail.com>
   class Configuration
-    attr_accessor :shortening_strategy, :enable_rest_api, :db_infra_strategy,
+    attr_reader :shortening_strategy, :enable_rest_api, :db_infra_strategy,
                   :async_processing, :redis_counter_config, :cache_store
 
     VALID_DB_INFRA_STRATEGIES = [:standard, :sharding].freeze

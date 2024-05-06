@@ -36,6 +36,8 @@ require "dynamic_links/shortening_strategies/redis_counter_strategy"
 require "dynamic_links/shortening_strategies/mock_strategy"
 require "dynamic_links/async/locker"
 require "dynamic_links/shortener"
+require "dynamic_links/shortener_v1"
+require "dynamic_links/shortener_v2"
 
 module DynamicLinks
   class << self
@@ -50,10 +52,21 @@ module DynamicLinks
     end
   end
 
-  def self.shorten_url(url, client, async: DynamicLinks.configuration.async_processing)
+  def self.shorten_url_v1(url, client, async: DynamicLinks.configuration.async_processing)
     raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
 
-    shortener = Shortener.new
+    shortener = ShortenerV1.new
+    if async
+      shortener.shorten_async(client, url)
+    else
+      shortener.shorten(client, url)
+    end
+  end
+
+  def self.shorten_url_v2(url, client, async: DynamicLinks.configuration.async_processing)
+    raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
+
+    shortener = ShortenerV2.new
     if async
       shortener.shorten_async(client, url)
     else

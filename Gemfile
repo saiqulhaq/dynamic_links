@@ -18,6 +18,8 @@ gem 'sidekiq'
 group :test do
   gem 'simplecov', require: false
   gem 'mocha'
+  gem 'dalli', '~> 2.7', '>= 2.7.6'
+  gem 'activerecord-multi-tenant'
 end
 
 # Start debugger with binding.b [https://github.com/ruby/debug]

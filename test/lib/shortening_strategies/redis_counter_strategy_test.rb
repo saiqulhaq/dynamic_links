@@ -6,6 +6,10 @@ class DynamicLinks::ShorteningStrategies::RedisCounterStrategyTest < ActiveSuppo
     @url_shortener = DynamicLinks::StrategyFactory.get_strategy(:redis_counter)
   end
 
+  test "always generates a new shortened URL" do
+    assert_equal @url_shortener.always_growing?, true
+  end
+
   test "shorten returns a string" do
     url = "https://example.com"
     short_url = @url_shortener.shorten(url)

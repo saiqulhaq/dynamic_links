@@ -21,5 +21,28 @@ module DynamicLinks
     multi_tenant :client if respond_to?(:multi_tenant)
 
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
+    validate :url_is_present?
+
+    def url_is_present?
+      url_error unless url.present?
+    end
+
+    def url_error
+      errors.add(:url, :blank, message: "can't be blank")
+    end
+
+    def self.find_or_create!(client, short_url, url)
+      return url_error unless url
+      transaction do
+        record = find_or_create_by!(client: client, short_url: short_url) do |record|
+          record.url = url
+        end
+        record
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      # Log the error and re-raise if needed or return a meaningful error message
+      DynamicLinks::Logger.log_error("ShortenedUrl creation failed: #{e.message}")
+      raise e
+    end
   end
 end

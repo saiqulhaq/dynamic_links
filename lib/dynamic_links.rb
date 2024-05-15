@@ -53,7 +53,7 @@ module DynamicLinks
   def self.shorten_url(url, client, async: DynamicLinks.configuration.async_processing)
     raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
 
-    shortener = ShortenerV2.new
+    shortener = Shortener.new
     if async
       shortener.shorten_async(client, url)
     else

@@ -16,6 +16,13 @@ module DynamicLinks
 
       assert_response :not_found
     end
+
+    test "should respond with not found for expired short URL" do
+      short_url = dynamic_links_shortened_urls(:expired)
+      get shortened_url(short_url: short_url.short_url)
+
+      assert_response :not_found
+    end
   end
 end
 

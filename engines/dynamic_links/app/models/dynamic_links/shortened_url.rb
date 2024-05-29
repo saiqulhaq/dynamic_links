@@ -23,6 +23,7 @@ module DynamicLinks
 
     validates :url, presence: true
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
+    visitable :ahoy_visit
 
     def self.find_or_create!(client, short_url, url)
       transaction do

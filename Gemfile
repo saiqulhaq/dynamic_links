@@ -84,11 +84,12 @@ group :test do
   gem 'dalli', '~> 2.7', '>= 2.7.6', require: false
   gem 'mocha'
   gem 'timecop'
-  
+
   # Mock Redis for testing
   gem 'mock_redis'
 end
 
+gem 'ahoy_matey'
 # Now using Rails 8 multi-database features
 gem 'dynamic_links', path: 'engines/dynamic_links'
 gem 'nanoid'

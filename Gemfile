@@ -12,6 +12,8 @@ gem 'pg', '>= 0.18', '< 2.0'
 
 gem 'sprockets-rails'
 
+gem 'ahoy_matey'
+
 # for dummy app
 gem 'sidekiq'
 

@@ -13,11 +13,24 @@ module DynamicLinks
       @storage = ShortenedUrl
       @async_worker = mock('async_worker')
       @shortener = Shortener.new(locker: @locker, strategy: @strategy, storage: @storage, async_worker: @async_worker)
+      @lock_key = @locker.generate_lock_key(@client, @url)
+      @cache_store = DynamicLinks.configuration.cache_store
     end
 
-    test 'shorten should create a shortened URL and save it' do
+    test 'with always_growing is true, shorten should create a shortened URL and save it' do
       @strategy.stubs(:shorten).returns(@short_url)
       @strategy.stubs(:always_growing?).returns(true)
+      @storage.stubs(:create!).returns(ShortenedUrl.new)
+
+      result = @shortener.shorten(@client, @url)
+
+      assert_match @short_url, result
+      assert_equal "#{@client.scheme}://#{@client.hostname}/#{@short_url}", result
+    end
+
+    test 'with always_growing is false, shorten should create a shortened URL and save it' do
+      @strategy.stubs(:shorten).returns(@short_url)
+      @strategy.stubs(:always_growing?).returns(false)
       @storage.stubs(:create!).returns(ShortenedUrl.new)
 
       result = @shortener.shorten(@client, @url)
@@ -54,6 +67,7 @@ module DynamicLinks
         @shortener.shorten_async(@client, @url)
       end
     end
+
   end
 end
 

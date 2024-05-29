@@ -5,6 +5,10 @@ class DynamicLinks::ShorteningStrategies::SHA256StrategyTest < ActiveSupport::Te
     @url_shortener = DynamicLinks::ShorteningStrategies::SHA256Strategy.new
   end
 
+  test "is not generates a new shortened URL" do
+    assert_equal @url_shortener.always_growing?, false
+  end
+
   test "shorten returns a string" do
     url = "https://example.com"
     short_url = @url_shortener.shorten(url)

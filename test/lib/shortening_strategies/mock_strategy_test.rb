@@ -6,8 +6,8 @@ class DynamicLinks::ShorteningStrategies::MockStrategyTest < ActiveSupport::Test
   end
 
   test "raise shorten method not implemented" do
-  	url = "https://example.com"
-  	short_url = @url_shortener.shorten(url)
+    url = "https://example.com"
+    short_url = @url_shortener.shorten(url)
     assert_equal url, short_url
   end
 

@@ -31,3 +31,9 @@ three:
   url: "https://example.com/three"
   short_url: "ghi789"
 
+expired:
+  client: two
+  url: "https://example.com/expired"
+  short_url: "jkl012"
+  expires_at: "20/02/2020"
+

@@ -248,7 +248,7 @@ DEPENDENCIES
   sidekiq
   simplecov
   sprockets-rails
-  timecop (< 1)
+  timecop
 
 BUNDLED WITH
    2.4.10

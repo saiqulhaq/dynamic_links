@@ -212,6 +212,7 @@ GEM
       sprockets (>= 3.0.0)
     stringio (3.1.1)
     thor (1.3.1)
+    timecop (0.9.10)
     timeout (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -227,7 +228,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  ahoy_matey
+  ahoy_matey (~> 5.1.0)
   annotate
   dotenv-rails
   dynamic_links!
@@ -239,6 +240,7 @@ DEPENDENCIES
   sidekiq
   simplecov
   sprockets-rails
+  timecop
 
 BUNDLED WITH
    2.4.10

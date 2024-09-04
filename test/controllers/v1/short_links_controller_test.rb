@@ -59,19 +59,21 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     assert_includes @response.body, 'REST API feature is disabled'
   end
 
-  test "should use MultiTenant.with when db_infra_strategy is :sharding" do
-    DynamicLinks.configuration.db_infra_strategy = :sharding
-    ::MultiTenant.expects(:with).with(@client).once
-    url = 'https://example.com/'
-    api_key = @client.api_key
-    post '/v1/shortLinks', params: { url: url, api_key: api_key }
-  end
+  if defined?(::MultiTenant)
+    test "should use MultiTenant.with when db_infra_strategy is :sharding" do
+      DynamicLinks.configuration.db_infra_strategy = :sharding
+      ::MultiTenant.expects(:with).with(@client).once
+      url = 'https://example.com/'
+      api_key = @client.api_key
+      post '/v1/shortLinks', params: { url: url, api_key: api_key }
+    end
 
-  test "should not use MultiTenant.with when db_infra_strategy is not :sharding" do
-    DynamicLinks.configuration.db_infra_strategy = :standard
-    url = 'https://example.com/'
-    api_key = @client.api_key
-    ::MultiTenant.expects(:with).with(@client).never
-    post '/v1/shortLinks', params: { url: url, api_key: api_key }
+    test "should not use MultiTenant.with when db_infra_strategy is not :sharding" do
+      DynamicLinks.configuration.db_infra_strategy = :standard
+      url = 'https://example.com/'
+      api_key = @client.api_key
+      ::MultiTenant.expects(:with).with(@client).never
+      post '/v1/shortLinks', params: { url: url, api_key: api_key }
+    end
   end
 end

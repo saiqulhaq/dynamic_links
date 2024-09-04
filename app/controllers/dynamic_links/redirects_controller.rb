@@ -8,6 +8,12 @@ module DynamicLinks
 
       raise ActiveRecord::RecordNotFound if link.expired?
 
+      ahoy.track "ShortenedUrl Visit", {
+        shortened_url: short_url,
+        user_agent: request.user_agent,
+        referrer: request.referrer
+      }
+
       redirect_to link.url, status: :found, allow_other_host: true
     end
   end

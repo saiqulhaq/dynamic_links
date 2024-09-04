@@ -35,5 +35,9 @@ module DynamicLinks
       DynamicLinks::Logger.log_error("ShortenedUrl creation failed: #{e.message}")
       raise e
     end
+
+    def expired?
+      expires_at&.past?
+    end
   end
 end

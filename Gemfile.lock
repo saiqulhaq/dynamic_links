@@ -77,16 +77,22 @@ GEM
       minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
+    ahoy_matey (5.1.0)
+      activesupport (>= 6.1)
+      device_detector (>= 1)
+      safely_block (>= 0.4)
     annotate (3.2.0)
       activerecord (>= 3.2, < 8.0)
       rake (>= 10.4, < 14.0)
     base64 (0.2.0)
     bigdecimal (3.1.8)
     builder (3.3.0)
+    byebug (11.1.3)
     concurrent-ruby (1.3.4)
     connection_pool (2.4.1)
     crass (1.0.6)
     date (3.3.4)
+    device_detector (1.1.3)
     docile (1.4.0)
     dotenv (3.1.2)
     dotenv-rails (3.1.2)
@@ -184,6 +190,7 @@ GEM
     reline (0.5.9)
       io-console (~> 0.5)
     ruby2_keywords (0.0.5)
+    safely_block (0.4.0)
     securerandom (0.3.1)
     sidekiq (7.3.1)
       concurrent-ruby (< 2)
@@ -206,6 +213,7 @@ GEM
       sprockets (>= 3.0.0)
     stringio (3.1.1)
     thor (1.3.1)
+    timecop (0.9.10)
     timeout (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -221,7 +229,9 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  ahoy_matey (~> 5.1.0)
   annotate
+  byebug
   dotenv-rails
   dynamic_links!
   mocha
@@ -232,6 +242,7 @@ DEPENDENCIES
   sidekiq
   simplecov
   sprockets-rails
+  timecop
 
 BUNDLED WITH
    2.4.10

@@ -19,6 +19,12 @@ if ENV['RAILS_ENV'] == 'test'
   end
 end
 
+begin
+  require "ahoy_matey"
+rescue LoadError
+  warn "Warning: ahoy_matey gem is not available. Tracking will not work."
+end
+
 require "dynamic_links/version"
 require "dynamic_links/engine"
 require "dynamic_links/logger"

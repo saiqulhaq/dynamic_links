@@ -10,3 +10,4 @@
 /test/dummy/tmp/
 .env
 coverage
+.byebug_history

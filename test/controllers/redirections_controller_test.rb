@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'timecop'
 
 module DynamicLinks
   class RedirectsControllerTest < ActionDispatch::IntegrationTest

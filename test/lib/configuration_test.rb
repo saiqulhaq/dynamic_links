@@ -30,16 +30,44 @@ module DynamicLinks
       end
     end
 
+    test 'false is valid async_processing' do
+      @config.async_processing = false
+      assert_equal @config.async_processing, false
+    end
+
+    test 'true is valid async_processing' do
+      @config.async_processing = true
+      assert_equal @config.async_processing, true
+    end
+
     test 'should raise error for invalid redis_counter_config' do
       assert_raises ArgumentError do
         @config.redis_counter_config = 'not a RedisConfig'
       end
     end
 
+    test 'valid redis_counter_config should not raise error' do
+      valid_redis_config = RedisConfig.new
+      @config.redis_counter_config = valid_redis_config
+      assert @config.redis_counter_config, valid_redis_config
+    end
+
     test 'should raise error for invalid cache_store' do
       assert_raises ArgumentError do
         @config.cache_store = 'not a Cache::Store'
       end
+    end
+
+    test 'valid redis cache_store should not raise error' do
+      valid_cache_store = ActiveSupport::Cache::RedisCacheStore.new(url: 'redis://localhost:6379/0/cache')
+      @config.cache_store = valid_cache_store
+      assert @config.cache_store, valid_cache_store
+    end
+
+    test 'valid memory cache_store should not raise error' do
+      valid_cache_store = ActiveSupport::Cache::MemCacheStore.new('localhost:11211')
+      @config.cache_store = valid_cache_store
+      assert @config.cache_store, valid_cache_store
     end
   end
 end

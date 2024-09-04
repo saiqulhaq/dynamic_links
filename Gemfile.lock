@@ -87,6 +87,7 @@ GEM
     base64 (0.2.0)
     bigdecimal (3.1.8)
     builder (3.3.0)
+    byebug (11.1.3)
     concurrent-ruby (1.3.4)
     connection_pool (2.4.1)
     crass (1.0.6)
@@ -230,6 +231,7 @@ PLATFORMS
 DEPENDENCIES
   ahoy_matey (~> 5.1.0)
   annotate
+  byebug
   dotenv-rails
   dynamic_links!
   mocha

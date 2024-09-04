@@ -19,6 +19,12 @@ if ENV['RAILS_ENV'] == 'test'
   end
 end
 
+begin
+  require "ahoy_matey"
+rescue LoadError
+  # it's okay if ahoy_matey is not available
+end
+
 require "dynamic_links/version"
 require "dynamic_links/engine"
 require "dynamic_links/logger"

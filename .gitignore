@@ -30,3 +30,4 @@ coverage
 .history/
 .DS_Store
 .ruby-version
+.byebug_history

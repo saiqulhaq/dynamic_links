@@ -25,7 +25,7 @@ module DynamicLinks
     #       config.async_processing = false # or true. if true, the shortening process will be done asynchronously using ActiveJob
     #       config.redis_counter_config = RedisConfig.new # see RedisConfig documentation for more details
     #       # if you use Redis
-    #       config.cache_store = ActiveSupport::Cache::RedisStore.new('redis://localhost:6379/0/cache')
+    #       config.cache_store = ActiveSupport::Cache::RedisCacheStore.new(url: 'redis://localhost:6379/0/cache')
     #       # if you use Memcached
     #       config.cache_store = ActiveSupport::Cache::MemCacheStore.new('localhost:11211')
     #     end

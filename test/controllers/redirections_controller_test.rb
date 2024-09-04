@@ -1,6 +1,4 @@
 require 'test_helper'
-require 'timecop'
-require 'ahoy_matey'
 
 module DynamicLinks
   class RedirectsControllerTest < ActionDispatch::IntegrationTest
@@ -49,12 +47,10 @@ module DynamicLinks
       assert_response :found
 
       ahoy_event = Ahoy::Event.last
-      if ahoy_event.present?
-        assert_equal "ShortenedUrl Visit", ahoy_event.name
-        assert_equal short_url.short_url, ahoy_event.properties["shortened_url"]
-        assert_equal user_agent, ahoy_event.properties["user_agent"]
-        assert_equal referrer, ahoy_event.properties["referrer"]
-      end
+      assert_equal "Link Clicked", ahoy_event.name
+      assert_equal short_url.short_url, ahoy_event.properties["shortened_url"]
+      assert_equal user_agent, ahoy_event.properties["user_agent"]
+      assert_equal referrer, ahoy_event.properties["referrer"]
     end
 
     test "responds with not found for non-existent short URL" do

@@ -2,7 +2,6 @@ default: &default
   adapter: "postgresql"
   encoding: "unicode"
   database: "<%= ENV.fetch("POSTGRES_DB") { "dynamic_links" } %>"
-  port: "<%= ENV.fetch("POSTGRES_PORT") { 5432 } %>"
   username: "<%= ENV.fetch("POSTGRES_USER") { "myapp" } %>"
   password: "<%= ENV.fetch("POSTGRES_PASSWORD") { "password" } %>"
   host: "<%= ENV.fetch("POSTGRES_HOST") { "postgres" } %>"

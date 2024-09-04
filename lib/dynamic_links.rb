@@ -22,7 +22,7 @@ end
 begin
   require "ahoy_matey"
 rescue LoadError
-  # it's okay if ahoy_matey is not available
+  puts "Warning: ahoy_matey gem is not available. Tracking will not work."
 end
 
 require "dynamic_links/version"

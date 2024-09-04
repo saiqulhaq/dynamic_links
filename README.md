@@ -88,8 +88,13 @@ rails test
 ```
 
 Note:
-Make sure the Citus extension already enabled on the installed PostgreSQL
+Make sure the Citus extension already enabled on the installed PostgreSQL  
 We don't manage it on Rails.
+
+## Track visits and events
+This gem uses 'ahoy_matey' gem to track visits and events.  
+So make sure it has been installed to your Rails app.  
+This engine will trigger the event once AhoyMatey gem has been detected to use
 
 ## License
 

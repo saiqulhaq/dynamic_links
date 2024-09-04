@@ -16,9 +16,10 @@ gem 'sprockets-rails'
 gem 'sidekiq'
 
 group :test do
-  gem 'simplecov', require: false
-  gem 'mocha'
   gem 'dalli', '~> 2.7', '>= 2.7.6'
+  gem 'mocha'
+  gem 'simplecov', require: false
+  gem 'timecop'
 end
 
 # Start debugger with binding.b [https://github.com/ruby/debug]

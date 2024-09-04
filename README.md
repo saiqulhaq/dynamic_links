@@ -183,7 +183,11 @@ To configure rate limiting, edit `config/initializers/rack_attack.rb`. See https
 
 This gem uses 'ahoy_matey' gem to track visits and events.
 So make sure it has been installed to your Rails app.
-This engine will trigger the event once AhoyMatey gem has been detected to use
+If it's not installed, you can add `gem 'ahoy_matey'` to your Gemfile and run `bundle install`.
+After that, you need to run `rails generate ahoy:install` and `rake db:migrate` to set up the necessary database tables.
+This engine will trigger the event once AhoyMatey gem has been detected to use.
+
+See more detail about Ahoy installation at [https://github.com/ankane/ahoy/tree/master](https://github.com/ankane/ahoy/tree/master).
 
 ### Back-end
 

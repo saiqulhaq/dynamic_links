@@ -25,22 +25,7 @@ module DynamicLinks
 
         raise ActiveRecord::RecordNotFound if link.expired?
 
-        if link
-          ahoy.track 'ShortenedUrl Visit', {
-            shortened_url: short_url,
-            user_agent: request.user_agent,
-            referrer: request.referrer,
-            ip: request.ip,
-            device_type: ahoy.visit_properties['device_type'],
-            os: ahoy.visit_properties['os'],
-            browser: ahoy.visit_properties['browser'],
-            utm_source: params[:utm_source],
-            utm_medium: params[:utm_medium],
-            utm_campaign: params[:utm_campaign],
-            landing_page: request.original_url
-          }
-        end
-
+        send_event_to_analytics(link)
         redirect_to link.url, status: :found, allow_other_host: true
       end
     end
@@ -48,17 +33,17 @@ module DynamicLinks
     private
 
     def send_event_to_analytics(link)
-      return unless defined?(ahoy)
+      return unless defined?(Ahoy::Store) || link.blank?
 
-      ahoy.track 'ShortenedUrl Visit', {
-        url: link.url,
+      ahoy.track 'Link Clicked', {
         shortened_url: link.short_url,
+        original_url: link.url,
         user_agent: request.user_agent,
         referrer: request.referrer,
         ip: request.ip,
-        device_type: ahoy.request.device_type,
-        os: ahoy.request.os,
-        browser: ahoy.request.browser,
+        device_type: ahoy.visit_properties['device_type'],
+        os: ahoy.visit_properties['os'],
+        browser: ahoy.visit_properties['browser'],
         utm_source: params[:utm_source],
         utm_medium: params[:utm_medium],
         utm_campaign: params[:utm_campaign],

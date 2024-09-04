@@ -18,11 +18,21 @@ module DynamicLinks
     end
 
     test "should respond with not found for expired short URL" do
-      short_url = dynamic_links_shortened_urls(:expired)
-      get shortened_url(short_url: short_url.short_url)
+      Timecop.freeze(Time.zone.now) do
+        short_url = dynamic_links_shortened_urls(:expired_url)
+        get shortened_url(short_url: short_url.short_url)
 
-      assert_response :not_found
+        assert_response :not_found
+      end
+    end
+
+    test "should respond with found for non-expired short URL" do
+      Timecop.freeze(Time.zone.now) do
+        short_url = dynamic_links_shortened_urls(:non_expired_url)
+        get shortened_url(short_url: short_url.short_url)
+
+        assert_response :found
+      end
     end
   end
 end
-

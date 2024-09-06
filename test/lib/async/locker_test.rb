@@ -38,12 +38,25 @@ module DynamicLinks
         assert result, 'lock_if_absent should return true when lock is acquired'
         assert @locker.locked?(@lock_key), 'Lock should be not released after block execution'
       end
+            
+      test 'lock_if_absent should raise error if not able acquire lock' do
+        @cache_store.write(@lock_key, 1, expires_in: 60)
 
-      test 'lock_if_absent should not called the given block if lock is already present' do
-        @cache_store.write(@lock_key, 1)
-        value = 100
-        @locker.lock_if_absent(@lock_key) { value = 200 }
-        assert_equal 100, value, 'Block should not have been executed'
+        assert_raises(Locker::LockAcquisitionError) do 
+          @locker.lock_if_absent(@lock_key) { value = 100 }
+        end
+      end
+
+      test 'lock_if_absent should log error and re-raise exception on locking error' do
+        error_message = 'Simulated locking error'
+
+        @cache_store.stubs(:increment).raises(StandardError, error_message)
+
+        DynamicLinks::Logger.expects(:log_error).with("Locking error: #{error_message}")
+
+        assert_raises(StandardError) do
+          @locker.lock_if_absent(@lock_key) { value = 100 }
+        end
       end
 
       test 'unlock should delete the lock key and return true' do

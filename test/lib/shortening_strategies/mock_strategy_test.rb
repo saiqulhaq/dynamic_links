@@ -11,7 +11,7 @@ class DynamicLinks::ShorteningStrategies::MockStrategyTest < ActiveSupport::Test
     assert_equal url, short_url
   end
 
-  test "is not generates a new shortened URL" do
+  test "always_growing returns false" do
     assert_equal @url_shortener.always_growing?, false
   end
 end

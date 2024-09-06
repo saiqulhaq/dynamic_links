@@ -44,11 +44,15 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
   end
 
   test "should return internal server error if multi_tenant block raises an error" do
-    DynamicLinks.stubs(:generate_short_url).raises(StandardError)
-    post '/v1/shortLinks', params: { url: 'https://example.com', api_key: @client.api_key }
+    begin
+      DynamicLinks.stubs(:generate_short_url).raises(StandardError)
+      post '/v1/shortLinks', params: { url: 'https://example.com', api_key: @client.api_key }
 
-    assert_response :internal_server_error
-    assert_equal '{"error":"An error occurred while processing your request"}', response.body
+      assert_response :internal_server_error
+      assert_equal '{"error":"An error occurred while processing your request"}', response.body
+    ensure
+      DynamicLinks.unstub(:generate_short_url)
+    end
   end
 
   test "should not allow short URL creation when REST API is disabled" do

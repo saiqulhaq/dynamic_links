@@ -24,6 +24,7 @@ module DynamicLinks
 
       result = @shortener.shorten(@client, @url)
 
+      assert_equal @strategy.always_growing?, true
       assert_match @short_url, result
       assert_equal "#{@client.scheme}://#{@client.hostname}/#{@short_url}", result
     end
@@ -35,6 +36,7 @@ module DynamicLinks
 
       result = @shortener.shorten(@client, @url)
 
+      assert_equal @strategy.always_growing?, false
       assert_match @short_url, result
       assert_equal "#{@client.scheme}://#{@client.hostname}/#{@short_url}", result
     end

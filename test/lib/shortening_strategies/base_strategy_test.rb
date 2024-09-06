@@ -10,7 +10,7 @@ class DynamicLinks::ShorteningStrategies::BaseStrategyTest < ActiveSupport::Test
     assert_raises(NotImplementedError, "You must implement the shorten method") {@url_shortener.shorten(url)}
   end
 
-  test "is not generates a new shortened URL" do
+  test "always_growing returns false" do
     assert_equal @url_shortener.always_growing?, false
   end
 end

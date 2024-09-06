@@ -5,7 +5,7 @@ class DynamicLinks::ShorteningStrategies::CRC32StrategyTest < ActiveSupport::Tes
     @url_shortener = DynamicLinks::ShorteningStrategies::CRC32Strategy.new
   end
 
-  test "is not generates a new shortened URL" do
+  test "always_growing returns false" do
     assert_equal @url_shortener.always_growing?, false
   end
 

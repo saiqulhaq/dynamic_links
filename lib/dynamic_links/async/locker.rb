@@ -29,10 +29,11 @@ module DynamicLinks
         is_locked = false
         begin
           is_locked = cache_store.increment(lock_key, 1, expires_in: expires_in) == 1
+
           yield if is_locked && block_given?
 
           unless is_locked
-            DynamicLinks::Logger.log_info "Unable to acquire lock for key: #{lock_key}"
+            raise LockAcquisitionError, "Unable to acquire lock for key: #{lock_key}"
           end
         rescue => e
           DynamicLinks::Logger.log_error("Locking error: #{e.message}")

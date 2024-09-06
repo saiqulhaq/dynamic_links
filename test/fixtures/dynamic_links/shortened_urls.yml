@@ -31,3 +31,14 @@ three:
   url: "https://example.com/three"
   short_url: "ghi789"
 
+expired_url:
+  client: one
+  url: "https://example.com/expired"
+  short_url: "jkl012"
+  expires_at: <%= 1.day.ago %>
+
+non_expired_url:
+  client: two
+  url: "https://example.com/not_expired"
+  short_url: "mno345"
+  expires_at: <%= 1.day.from_now %>

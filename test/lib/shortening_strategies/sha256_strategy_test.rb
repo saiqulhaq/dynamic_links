@@ -5,7 +5,7 @@ class DynamicLinks::ShorteningStrategies::SHA256StrategyTest < ActiveSupport::Te
     @url_shortener = DynamicLinks::ShorteningStrategies::SHA256Strategy.new
   end
 
-  test "is not generates a new shortened URL" do
+  test "always_growing returns false" do
     assert_equal @url_shortener.always_growing?, false
   end
 

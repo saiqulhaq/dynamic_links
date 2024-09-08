@@ -16,8 +16,8 @@ gem 'sprockets-rails'
 gem 'sidekiq'
 
 group :test do
-  gem 'dalli', '~> 2.7', '>= 2.7.6'
   gem 'mocha'
+  gem 'dalli', '~> 2.7', '>= 2.7.6'
   gem 'simplecov', require: false
   gem 'timecop'
 end

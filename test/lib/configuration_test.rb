@@ -18,6 +18,12 @@ module DynamicLinks
       end
     end
 
+    test 'should raise error for invalid enable_logging' do
+      assert_raises ArgumentError do
+        @config.enable_logging = 'not a boolean'
+      end
+    end
+
     test 'should raise error for invalid db_infra_strategy' do
       assert_raises ArgumentError do
         @config.db_infra_strategy = :invalid_strategy

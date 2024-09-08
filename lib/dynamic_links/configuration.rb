@@ -10,6 +10,7 @@ module DynamicLinks
     DEFAULT_ENABLE_REST_API = true
     DEFAULT_DB_INFRA_STRATEGY = :standard
     DEFAULT_ASYNC_PROCESSING = false
+    DEFAULT_ENABLE_LOGGING = true
     DEFAULT_REDIS_COUNTER_CONFIG = RedisConfig.new
     # use any class that extends ActiveSupport::Cache::Store, default is MemoryStore
     DEFAULT_CACHE_STORE = ActiveSupport::Cache::MemoryStore.new
@@ -31,6 +32,7 @@ module DynamicLinks
     def initialize
       @shortening_strategy = DEFAULT_SHORTENING_STRATEGY
       @enable_rest_api = DEFAULT_ENABLE_REST_API
+      @enable_logging = DEFAULT_ENABLE_LOGGING
       @db_infra_strategy = DEFAULT_DB_INFRA_STRATEGY
       @async_processing = DEFAULT_ASYNC_PROCESSING
       # config for RedisCounterStrategy
@@ -66,6 +68,11 @@ module DynamicLinks
     def cache_store=(store)
       raise ArgumentError, "cache_store must be an instance of ActiveSupport::Cache::Store" unless store.is_a?(ActiveSupport::Cache::Store)
       @cache_store = store
+    end
+
+    def logging_enabled=(value)
+      raise ArgumentError, "enable_logging must be a boolean" unless [true, false].include?(value)
+      @enable_logging = value
     end
   end
 end

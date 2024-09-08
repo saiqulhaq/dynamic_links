@@ -6,11 +6,11 @@ module DynamicLinks
     end
 
     def self.log_info(message)
-      instance.info(message)
+      instance.info(message) if DynamicLinks.configuration.logging_enabled
     end
 
     def self.log_error(message)
-      instance.error(message)
+      instance.error(message) if DynamicLinks.configuration.logging_enabled
     end
   end
 end

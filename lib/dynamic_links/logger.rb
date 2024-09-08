@@ -9,6 +9,10 @@ module DynamicLinks
       instance.info(message) if DynamicLinks.configuration.enable_logging
     end
 
+    def self.log_warn(message)
+      instance.warn(message) if DynamicLinks.configuration.enable_logging
+    end
+
     def self.log_error(message)
       instance.error(message) if DynamicLinks.configuration.enable_logging
     end

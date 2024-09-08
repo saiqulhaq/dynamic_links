@@ -20,6 +20,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rails', '>= 5'
 
   spec.add_development_dependency 'annotate'
+  spec.add_development_dependency 'timecop'
+  # add dotenv gem
   spec.add_development_dependency 'dotenv-rails'
   spec.add_development_dependency 'ahoy_matey'
 end

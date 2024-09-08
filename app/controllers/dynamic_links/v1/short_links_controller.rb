@@ -31,7 +31,12 @@ module DynamicLinks
 
     def multi_tenant(client, db_infra_strategy = DynamicLinks.configuration.db_infra_strategy)
       if db_infra_strategy == :sharding
-        MultiTenant.with(client) do
+        if defined?(::MultiTenant)
+          ::MultiTenant.with(client) do
+            yield
+          end
+        else
+          Rails.logger.warn 'MultiTenant gem is not installed. Please install it to use sharding strategy'
           yield
         end
       else

@@ -4,7 +4,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 # Specify your gem's dependencies in dynamic_links.gemspec.
 gemspec
 
-gem 'dotenv-rails', require: 'dotenv/rails-now'
+gem 'dotenv-rails', require: 'dotenv/load'
 
 gem 'puma'
 
@@ -18,8 +18,9 @@ gem 'ahoy_matey'
 gem 'sidekiq'
 
 group :test do
-  gem 'simplecov', require: false
   gem 'mocha'
+  gem 'simplecov', require: false
+  gem 'timecop'
 end
 
 # Start debugger with binding.b [https://github.com/ruby/debug]

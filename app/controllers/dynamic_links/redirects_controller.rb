@@ -1,8 +1,21 @@
 module DynamicLinks
   class RedirectsController < ApplicationController
+
+    # Rails will return a 404 if the record is not found
     def show
       short_url = params[:short_url]
-      link = ShortenedUrl.find_by(short_url: short_url)
+      link = ShortenedUrl.find_by!(short_url: short_url)
+
+      raise ActiveRecord::RecordNotFound if link.expired?
+
+      send_event_to_analytics(link)
+      redirect_to link.url, status: :found, allow_other_host: true
+    end
+
+    private
+
+    def send_event_to_analytics(link)
+      return unless defined?(Ahoy::Store)
 
       if link
         ahoy.track "ShortenedUrl Visit", {

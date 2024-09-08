@@ -24,6 +24,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'redis', '>= 4', '< 6'
   spec.add_development_dependency 'annotate', '>= 3', '< 4'
   spec.add_development_dependency 'timecop', '< 1'
-  # add dotenv gem
   spec.add_development_dependency 'dotenv-rails', '>= 2', '< 3'
+  spec.add_development_dependency 'ahoy_matey'
 end

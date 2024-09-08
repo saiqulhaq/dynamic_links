@@ -7,9 +7,6 @@ class CreateAhoyVisitsAndEvents < ActiveRecord::Migration[7.1]
       # the rest are recommended but optional
       # simply remove any you don't want
 
-      # user
-      t.references :user
-
       # standard
       t.string :ip
       t.text :user_agent
@@ -42,14 +39,14 @@ class CreateAhoyVisitsAndEvents < ActiveRecord::Migration[7.1]
       t.string :platform
 
       t.datetime :started_at
+      t.references :dynamic_links_shortened_urls
     end
 
     add_index :ahoy_visits, :visit_token, unique: true
     add_index :ahoy_visits, [:visitor_token, :started_at]
 
     create_table :ahoy_events do |t|
-      t.references :visit
-      t.references :user
+      t.references :ahoy_visits
 
       t.string :name
       t.jsonb :properties

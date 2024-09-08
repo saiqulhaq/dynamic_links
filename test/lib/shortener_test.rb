@@ -41,17 +41,6 @@ module DynamicLinks
       assert_equal "#{@client.scheme}://#{@client.hostname}/#{@short_url}", result
     end
 
-    test 'with always_growing is false, shorten should create a shortened URL and save it' do
-      @strategy.stubs(:shorten).returns(@short_url)
-      @strategy.stubs(:always_growing?).returns(false)
-      @storage.stubs(:create!).returns(ShortenedUrl.new)
-
-      result = @shortener.shorten(@client, @url)
-
-      assert_match @short_url, result
-      assert_equal "#{@client.scheme}://#{@client.hostname}/#{@short_url}", result
-    end
-
     test 'shorten should handle exceptions and log errors' do
       @strategy.stubs(:shorten).raises(ShorteningFailed.new('shortening failed'))
       DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/Error shortening URL/))

@@ -23,6 +23,6 @@ end
 # Start debugger with binding.b [https://github.com/ruby/debug]
 # gem "debug", ">= 1.0.0"
 
-if ENV['CITUS_ENABLED'] == 'true'
+if ENV['CITUS_ENABLED'].to_s == 'true'
   gem 'activerecord-multi-tenant'
 end

@@ -66,43 +66,45 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     assert_includes @response.body, 'REST API feature is disabled'
   end
 
-  #if defined?(::MultiTenant)
-    test "should use MultiTenant.with when db_infra_strategy is :sharding" do
-      ENV['CITUS_ENABLED'] = 'true'
-      DynamicLinks.configuration.db_infra_strategy = :sharding
-      ::MultiTenant.expects(:with).with(@client).once
-      url = 'https://example.com/'
-      api_key = @client.api_key
-      post '/v1/shortLinks', params: { url: url, api_key: api_key }
-    end
+  test "should use MultiTenant.with when db_infra_strategy is :sharding" do
+    ENV['CITUS_ENABLED'] = 'true'
+    DynamicLinks.configuration.db_infra_strategy = :sharding
+    
+    expected_block_result = "result from within MultiTenant.with block"
+    ::MultiTenant.expects(:with).with(@client).once.yields.returns(expected_block_result) 
 
-    test "should use MultiTenant.with when db_infra_strategy is :sharding and log error" do
-      ENV['CITUS_ENABLED'] = 'false'
+    #::MultiTenant.expects(:with).with(@client).once
+    url = 'https://example.com/'
+    api_key = @client.api_key
+    post '/v1/shortLinks', params: { url: url, api_key: api_key }
+  end
 
-      DynamicLinks.configuration.db_infra_strategy = :sharding
+  test "should use MultiTenant.with when db_infra_strategy is :sharding and log error when MultiTenant gem is not installed" do
+    ENV['CITUS_ENABLED'] = 'false'
 
-      # Ensure that MultiTenant is not defined (simulating it not being installed)
-      originally_defined = defined?(::MultiTenant)
-      Object.send(:remove_const, :MultiTenant) if originally_defined
+    DynamicLinks.configuration.db_infra_strategy = :sharding
 
-      # Expect the warning message to be logged
-      Rails.logger.expects(:warn).with('MultiTenant gem is not installed. Please install it to use sharding strategy')
+    # Ensure that MultiTenant is not defined (simulating it not being installed)
+    originally_defined = defined?(::MultiTenant)
+    Object.send(:remove_const, :MultiTenant) if originally_defined
 
-      # Make the request
-      url = 'https://example.com/'
-      api_key = @client.api_key
-      post '/v1/shortLinks', params: { url: url, api_key: api_key }
+    # Expect the warning message to be logged
+    Rails.logger.expects(:warn).with('MultiTenant gem is not installed. Please install it to use sharding strategy')
 
-      # Re-define MultiTenant if it was originally defined
-      Object.const_set(:MultiTenant, Module.new) if originally_defined
-    end
+    # Make the request
+    url = 'https://example.com/'
+    api_key = @client.api_key
+    post '/v1/shortLinks', params: { url: url, api_key: api_key }
 
-    test "should not use MultiTenant.with when db_infra_strategy is not :sharding" do
-      DynamicLinks.configuration.db_infra_strategy = :standard
-      url = 'https://example.com/'
-      api_key = @client.api_key
-      ::MultiTenant.expects(:with).with(@client).never
-      post '/v1/shortLinks', params: { url: url, api_key: api_key }
-    end
-  #end
+    # Re-define MultiTenant if it was originally defined
+    Object.const_set(:MultiTenant, Module.new) if originally_defined
+  end
+
+  test "should not use MultiTenant.with when db_infra_strategy is not :sharding" do
+    DynamicLinks.configuration.db_infra_strategy = :standard
+    url = 'https://example.com/'
+    api_key = @client.api_key
+    ::MultiTenant.expects(:with).with(@client).never
+    post '/v1/shortLinks', params: { url: url, api_key: api_key }
+  end
 end

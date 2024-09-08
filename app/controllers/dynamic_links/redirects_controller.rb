@@ -17,17 +17,25 @@ module DynamicLinks
     def send_event_to_analytics(link)
       return unless defined?(Ahoy::Store)
 
-      # setting up Ahoy Mate gem should be done in the host application
-      ahoy.track "Link Clicked", {
-        landing_page: link.url,
-        shortened_url: link.short_url,
-        user_agent: request.user_agent,
-        referrer: request.referrer,
-        ip: request.ip,
-        utm_source: params[:utm_source],
-        utm_medium: params[:utm_medium],
-        utm_campaign: params[:utm_campaign],
-      }
+      if link
+        ahoy.track "ShortenedUrl Visit", {
+          shortened_url: short_url,
+          user_agent: request.user_agent,
+          referrer: request.referrer,
+          ip: request.ip,
+          device_type: ahoy.visit_properties['device_type'],
+          os: ahoy.visit_properties['os'],
+          browser: ahoy.visit_properties['browser'],
+          utm_source: params[:utm_source],
+          utm_medium: params[:utm_medium],
+          utm_campaign: params[:utm_campaign],
+          landing_page: request.original_url
+        }
+
+        redirect_to link.url, status: :found, allow_other_host: true
+      else
+        raise ActiveRecord::RecordNotFound
+      end
     end
   end
 end

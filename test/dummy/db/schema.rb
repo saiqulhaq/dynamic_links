@@ -10,26 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_09_04_155942) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_29_173554) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "ahoy_events", force: :cascade do |t|
-    t.bigint "visit_id"
-    t.bigint "user_id"
+    t.bigint "ahoy_visits_id"
     t.string "name"
     t.jsonb "properties"
     t.datetime "time"
+    t.index ["ahoy_visits_id"], name: "index_ahoy_events_on_ahoy_visits_id"
     t.index ["name", "time"], name: "index_ahoy_events_on_name_and_time"
     t.index ["properties"], name: "index_ahoy_events_on_properties", opclass: :jsonb_path_ops, using: :gin
-    t.index ["user_id"], name: "index_ahoy_events_on_user_id"
-    t.index ["visit_id"], name: "index_ahoy_events_on_visit_id"
   end
 
   create_table "ahoy_visits", force: :cascade do |t|
     t.string "visit_token"
     t.string "visitor_token"
-    t.bigint "user_id"
     t.string "ip"
     t.text "user_agent"
     t.text "referrer"
@@ -52,7 +49,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_04_155942) do
     t.string "os_version"
     t.string "platform"
     t.datetime "started_at"
-    t.index ["user_id"], name: "index_ahoy_visits_on_user_id"
+    t.bigint "dynamic_links_shortened_urls_id"
+    t.index ["dynamic_links_shortened_urls_id"], name: "index_ahoy_visits_on_dynamic_links_shortened_urls_id"
     t.index ["visit_token"], name: "index_ahoy_visits_on_visit_token", unique: true
     t.index ["visitor_token", "started_at"], name: "index_ahoy_visits_on_visitor_token_and_started_at"
   end
@@ -77,6 +75,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_04_155942) do
     t.datetime "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "ahoy_visit_id"
+    t.index ["ahoy_visit_id"], name: "index_dynamic_links_shortened_urls_on_ahoy_visit_id"
     t.index ["client_id", "short_url"], name: "index_dynamic_links_shortened_urls_on_client_id_and_short_url", unique: true
     t.index ["client_id"], name: "index_dynamic_links_shortened_urls_on_client_id"
   end

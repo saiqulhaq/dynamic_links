@@ -44,7 +44,7 @@ module DynamicLinks
     end
 
     def shortening_strategy=(strategy)
-      raise ArgumentError, "Invalid shortening strategy" unless StrategyFactory::VALID_SHORTENING_STRATEGIES.include?(strategy)
+      raise ArgumentError, "Invalid shortening strategy, provided strategy: #{strategy}, but the valid strategies are: #{StrategyFactory::VALID_SHORTENING_STRATEGIES}" unless StrategyFactory::VALID_SHORTENING_STRATEGIES.include?(strategy)
       @shortening_strategy = strategy
     end
 

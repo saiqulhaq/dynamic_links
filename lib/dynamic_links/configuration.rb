@@ -2,7 +2,7 @@ module DynamicLinks
   # @author Saiqul Haq <saiqulhaq@gmail.com>
   class Configuration
     attr_reader :shortening_strategy, :enable_rest_api, :db_infra_strategy,
-                  :async_processing, :redis_counter_config, :cache_store
+                  :async_processing, :redis_counter_config, :cache_store, :enable_logging
 
     VALID_DB_INFRA_STRATEGIES = [:standard, :sharding].freeze
 
@@ -70,7 +70,7 @@ module DynamicLinks
       @cache_store = store
     end
 
-    def logging_enabled=(value)
+    def enable_logging=(value)
       raise ArgumentError, "enable_logging must be a boolean" unless [true, false].include?(value)
       @enable_logging = value
     end

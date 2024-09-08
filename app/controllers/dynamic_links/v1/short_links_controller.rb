@@ -36,7 +36,7 @@ module DynamicLinks
             yield
           end
         else
-          Rails.logger.warn 'MultiTenant gem is not installed. Please install it to use sharding strategy'
+          DynamicLinks::Logger.log_warn 'MultiTenant gem is not installed. Please install it to use sharding strategy'
           yield
         end
       else

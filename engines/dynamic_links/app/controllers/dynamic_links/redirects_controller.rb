@@ -29,7 +29,15 @@ module DynamicLinks
           ahoy.track "ShortenedUrl Visit", {
             shortened_url: short_url,
             user_agent: request.user_agent,
-            referrer: request.referrer
+            referrer: request.referrer,
+            ip: request.ip,
+            device_type: ahoy.visit_properties['device_type'],
+            os: ahoy.visit_properties['os'],
+            browser: ahoy.visit_properties['browser'],
+            utm_source: params[:utm_source],
+            utm_medium: params[:utm_medium],
+            utm_campaign: params[:utm_campaign],
+            landing_page: request.original_url
           }
         end
 

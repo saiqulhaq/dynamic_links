@@ -21,6 +21,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'nanoid', '~> 2.0'
   spec.add_development_dependency 'redis', '>= 4'
   spec.add_development_dependency 'annotate'
-  # add dotenv gem
   spec.add_development_dependency 'dotenv-rails'
+  spec.add_development_dependency 'ahoy_matey'
 end

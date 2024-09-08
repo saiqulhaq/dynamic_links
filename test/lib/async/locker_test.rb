@@ -42,9 +42,11 @@ module DynamicLinks
       test 'lock_if_absent should raise error if not able acquire lock' do
         @cache_store.write(@lock_key, 1, expires_in: 60)
 
-        assert_raises(Locker::LockAcquisitionError) do 
-          @locker.lock_if_absent(@lock_key) { value = 100 }
-        end
+        DynamicLinks::Logger.expects(:log_error).with("Unable to acquire lock for key: #{@lock_key}")
+
+        result = @locker.lock_if_absent(@lock_key) { }
+
+        assert_not result, 'lock_if_absent should return false when lock acquisition fails'
       end
 
       test 'lock_if_absent should log error and re-raise exception on locking error' do

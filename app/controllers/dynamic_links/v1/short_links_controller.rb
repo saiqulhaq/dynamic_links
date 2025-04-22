@@ -21,6 +21,20 @@ module DynamicLinks
       render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
     end
 
+    def expand
+      short_link = params.require(:short_url)
+      full_url = DynamicLinks.resolve_short_url(short_link)
+
+      if full_url
+        render json: { full_url: full_url }, status: :ok
+      else
+        render json: { error: 'Short link not found' }, status: :not_found
+      end
+    rescue => e
+      DynamicLinks::Logger.log_error(e)
+      render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
+    end
+
     private
 
     def check_rest_api_enabled

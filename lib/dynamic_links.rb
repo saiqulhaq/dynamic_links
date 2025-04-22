@@ -73,7 +73,6 @@ module DynamicLinks
   end
 
   def self.resolve_short_url(short_link)
-    # Assuming you have a model `ShortLink` that stores short and full URLs
     record = DynamicLinks::ShortenedUrl.find_by(short_url: short_link)
 
     if record

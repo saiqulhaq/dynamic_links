@@ -4,6 +4,11 @@ module DynamicLinks
   class RedirectsControllerTest < ActionDispatch::IntegrationTest
     include Engine.routes.url_helpers
 
+    setup do
+      @valid_hostname = dynamic_links_clients(:one).hostname
+      host! @valid_hostname
+    end
+
     test "should redirect to original URL for existing short URL" do
       short_url = dynamic_links_shortened_urls(:one)
       get shortened_url(short_url: short_url.short_url)
@@ -33,6 +38,15 @@ module DynamicLinks
 
         assert_response :found
       end
+    end
+
+    test "should respond with not found if host is not in clients" do
+      host! 'unknown-host.com'
+      short_url = dynamic_links_shortened_urls(:one)
+      get shortened_url(short_url: short_url.short_url)
+
+      assert_response :not_found
+      assert_equal 'URL not found', @response.body
     end
   end
 end

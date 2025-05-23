@@ -2,7 +2,8 @@ module DynamicLinks
   # @author Saiqul Haq <saiqulhaq@gmail.com>
   class Configuration
     attr_reader :shortening_strategy, :enable_rest_api, :db_infra_strategy,
-                  :async_processing, :redis_counter_config, :cache_store
+                  :async_processing, :redis_counter_config, :cache_store,
+                  :enable_fallback_mode, :firebase_host
 
     VALID_DB_INFRA_STRATEGIES = [:standard, :sharding].freeze
 
@@ -13,6 +14,8 @@ module DynamicLinks
     DEFAULT_REDIS_COUNTER_CONFIG = RedisConfig.new
     # use any class that extends ActiveSupport::Cache::Store, default is MemoryStore
     DEFAULT_CACHE_STORE = ActiveSupport::Cache::MemoryStore.new
+    DEFAULT_ENABLE_FALLBACK_MODE = false
+    DEFAULT_FIREBASE_HOST = 'https://k4mu4.app.goo.gl'
 
     # Usage:
     #     DynamicLinks.configure do |config|
@@ -36,6 +39,8 @@ module DynamicLinks
       # config for RedisCounterStrategy
       @redis_counter_config = DEFAULT_REDIS_COUNTER_CONFIG
       @cache_store = DEFAULT_CACHE_STORE
+      @enable_fallback_mode = DEFAULT_ENABLE_FALLBACK_MODE
+      @firebase_host = DEFAULT_FIREBASE_HOST
     end
 
     def shortening_strategy=(strategy)
@@ -66,6 +71,16 @@ module DynamicLinks
     def cache_store=(store)
       raise ArgumentError, "cache_store must be an instance of ActiveSupport::Cache::Store" unless store.is_a?(ActiveSupport::Cache::Store)
       @cache_store = store
+    end
+
+    def enable_fallback_mode=(value)
+      raise ArgumentError, "enable_fallback_mode must be a boolean" unless [true, false].include?(value)
+      @enable_fallback_mode = value
+    end
+
+    def firebase_host=(host)
+      raise ArgumentError, "firebase_host must be a valid URL" unless host =~ /\A#{URI::regexp(['http', 'https'])}\z/
+      @firebase_host = host
     end
   end
 end

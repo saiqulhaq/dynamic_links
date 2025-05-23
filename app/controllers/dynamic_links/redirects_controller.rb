@@ -14,9 +14,13 @@ module DynamicLinks
       link = ShortenedUrl.find_by(short_url: short_url)
 
       if link.nil?
-        url = 'https://k4mu4.app.goo.gl'
-        redirect_to url + "/#{params[:short_url]}", status: :found, allow_other_host: true
-        return
+        if DynamicLinks.configuration.enable_fallback_mode && DynamicLinks.configuration.firebase_host.present?
+          url = DynamicLinks.configuration.firebase_host
+          redirect_to url + "/#{params[:short_url]}", status: :found, allow_other_host: true
+          return
+        else
+          render plain: 'Not found', status: :not_found
+        end
       end
       raise ActiveRecord::RecordNotFound if link.expired?
 

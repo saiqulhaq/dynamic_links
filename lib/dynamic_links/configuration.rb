@@ -15,7 +15,7 @@ module DynamicLinks
     # use any class that extends ActiveSupport::Cache::Store, default is MemoryStore
     DEFAULT_CACHE_STORE = ActiveSupport::Cache::MemoryStore.new
     DEFAULT_ENABLE_FALLBACK_MODE = false
-    DEFAULT_FIREBASE_HOST = 'https://k4mu4.app.goo.gl'
+    DEFAULT_FIREBASE_HOST = nil
 
     # Usage:
     #     DynamicLinks.configure do |config|

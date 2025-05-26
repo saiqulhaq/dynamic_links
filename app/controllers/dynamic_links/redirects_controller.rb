@@ -3,7 +3,7 @@ module DynamicLinks
     def show
       client = DynamicLinks::Client.find_by(hostname: request.host)
       unless client
-        head :not_found
+        render plain: 'URL not found', status: :not_found
         return
       end
 
@@ -14,7 +14,7 @@ module DynamicLinks
         if DynamicLinks.configuration.enable_fallback_mode && DynamicLinks.configuration.firebase_host.present?
           redirect_to "#{DynamicLinks.configuration.firebase_host}/#{short_url}", status: :found, allow_other_host: true
         else
-          head :not_found
+          render plain: 'Not found', status: :not_found
         end
         return
       end

@@ -31,7 +31,7 @@ module DynamicLinks
       end
 
       multi_tenant(client) do
-        short_link = params.require(:short_url)
+        short_link = params[:id] # <- changed from params.require(:short_url)
         full_url = DynamicLinks.resolve_short_url(short_link)
 
         if full_url

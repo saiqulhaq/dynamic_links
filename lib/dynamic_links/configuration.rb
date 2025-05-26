@@ -79,7 +79,20 @@ module DynamicLinks
     end
 
     def firebase_host=(host)
-      raise ArgumentError, "firebase_host must be a valid URL" unless host =~ /\A#{URI::regexp(['http', 'https'])}\z/
+      # allow nil or blank host (optional, depends on your app logic)
+      if host.nil? || host.strip.empty?
+        @firebase_host = nil
+        return
+      end
+
+      begin
+        uri = URI.parse(host.to_s)
+        valid = uri.is_a?(URI::HTTP) && uri.host.present?
+        raise unless valid
+      rescue
+        raise ArgumentError, "firebase_host must be a valid URL with a host"
+      end
+
       @firebase_host = host
     end
   end

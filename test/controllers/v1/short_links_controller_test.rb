@@ -74,7 +74,7 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     full_url = 'https://example.com/full-path'
 
     DynamicLinks.stub :resolve_short_url, full_url do
-      get '/v1/shortLinks/expand', params: { short_url: short_url }
+      get "/v1/shortLinks/#{short_url}"
 
       assert_response :success
       assert_equal "application/json; charset=utf-8", @response.content_type
@@ -87,7 +87,7 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     short_url = 'nonexistent'
 
     DynamicLinks.stub :resolve_short_url, nil do
-      get '/v1/shortLinks/expand', params: { short_url: short_url }
+      get "/v1/shortLinks/#{short_url}"
 
       assert_response :not_found
       body = JSON.parse(@response.body)
@@ -99,7 +99,7 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     short_url = 'abc123'
 
     DynamicLinks.stub :resolve_short_url, ->(_short_url) { raise StandardError, "Unexpected error" } do
-      get '/v1/shortLinks/expand', params: { short_url: short_url }
+      get "/v1/shortLinks/#{short_url}"
 
       assert_response :internal_server_error
       body = JSON.parse(@response.body)

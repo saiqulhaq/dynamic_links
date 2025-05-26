@@ -73,12 +73,6 @@ module DynamicLinks
   end
 
   def self.resolve_short_url(short_link)
-    record = DynamicLinks::ShortenedUrl.find_by(short_url: short_link)
-
-    if record
-      record.url
-    else
-      nil
-    end
+    DynamicLinks::ShortenedUrl.find_by(short_url: short_link)&.url
   end
 end

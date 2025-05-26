@@ -9,20 +9,21 @@ module DynamicLinks
       host! @valid_hostname
     end
 
-    test "should redirect to original URL for existing short URL" do
+    test "redirects to original URL for valid short URL" do
       short_url = dynamic_links_shortened_urls(:one)
       get shortened_url(short_url: short_url.short_url)
 
       assert_redirected_to short_url.url
     end
 
-    test "should respond with not found for non-existing short URL" do
+    test "responds with not found for non-existent short URL" do
       get shortened_url(short_url: 'nonexistent')
 
       assert_response :not_found
+      assert_match(/not found/i, @response.body)
     end
 
-    test "should respond with not found for expired short URL" do
+    test "responds with not found for expired short URL" do
       Timecop.freeze(Time.zone.now) do
         short_url = dynamic_links_shortened_urls(:expired_url)
         get shortened_url(short_url: short_url.short_url)
@@ -31,16 +32,17 @@ module DynamicLinks
       end
     end
 
-    test "should respond with found for non-expired short URL" do
+    test "redirects for valid non-expired short URL" do
       Timecop.freeze(Time.zone.now) do
         short_url = dynamic_links_shortened_urls(:non_expired_url)
         get shortened_url(short_url: short_url.short_url)
 
         assert_response :found
+        assert_redirected_to short_url.url
       end
     end
 
-    test "should respond with not found if host is not in clients" do
+    test "responds with not found if host is not in clients" do
       host! 'unknown-host.com'
       short_url = dynamic_links_shortened_urls(:one)
       get shortened_url(short_url: short_url.short_url)

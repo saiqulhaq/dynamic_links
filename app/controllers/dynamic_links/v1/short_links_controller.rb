@@ -22,13 +22,23 @@ module DynamicLinks
     end
 
     def expand
-      short_link = params.require(:short_url)
-      full_url = DynamicLinks.resolve_short_url(short_link)
+      api_key = params.require(:api_key)
+      client = DynamicLinks::Client.find_by(api_key: api_key)
 
-      if full_url
-        render json: { full_url: full_url }, status: :ok
-      else
-        render json: { error: 'Short link not found' }, status: :not_found
+      unless client
+        render json: { error: 'Invalid API key' }, status: :unauthorized
+        return
+      end
+
+      multi_tenant(client) do
+        short_link = params.require(:short_url)
+        full_url = DynamicLinks.resolve_short_url(short_link)
+
+        if full_url
+          render json: { full_url: full_url }, status: :ok
+        else
+          render json: { error: 'Short link not found' }, status: :not_found
+        end
       end
     rescue => e
       DynamicLinks::Logger.log_error(e)

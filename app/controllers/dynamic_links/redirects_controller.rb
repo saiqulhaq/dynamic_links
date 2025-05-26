@@ -1,12 +1,9 @@
 module DynamicLinks
   class RedirectsController < ApplicationController
-
-    # Rails will return a 404 if the record is not found
     def show
-      host = request.host
-      check_url = DynamicLinks::Client.find_by(hostname: host)
-      if check_url.nil?
-        render plain: 'URL not found', status: :not_found
+      client = DynamicLinks::Client.find_by(hostname: request.host)
+      unless client
+        head :not_found
         return
       end
 
@@ -15,13 +12,13 @@ module DynamicLinks
 
       if link.nil?
         if DynamicLinks.configuration.enable_fallback_mode && DynamicLinks.configuration.firebase_host.present?
-          url = DynamicLinks.configuration.firebase_host
-          redirect_to url + "/#{params[:short_url]}", status: :found, allow_other_host: true
-          return
+          redirect_to "#{DynamicLinks.configuration.firebase_host}/#{short_url}", status: :found, allow_other_host: true
         else
-          render plain: 'Not found', status: :not_found
+          head :not_found
         end
+        return
       end
+
       raise ActiveRecord::RecordNotFound if link.expired?
 
       redirect_to link.url, status: :found, allow_other_host: true

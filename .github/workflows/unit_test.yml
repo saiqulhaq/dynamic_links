@@ -1,0 +1,84 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        # Use Citus image for Citus tests, regular PostgreSQL for standard tests
+        image: ${{ matrix.db_type == 'citus' && 'citusdata/citus:11.3.0' || 'postgres:14' }}
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dynamic_links_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      matrix:
+        db_type: ['standard', 'citus']
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+    
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle install --jobs 4 --retry 3
+    
+    - name: Run tests with standard PostgreSQL
+      if: matrix.db_type == 'standard'
+      env:
+        RAILS_ENV: test
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/dynamic_links_test
+      run: |
+        rails db:setup
+        rails db:test:prepare
+        rails test
+    
+    - name: Run tests with Citus
+      if: matrix.db_type == 'citus'
+      env:
+        RAILS_ENV: test
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/dynamic_links_test
+        CITUS_ENABLED: true
+      run: |
+        rails db:setup
+        rails db:test:prepare
+        rails test
+    
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: coverage-report
+        path: coverage/

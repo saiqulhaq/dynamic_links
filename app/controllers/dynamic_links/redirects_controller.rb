@@ -7,21 +7,23 @@ module DynamicLinks
         return
       end
 
-      short_url = params[:short_url]
-      link = ShortenedUrl.find_by(short_url: short_url)
+      multi_tenant(client) do
+        short_url = params[:short_url]
+        link = ShortenedUrl.find_by(short_url: short_url)
 
-      if link.nil?
-        if DynamicLinks.configuration.enable_fallback_mode && DynamicLinks.configuration.firebase_host.present?
-          redirect_to "#{DynamicLinks.configuration.firebase_host}/#{short_url}", status: :found, allow_other_host: true
-        else
-          render plain: 'Not found', status: :not_found
+        if link.nil?
+          if DynamicLinks.configuration.enable_fallback_mode && DynamicLinks.configuration.firebase_host.present?
+            redirect_to "#{DynamicLinks.configuration.firebase_host}/#{short_url}", status: :found, allow_other_host: true
+          else
+            render plain: 'Not found', status: :not_found
+          end
+          return
         end
-        return
+
+        raise ActiveRecord::RecordNotFound if link.expired?
+
+        redirect_to link.url, status: :found, allow_other_host: true
       end
-
-      raise ActiveRecord::RecordNotFound if link.expired?
-
-      redirect_to link.url, status: :found, allow_other_host: true
     end
   end
 end

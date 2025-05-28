@@ -71,4 +71,8 @@ module DynamicLinks
       warning: []
     }
   end
+
+  def self.resolve_short_url(short_link)
+    DynamicLinks::ShortenedUrl.find_by(short_url: short_link)&.url
+  end
 end

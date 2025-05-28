@@ -31,7 +31,7 @@ module DynamicLinks
       end
 
       multi_tenant(client) do
-        short_link = params[:id] # <- changed from params.require(:short_url)
+        short_link = params.require(:short_url)
         full_url = DynamicLinks.resolve_short_url(short_link)
 
         if full_url
@@ -50,21 +50,6 @@ module DynamicLinks
     def check_rest_api_enabled
       unless DynamicLinks.configuration.enable_rest_api
         render json: { error: 'REST API feature is disabled' }, status: :forbidden
-      end
-    end
-
-    def multi_tenant(client, db_infra_strategy = DynamicLinks.configuration.db_infra_strategy)
-      if db_infra_strategy == :sharding
-        if defined?(::MultiTenant)
-          ::MultiTenant.with(client) do
-            yield
-          end
-        else
-          Rails.logger.warn 'MultiTenant gem is not installed. Please install it to use sharding strategy'
-          yield
-        end
-      else
-        yield
       end
     end
   end

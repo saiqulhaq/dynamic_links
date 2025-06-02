@@ -16,3 +16,16 @@ if ActiveSupport::TestCase.respond_to?(:fixture_paths=)
   ActiveSupport::TestCase.file_fixture_path = File.expand_path('fixtures', __dir__) + '/files'
   ActiveSupport::TestCase.fixtures :all
 end
+
+# Monkey-patch multi_tenant in tests to just yield directly (bypasses MultiTenant.with)
+module DynamicLinks
+  module V1
+    class ShortLinksController < ApplicationController
+      private
+
+      def multi_tenant(_client)
+        yield
+      end
+    end
+  end
+end

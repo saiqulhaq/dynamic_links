@@ -2,6 +2,10 @@ module DynamicLinks
   class V1::ShortLinksController < ApplicationController
     before_action :check_rest_api_enabled
 
+    rescue_from ActionController::ParameterMissing, with: :handle_parameter_missing
+    rescue_from DynamicLinks::InvalidURIError, with: :handle_invalid_uri
+    rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
+
     def create
       url = params.require(:url)
       client = DynamicLinks::Client.find_by(api_key: params.require(:api_key))
@@ -14,24 +18,22 @@ module DynamicLinks
       multi_tenant(client) do
         render json: DynamicLinks.generate_short_url(url, client), status: :created
       end
-    rescue DynamicLinks::InvalidURIError
+    rescue DynamicLinks::InvalidURIError => e
+      logger.error("Caught InvalidURIError: #{e.class}")
       render json: { error: 'Invalid URL' }, status: :bad_request
     rescue => e
+      logger.error("Caught generic error: #{e.class} - #{e.message}")
       DynamicLinks::Logger.log_error(e)
       render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
     end
 
     def expand
-      api_key = params.require(:api_key)
-      client = DynamicLinks::Client.find_by(api_key: api_key)
+      short_link = params.require(:short_url)
+      client = find_client_from_api_key
 
-      unless client
-        render json: { error: 'Invalid API key' }, status: :unauthorized
-        return
-      end
+      return unless client
 
       multi_tenant(client) do
-        short_link = params.require(:short_url)
         full_url = DynamicLinks.resolve_short_url(short_link)
 
         if full_url
@@ -51,6 +53,29 @@ module DynamicLinks
       unless DynamicLinks.configuration.enable_rest_api
         render json: { error: 'REST API feature is disabled' }, status: :forbidden
       end
+    end
+
+    def find_client_from_api_key
+      api_key = params.require(:api_key)
+      client = DynamicLinks::Client.find_by(api_key: api_key)
+
+      unless client
+        render json: { error: 'Invalid API key' }, status: :unauthorized
+      end
+
+      client
+    end
+
+    def handle_parameter_missing(exception)
+      render json: { error: "Missing parameter: #{exception.param}" }, status: :bad_request
+    end
+
+    def handle_invalid_uri
+      render json: { error: 'Invalid URL' }, status: :bad_request
+    end
+
+    def handle_not_found
+      render json: { error: 'Short link not found' }, status: :not_found
     end
   end
 end

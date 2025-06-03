@@ -20,14 +20,14 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
       shortLink: expected_short_link,
       previewLink: "#{expected_short_link}?preview=true",
       warning: []
-    }.as_json
+    }
 
-    DynamicLinks.stub :generate_short_url, expected_response do
+    DynamicLinks.stub :generate_short_url, ->(args) { expected_response } do
       post '/v1/shortLinks', params: { url: url, api_key: api_key }
 
       assert_response :created
       assert_equal "application/json; charset=utf-8", @response.content_type
-      assert_equal expected_response, JSON.parse(@response.body)
+      assert_equal expected_response.deep_stringify_keys, JSON.parse(@response.body)
     end
   end
 
@@ -37,7 +37,7 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
   end
 
   test "should respond with bad request for invalid URL" do
-    DynamicLinks.stub :generate_short_url, ->(_url, _client) { raise DynamicLinks::InvalidURIError } do
+    DynamicLinks.stub :generate_short_url, ->(_args) { raise DynamicLinks::InvalidURIError } do
       post '/v1/shortLinks', params: { url: 'invalid_url', api_key: @client.api_key }
       assert_response :bad_request
     end
@@ -54,9 +54,20 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
   if defined?(::MultiTenant)
     test "should use MultiTenant.with when db_infra_strategy is :sharding" do
       DynamicLinks.configuration.db_infra_strategy = :sharding
-      ::MultiTenant.expects(:with).with(@client).once
       url = 'https://example.com/'
       api_key = @client.api_key
+
+      # You must allow the method to execute to hit the MultiTenant call
+      DynamicLinks::ShortLinksController.any_instance.stubs(:generate_short_url).returns(
+        {
+          shortLink: 'https://test.link',
+          previewLink: 'https://test.link?preview=true',
+          warning: []
+        }
+      )
+
+      ::MultiTenant.expects(:with).with(@client).once
+
       post '/v1/shortLinks', params: { url: url, api_key: api_key }
     end
 
@@ -64,7 +75,17 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
       DynamicLinks.configuration.db_infra_strategy = :standard
       url = 'https://example.com/'
       api_key = @client.api_key
+
+      DynamicLinks::ShortLinksController.any_instance.stubs(:generate_short_url).returns(
+        {
+          shortLink: 'https://test.link',
+          previewLink: 'https://test.link?preview=true',
+          warning: []
+        }
+      )
+
       ::MultiTenant.expects(:with).with(@client).never
+
       post '/v1/shortLinks', params: { url: url, api_key: api_key }
     end
   end
@@ -73,7 +94,7 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     short_url = 'abc123'
     full_url = 'https://example.com/full-path'
 
-    DynamicLinks.stub :resolve_short_url, full_url do
+    DynamicLinks.stub :resolve_short_url, ->(_args) { full_url } do
       get "/v1/shortLinks/#{short_url}", params: { api_key: @client.api_key }
 
       assert_response :success
@@ -86,7 +107,7 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
   test "should return not found for non-existent short URL" do
     short_url = 'nonexistent'
 
-    DynamicLinks.stub :resolve_short_url, nil do
+    DynamicLinks.stub :resolve_short_url, ->(_args) { nil } do
       get "/v1/shortLinks/#{short_url}", params: { api_key: @client.api_key }
 
       assert_response :not_found
@@ -98,7 +119,7 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
   test "should handle internal server error on expand" do
     short_url = 'abc123'
 
-    DynamicLinks.stub :resolve_short_url, ->(_short_url) { raise StandardError, "Unexpected error" } do
+    DynamicLinks.stub :resolve_short_url, ->(_args) { raise StandardError, "Unexpected error" } do
       get "/v1/shortLinks/#{short_url}", params: { api_key: @client.api_key }
 
       assert_response :internal_server_error

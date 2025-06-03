@@ -31,6 +31,7 @@ module DynamicLinks
 
       with_tenant(@client) do
         get shortened_url(short_url: short_url.short_url)
+        assert_response :found
         assert_redirected_to short_url.url
       end
     end

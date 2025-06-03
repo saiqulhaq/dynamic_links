@@ -11,14 +11,17 @@ module DynamicLinks
         return
       end
 
-      multi_tenant(client) do
-        render json: DynamicLinks.generate_short_url(url, client), status: :created
+      begin
+        result = multi_tenant(client) do
+          DynamicLinks.generate_short_url(url, client)
+        end
+        render json: result, status: :created
+      rescue DynamicLinks::InvalidURIError
+        render json: { error: 'Invalid URL' }, status: :bad_request
+      rescue => e
+        DynamicLinks::Logger.log_error(e)
+        render_error(e, :internal_server_error)
       end
-    rescue DynamicLinks::InvalidURIError
-      render json: { error: 'Invalid URL' }, status: :bad_request
-    rescue => e
-      DynamicLinks::Logger.log_error(e)
-      render_error(e, :internal_server_error)
     end
 
     def expand
@@ -30,19 +33,21 @@ module DynamicLinks
         return
       end
 
-      multi_tenant(client) do
-        short_link = params[:id] # <- changed from params.require(:short_url)
-        full_url = DynamicLinks.resolve_short_url(short_link)
+      begin
+        short_link = params[:id]
+        full_url = multi_tenant(client) do
+          DynamicLinks.resolve_short_url(short_link)
+        end
 
         if full_url
           render json: { full_url: full_url }, status: :ok
         else
           render json: { error: 'Short link not found' }, status: :not_found
         end
+      rescue => e
+        DynamicLinks::Logger.log_error(e)
+        render_error(e, :internal_server_error)
       end
-    rescue => e
-      DynamicLinks::Logger.log_error(e)
-      render_error(e, :internal_server_error)
     end
 
     private
@@ -55,14 +60,14 @@ module DynamicLinks
 
     def multi_tenant(client, db_infra_strategy = DynamicLinks.configuration.db_infra_strategy)
       if db_infra_strategy == :sharding
-        # Check if MultiTenant is available and loaded
-        if Object.const_defined?('MultiTenant')
+        # Use fully qualified constant name and ensure it's loaded
+        if defined?(::MultiTenant) && ::MultiTenant.respond_to?(:with)
           # Use MultiTenant to set the tenant context
-          MultiTenant.with(client) do
+          ::MultiTenant.with(client) do
             yield
           end
         else
-          Rails.logger.warn 'MultiTenant gem is not installed. Please install it to use sharding strategy'
+          Rails.logger.warn 'MultiTenant gem is not properly loaded. Using standard mode.'
           yield
         end
       else

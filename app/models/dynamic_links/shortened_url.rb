@@ -24,12 +24,13 @@ module DynamicLinks
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
 
     def self.find_or_create!(client, short_url, url)
-      if respond_to?(:multi_tenant)
+      if respond_to?(:multi_tenant) && defined?(::MultiTenant)
         # When Citus is enabled, use MultiTenant.with
-        MultiTenant.with(client) do
+        ::MultiTenant.with(client) do
           transaction do
             record = find_or_create_by!(short_url: short_url) do |record|
               record.url = url
+              # client is automatically set by multi_tenant
             end
             record
           end

@@ -37,6 +37,15 @@ require "dynamic_links/shortening_strategies/mock_strategy"
 require "dynamic_links/async/locker"
 require "dynamic_links/shortener"
 
+# Ensure MultiTenant is properly initialized if CITUS_ENABLED
+if ENV['CITUS_ENABLED'] == 'true' && !defined?(::MultiTenant)
+  begin
+    require 'activerecord-multi-tenant'
+  rescue LoadError => e
+    warn "MultiTenant gem is required when CITUS_ENABLED is true. Error: #{e.message}"
+  end
+end
+
 module DynamicLinks
   class << self
     attr_writer :configuration

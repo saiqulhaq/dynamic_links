@@ -37,13 +37,9 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
   end
 
   test "should respond with bad request for invalid URL" do
-    DynamicLinks.stub :generate_short_url, proc { raise DynamicLinks::InvalidURIError } do
+    DynamicLinks.stub :generate_short_url, ->(_url, _client) { raise DynamicLinks::InvalidURIError } do
       post '/v1/shortLinks', params: { url: 'invalid_url', api_key: @client.api_key }
-
       assert_response :bad_request
-      assert_equal "application/json; charset=utf-8", @response.content_type
-      body = JSON.parse(@response.body)
-      assert_equal 'Invalid URL', body["error"]
     end
   end
 

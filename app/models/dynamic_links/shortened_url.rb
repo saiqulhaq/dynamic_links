@@ -51,11 +51,11 @@ module DynamicLinks
           end
           record
         end
-      rescue ActiveRecord::RecordInvalid => e
-        # Log the error and re-raise if needed or return a meaningful error message
-        DynamicLinks::Logger.log_error("ShortenedUrl creation failed: #{e.message}")
-        raise e
       end
+    rescue ActiveRecord::RecordInvalid => e
+      # Log the error and re-raise if needed or return a meaningful error message
+      DynamicLinks::Logger.log_error("ShortenedUrl creation failed: #{e.message}")
+      raise e
     end
 
     def expired?

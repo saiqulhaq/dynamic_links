@@ -65,16 +65,6 @@ jobs:
         CITUS_ENABLED: 'true'
       run: bundle install --jobs 4 --retry 3
 
-    - name: Set up Citus extensions (only for Citus tests)
-      if: matrix.db_type == 'citus'
-      env:
-        PGPASSWORD: postgres
-      run: |
-        # Wait for PostgreSQL to be ready
-        sleep 5
-        # Create Citus extension if needed
-        psql -h localhost -U postgres -d dynamic_links -c "CREATE EXTENSION IF NOT EXISTS citus;"
-
     - name: Run tests with standard PostgreSQL
       if: matrix.db_type == 'standard'
       env:
@@ -104,7 +94,15 @@ jobs:
         CITUS_ENABLED: 'true'
         SHORTENING_STRATEGY: md5
       run: |
-        bundle exec rails db:drop db:create db:migrate
+        # First create the database
+        # Drop and recreate the database to ensure a clean slate before adding the Citus extension
+        bundle exec rails db:drop db:create
+        
+        # Now create the Citus extension after the database exists
+        PGPASSWORD=postgres psql -h localhost -U postgres -d dynamic_links -c "CREATE EXTENSION IF NOT EXISTS citus;"
+        
+        # Continue with migrations and tests
+        bundle exec rails db:migrate
         bundle exec rails db:test:prepare
         bundle exec rails test
 

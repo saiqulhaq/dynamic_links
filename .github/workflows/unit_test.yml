@@ -96,19 +96,7 @@ jobs:
       run: |
         # First create the database
         # Drop and recreate the database to ensure a clean slate before adding the Citus extension
-        bundle exec rails db:drop db:create
-        
-        # Now create the Citus extension properly - with all required components
-        PGPASSWORD=postgres psql -h localhost -U postgres -d dynamic_links_test -c "CREATE EXTENSION IF NOT EXISTS citus;"
-        
-        # Skip creating columnar extension if it causes issues
-        # Retry creating the Citus extension until successful
-        for i in {1..1000}; do
-          PGPASSWORD=postgres psql -h localhost -U postgres -d dynamic_links_test -c "CREATE EXTENSION IF NOT EXISTS citus;" && break || sleep 2;
-        done
-        
-        # Continue with migrations and tests
-        bundle exec rails db:migrate
+        bundle exec rails db:drop db:create db:migrate
         bundle exec rails db:test:prepare
         bundle exec rails test
 

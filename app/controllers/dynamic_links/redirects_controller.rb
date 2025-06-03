@@ -1,7 +1,7 @@
 module DynamicLinks
   class RedirectsController < ApplicationController
     def show
-      client = DynamicLinks::Client.find_by(hostname: request.host)
+      client = DynamicLinks::Client.find_by({ hostname: request.host })
       unless client
         render plain: 'URL not found', status: :not_found
         return

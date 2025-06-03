@@ -4,7 +4,7 @@ module DynamicLinks
 
     def create
       url = params.require(:url)
-      client = DynamicLinks::Client.find_by(api_key: params.require(:api_key))
+      client = DynamicLinks::Client.find_by({ api_key: params.require(:api_key) })
 
       unless client
         render json: { error: 'Invalid API key' }, status: :unauthorized
@@ -23,7 +23,7 @@ module DynamicLinks
 
     def expand
       api_key = params.require(:api_key)
-      client = DynamicLinks::Client.find_by(api_key: api_key)
+      client = DynamicLinks::Client.find_by({ api_key: api_key })
 
       unless client
         render json: { error: 'Invalid API key' }, status: :unauthorized

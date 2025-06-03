@@ -28,11 +28,19 @@ module DynamicLinks
         # When Citus is enabled, use MultiTenant.with
         ::MultiTenant.with(client) do
           transaction do
-            record = find_or_create_by!(short_url: short_url) do |record|
-              record.url = url
-              # client is automatically set by multi_tenant
+            # When in a multi-tenant context, client is automatically set by the tenant
+            # We need to handle creation differently to ensure validation errors are raised
+            begin
+              record = where(short_url: short_url).first_or_initialize
+              if record.new_record?
+                record.url = url
+                record.save!
+              end
+              record
+            rescue ActiveRecord::RecordInvalid => e
+              DynamicLinks::Logger.log_error("ShortenedUrl creation failed: #{e.message}")
+              raise e
             end
-            record
           end
         end
       else
@@ -43,11 +51,11 @@ module DynamicLinks
           end
           record
         end
+      rescue ActiveRecord::RecordInvalid => e
+        # Log the error and re-raise if needed or return a meaningful error message
+        DynamicLinks::Logger.log_error("ShortenedUrl creation failed: #{e.message}")
+        raise e
       end
-    rescue ActiveRecord::RecordInvalid => e
-      # Log the error and re-raise if needed or return a meaningful error message
-      DynamicLinks::Logger.log_error("ShortenedUrl creation failed: #{e.message}")
-      raise e
     end
 
     def expired?

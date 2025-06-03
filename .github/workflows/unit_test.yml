@@ -65,6 +65,16 @@ jobs:
         CITUS_ENABLED: 'true'
       run: bundle install --jobs 4 --retry 3
 
+    - name: Set up Citus extensions (only for Citus tests)
+      if: matrix.db_type == 'citus'
+      env:
+        PGPASSWORD: postgres
+      run: |
+        # Wait for PostgreSQL to be ready
+        sleep 5
+        # Create Citus extension if needed
+        psql -h localhost -U postgres -d dynamic_links -c "CREATE EXTENSION IF NOT EXISTS citus;"
+
     - name: Run tests with standard PostgreSQL
       if: matrix.db_type == 'standard'
       env:

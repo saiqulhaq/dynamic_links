@@ -18,7 +18,7 @@ module DynamicLinks
       render json: { error: 'Invalid URL' }, status: :bad_request
     rescue => e
       DynamicLinks::Logger.log_error(e)
-      render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
+      render_error(e, :internal_server_error)
     end
 
     def expand
@@ -42,7 +42,7 @@ module DynamicLinks
       end
     rescue => e
       DynamicLinks::Logger.log_error(e)
-      render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
+      render_error(e, :internal_server_error)
     end
 
     private
@@ -55,8 +55,10 @@ module DynamicLinks
 
     def multi_tenant(client, db_infra_strategy = DynamicLinks.configuration.db_infra_strategy)
       if db_infra_strategy == :sharding
-        if defined?(::MultiTenant)
-          ::MultiTenant.with(client) do
+        # Check if MultiTenant is available and loaded
+        if Object.const_defined?('MultiTenant')
+          # Use MultiTenant to set the tenant context
+          MultiTenant.with(client) do
             yield
           end
         else
@@ -66,6 +68,23 @@ module DynamicLinks
       else
         yield
       end
+    rescue => e
+      DynamicLinks::Logger.log_error("Error in multi_tenant block: #{e.message}")
+      raise e
+    end
+    
+    def render_error(error, status)
+      response = { error: 'An error occurred while processing your request' }
+      
+      # Add detailed error information in test environment or if configured
+      if Rails.env.test? || (defined?(DynamicLinks.configuration.show_detailed_errors) && DynamicLinks.configuration.show_detailed_errors)
+        response.merge!({
+          detailed_error: "#{error.class}: #{error.message}",
+          backtrace: error.backtrace&.first(10)
+        })
+      end
+      
+      render json: response, status: status
     end
   end
 end

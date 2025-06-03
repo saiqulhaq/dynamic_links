@@ -5,11 +5,25 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     @client = dynamic_links_clients(:one)
     @original_rest_api_setting = DynamicLinks.configuration.enable_rest_api
     @original_db_infra_strategy = DynamicLinks.configuration.db_infra_strategy
+    # Enable detailed errors in test mode
+    @original_show_detailed_errors = DynamicLinks.configuration.show_detailed_errors
+    DynamicLinks.configuration.show_detailed_errors = true if defined?(DynamicLinks.configuration.show_detailed_errors)
   end
 
   teardown do
     DynamicLinks.configuration.enable_rest_api = @original_rest_api_setting
     DynamicLinks.configuration.db_infra_strategy = @original_db_infra_strategy
+    DynamicLinks.configuration.show_detailed_errors = @original_show_detailed_errors if defined?(DynamicLinks.configuration.show_detailed_errors)
+  end
+
+  # Helper method to get detailed error from response
+  def get_detailed_error(response)
+    body = JSON.parse(response.body)
+    if body["detailed_error"].present?
+      puts "DETAILED ERROR: #{body['detailed_error']}"
+      puts "ERROR BACKTRACE: #{body['backtrace']}" if body["backtrace"].present?
+    end
+    body
   end
 
   test "should create a shortened URL" do
@@ -92,6 +106,21 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
       assert_response :not_found
       body = JSON.parse(@response.body)
       assert_equal 'Short link not found', body["error"]
+    end
+  end
+
+  test "should capture and display detailed errors in test mode" do
+    skip unless defined?(DynamicLinks.configuration.show_detailed_errors)
+    
+    short_url = 'test_error'
+    test_error = RuntimeError.new("Test specific error for debugging")
+    
+    DynamicLinks.stub :resolve_short_url, ->(_) { raise test_error } do
+      get "/v1/shortLinks/#{short_url}", params: { api_key: @client.api_key }
+      
+      assert_response :internal_server_error
+      body = get_detailed_error(@response)
+      assert_includes body["detailed_error"], "Test specific error for debugging" if body["detailed_error"]
     end
   end
 

@@ -24,11 +24,24 @@ module DynamicLinks
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
 
     def self.find_or_create!(client, short_url, url)
-      transaction do
-        record = find_or_create_by!(client: client, short_url: short_url) do |record|
-          record.url = url
+      if respond_to?(:multi_tenant)
+        # When Citus is enabled, use MultiTenant.with
+        MultiTenant.with(client) do
+          transaction do
+            record = find_or_create_by!(short_url: short_url) do |record|
+              record.url = url
+            end
+            record
+          end
         end
-        record
+      else
+        # Original implementation for standard PostgreSQL
+        transaction do
+          record = find_or_create_by!(client: client, short_url: short_url) do |record|
+            record.url = url
+          end
+          record
+        end
       end
     rescue ActiveRecord::RecordInvalid => e
       # Log the error and re-raise if needed or return a meaningful error message

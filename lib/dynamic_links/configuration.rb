@@ -5,6 +5,9 @@ module DynamicLinks
                   :async_processing, :redis_counter_config, :cache_store,
                   :enable_fallback_mode, :firebase_host
 
+    # When true, detailed error messages are shown in responses
+    attr_accessor :show_detailed_errors
+
     VALID_DB_INFRA_STRATEGIES = [:standard, :sharding].freeze
 
     DEFAULT_SHORTENING_STRATEGY = :md5
@@ -41,6 +44,8 @@ module DynamicLinks
       @cache_store = DEFAULT_CACHE_STORE
       @enable_fallback_mode = DEFAULT_ENABLE_FALLBACK_MODE
       @firebase_host = DEFAULT_FIREBASE_HOST
+
+      @show_detailed_errors = Rails.env.development? || Rails.env.test?
     end
 
     def shortening_strategy=(strategy)

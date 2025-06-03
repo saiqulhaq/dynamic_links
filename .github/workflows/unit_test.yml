@@ -99,7 +99,8 @@ jobs:
         bundle exec rails db:drop db:create
         
         # Now create the Citus extension after the database exists
-        PGPASSWORD=postgres psql -h localhost -U postgres -d dynamic_links -c "CREATE EXTENSION IF NOT EXISTS citus;"
+        # dynamic_links_test is because there is a suffix in the database name for test environment
+        PGPASSWORD=postgres psql -h localhost -U postgres -d dynamic_links_test -c "CREATE EXTENSION IF NOT EXISTS citus;"
         
         # Continue with migrations and tests
         bundle exec rails db:migrate

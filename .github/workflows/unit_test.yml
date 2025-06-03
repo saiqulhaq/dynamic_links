@@ -13,7 +13,7 @@ jobs:
     services:
       postgres:
         # Use Citus image for Citus tests, regular PostgreSQL for standard tests
-        image: ${{ matrix.db_type == 'citus' && 'citusdata/citus:11.3.0' || 'postgres:14' }}
+        image: ${{ matrix.db_type == 'citus' && 'citusdata/citus:13.0.2' || 'postgres:14' }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres

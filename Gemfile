@@ -10,7 +10,7 @@ gem 'puma'
 
 gem 'pg', '>= 0.18', '< 2.0'
 
-gem 'sprockets-rails'
+gem 'sprockets-rails', '>= 3.5.2'
 
 # for dummy app
 gem 'sidekiq'

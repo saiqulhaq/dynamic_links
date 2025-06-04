@@ -100,6 +100,7 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     
       # Verify the expectation was met
       assert_mock mock
+      mocha_verify
     end
 
     test "should not use MultiTenant.with when db_infra_strategy is not :sharding" do

@@ -123,7 +123,7 @@ class DynamicLinks::ShortenedUrlTest < ActiveSupport::TestCase
   end
 
   test 'find_or_create! should raise error and log if save fails' do
-    DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/ShortenedUrl creation failed/)).twice
+    DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/ShortenedUrl creation failed/)).times(2)
     assert_raises ActiveRecord::RecordInvalid do
       DynamicLinks::ShortenedUrl.find_or_create!(@client, nil, @url)
     end

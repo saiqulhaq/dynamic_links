@@ -24,5 +24,8 @@ end
 # gem "debug", ">= 1.0.0"
 
 if ENV['CITUS_ENABLED'] == 'true'
-  gem 'activerecord-multi-tenant'
+  # need to use Github version for MultiTenant
+  # because the gem version is not compatible with Rails 8
+  # and we need to use the latest features
+  gem 'activerecord-multi-tenant', github: 'citusdata/activerecord-multi-tenant'
 end

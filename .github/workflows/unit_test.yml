@@ -13,7 +13,7 @@ jobs:
     services:
       postgres:
         # Use Citus image for Citus tests, regular PostgreSQL for standard tests
-        image: ${{ matrix.db_type == 'citus' && 'citusdata/citus:11.3.0' || 'postgres:14' }}
+        image: ${{ matrix.db_type == 'citus' && 'citusdata/citus:13.0.2' || 'postgres:14' }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -94,6 +94,8 @@ jobs:
         CITUS_ENABLED: 'true'
         SHORTENING_STRATEGY: md5
       run: |
+        # First create the database
+        # Drop and recreate the database to ensure a clean slate before adding the Citus extension
         bundle exec rails db:drop db:create db:migrate
         bundle exec rails db:test:prepare
         bundle exec rails test

@@ -24,11 +24,33 @@ module DynamicLinks
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
 
     def self.find_or_create!(client, short_url, url)
-      transaction do
-        record = find_or_create_by!(client: client, short_url: short_url) do |record|
-          record.url = url
+      if respond_to?(:multi_tenant) && defined?(::MultiTenant)
+        # When Citus is enabled, use MultiTenant.with
+        ::MultiTenant.with(client) do
+          transaction do
+            # When in a multi-tenant context, client is automatically set by the tenant
+            # We need to handle creation differently to ensure validation errors are raised
+            begin
+              record = where(short_url: short_url).first_or_initialize
+              if record.new_record?
+                record.url = url
+                record.save!
+              end
+              record
+            rescue ActiveRecord::RecordInvalid => e
+              DynamicLinks::Logger.log_error("ShortenedUrl creation failed: #{e.message}")
+              raise e
+            end
+          end
         end
-        record
+      else
+        # Original implementation for standard PostgreSQL
+        transaction do
+          record = find_or_create_by!(client: client, short_url: short_url) do |record|
+            record.url = url
+          end
+          record
+        end
       end
     rescue ActiveRecord::RecordInvalid => e
       # Log the error and re-raise if needed or return a meaningful error message

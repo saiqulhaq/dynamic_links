@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     dynamic_links (0.1.0)
-      rails (>= 5)
+      rails (>= 7, < 9)
 
 GEM
   remote: https://rubygems.org/
@@ -241,7 +241,7 @@ DEPENDENCIES
   redis (>= 4)
   sidekiq
   simplecov
-  sprockets-rails
+  sprockets-rails (>= 3.5.2)
   timecop
 
 BUNDLED WITH

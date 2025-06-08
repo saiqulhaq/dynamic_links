@@ -1,4 +1,5 @@
 AllCops:
+  # This version matches the Ruby version in the development container (Dockerfile)
   TargetRubyVersion: 3.2
   NewCops: enable
   SuggestExtensions: false
@@ -13,7 +14,8 @@ Style/Documentation:
 Style/StringLiterals:
   EnforcedStyle: single_quotes
 
-Metrics/LineLength:
+# The Metrics/LineLength cop has been replaced by Layout/LineLength in RuboCop 0.78.0
+Layout/LineLength:
   Max: 120
 
 Metrics/MethodLength:
@@ -23,6 +25,3 @@ Metrics/BlockLength:
   Exclude:
     - "test/**/*"
     - "*.gemspec"
-
-Layout/LineLength:
-  Max: 120

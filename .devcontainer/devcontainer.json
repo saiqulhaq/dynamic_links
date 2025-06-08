@@ -56,7 +56,7 @@
     }
   },
   "postCreateCommand": "bash .devcontainer/setup-environment.sh",
-  "postStartCommand": "bash .devcontainer/on-create-command.sh && bash .devcontainer/init-services.sh",
+  "postStartCommand": "bash .devcontainer/on-create-command.sh && bash .devcontainer/init-services.sh && bash .devcontainer/check-ruby-version.sh",
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,

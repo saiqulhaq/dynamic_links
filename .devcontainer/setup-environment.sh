@@ -12,7 +12,7 @@ CONFIG_DIR="${DUMMY_APP}/config"
 check_service() {
   local service_name="$1"
   echo "Checking ${service_name} service status..."
-  
+
   if service "${service_name}" status > /dev/null 2>&1; then
     echo "✅ ${service_name} is running"
   else
@@ -62,7 +62,7 @@ fi
 if [ $postgres_running -eq 0 ]; then
   echo "Setting up the database..."
   cd "${DUMMY_APP}"
-  
+
   # Check if database exists
   if psql -lqt | grep -q dynamic_links_development; then
     echo "Database already exists, running migrations..."
@@ -108,7 +108,7 @@ else
   echo "✅ Solargraph is already installed"
 fi
 
-# Initialize Solargraph bundle 
+# Initialize Solargraph bundle
 echo "Initializing Solargraph bundle..."
 cd "${PROJECT_ROOT}" && solargraph bundle
 

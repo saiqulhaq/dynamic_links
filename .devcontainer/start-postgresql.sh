@@ -4,7 +4,7 @@ set -e
 # This script is used to start PostgreSQL service within the dev container
 
 # Start PostgreSQL service
-service postgresql start
+sudo service postgresql start
 
 # Wait for PostgreSQL to start
 until pg_isready > /dev/null 2>&1; do

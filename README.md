@@ -21,25 +21,57 @@ DynamicLinks.configure do |config|
   config.enable_rest_api = true  # Enable or disable REST API feature
 ```
 
-## Development with GitHub Codespaces
+## Development Environment
+
+This project supports two development environment options: GitHub Codespaces and local Docker Compose.
+
+### Option 1: GitHub Codespaces
 
 This project is configured to work with GitHub development containers, providing a consistent development environment.
 
-### Opening in GitHub Codespaces
+#### Opening in GitHub Codespaces
 
 1. Navigate to the GitHub repository
 2. Click the "Code" button
 3. Select the "Codespaces" tab
 4. Click "Create codespace on main"
 
-### Development in the Container
+#### Development in the Codespace
 
 Once the development container is created and set up:
 
 1. The container includes Ruby 3.2, PostgreSQL, Redis, and other dependencies
 2. Run the test suite: `cd test/dummy && bin/rails test`
 3. Start the Rails server: `cd test/dummy && bin/rails server`
-4. Access the application at the forwarded port (usually port 3000)
+
+### Option 2: Local Development with Docker Compose
+
+For local development, we use Docker Compose with VS Code's Remote - Containers extension.
+
+#### Prerequisites
+
+1. Install [Docker](https://docs.docker.com/get-docker/)
+2. Install [VS Code](https://code.visualstudio.com/)
+3. Install the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+#### Opening in VS Code with Containers
+
+1. Clone the repository to your local machine
+2. Open the project folder in VS Code
+3. VS Code will detect the devcontainer configuration and prompt you to reopen in a container
+4. Click "Reopen in Container"
+
+#### Working with the Docker Compose Setup
+
+- The setup includes three services: app (Ruby), postgres (PostgreSQL), and redis (Redis)
+- Database and Redis connections are automatically configured
+- Use VS Code tasks (F1 -> "Tasks: Run Task") for common operations like:
+  - Starting the Rails server
+  - Running tests
+  - Running the Rails console
+  - Managing Docker Compose services
+
+For more details on the Docker Compose setup, refer to the [Docker Compose documentation](DOCKER_COMPOSE.md). 4. Access the application at the forwarded port (usually port 3000)
 
 ### Shortening a URL
 

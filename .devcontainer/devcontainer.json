@@ -1,6 +1,8 @@
 {
   "name": "Ruby on Rails Dynamic Links",
-  "dockerFile": "Dockerfile",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "app",
+  "workspaceFolder": "/workspaces/dynamic_links",
   "forwardPorts": [3000, 6379, 5432],
   "customizations": {
     "vscode": {
@@ -28,10 +30,10 @@
           {
             "name": "PostgreSQL",
             "driver": "PostgreSQL",
-            "server": "localhost",
+            "server": "postgres",
             "port": 5432,
-            "username": "vscode",
-            "password": "vscode",
+            "username": "postgres",
+            "password": "postgres",
             "database": "dynamic_links_development"
           }
         ]
@@ -55,22 +57,8 @@
       ]
     }
   },
-  "postCreateCommand": "bash .devcontainer/setup-environment.sh",
-  "postStartCommand": "bash .devcontainer/on-create-command.sh && bash .devcontainer/init-services.sh && bash .devcontainer/check-ruby-version.sh",
-  "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": true,
-      "installOhMyZsh": true,
-      "upgradePackages": true
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "lts"
-    },
-    "ghcr.io/devcontainers/features/ruby:1": {
-      "version": "3.2"
-    }
-  },
+  "postCreateCommand": "bundle install && cd test/dummy && bin/rails db:create db:migrate",
+  "postStartCommand": "bash .devcontainer/on-create-command.sh",
   "portsAttributes": {
     "3000": {
       "label": "Rails Server",
@@ -89,6 +77,8 @@
   "updateContentCommand": "bundle install",
   "remoteUser": "vscode",
   "containerEnv": {
-    "RAILS_ENV": "development"
+    "RAILS_ENV": "development",
+    "DATABASE_URL": "postgres://postgres:postgres@postgres:5432/dynamic_links_development",
+    "REDIS_URL": "redis://redis:6379/1"
   }
 }

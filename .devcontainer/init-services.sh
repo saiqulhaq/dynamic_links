@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Start services
-service postgresql start
-service redis-server start
+sudo service postgresql start
+sudo service redis-server start
 
 # Output status
-echo "PostgreSQL status: $(service postgresql status)"
-echo "Redis status: $(service redis-server status)"
+echo "PostgreSQL status: $(sudo service postgresql status)"
+echo "Redis status: $(sudo service redis-server status)"
 
 # Check Redis connection
 echo "Testing Redis connection..."

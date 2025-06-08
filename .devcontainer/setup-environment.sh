@@ -13,13 +13,13 @@ check_service() {
   local service_name="$1"
   echo "Checking ${service_name} service status..."
 
-  if service "${service_name}" status > /dev/null 2>&1; then
+  if sudo service "${service_name}" status > /dev/null 2>&1; then
     echo "✅ ${service_name} is running"
   else
     echo "⚠️ ${service_name} is not running, attempting to start..."
-    service "${service_name}" start
+    sudo service "${service_name}" start
     sleep 2
-    if service "${service_name}" status > /dev/null 2>&1; then
+    if sudo service "${service_name}" status > /dev/null 2>&1; then
       echo "✅ ${service_name} started successfully"
     else
       echo "❌ Failed to start ${service_name}. Setup may fail."

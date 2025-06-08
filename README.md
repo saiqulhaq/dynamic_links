@@ -19,6 +19,69 @@ DynamicLinks.configure do |config|
   config.redis_pool_size = 10  # Redis connection pool size
   config.redis_pool_timeout = 3  # Redis connection pool timeout in seconds
   config.enable_rest_api = true  # Enable or disable REST API feature
+```
+
+## Development with GitHub
+
+This project is configured to work with GitHub development containers, providing a consistent development environment.
+
+### Opening in GitHub Development Container
+
+1. Navigate to the GitHub repository
+2. Click the "Code" button
+3. Select the "Codespaces" tab
+4. Click "Create codespace on main"
+
+### Development in the Container
+
+Once the development container is created and set up:
+
+1. The container includes Ruby 3.2, PostgreSQL, Redis, and other dependencies
+2. Run the test suite: `cd test/dummy && bin/rails test`
+3. Start the Rails server: `cd test/dummy && bin/rails server`
+4. Access the application at the forwarded port (usually port 3000)
+```
+
+## Development with GitHub Codespaces
+
+This project is configured to work with GitHub Codespaces, providing a consistent development environment.
+
+### Opening in Codespaces
+
+1. Navigate to the GitHub repository
+2. Click the "Code" button
+3. Select the "Codespaces" tab
+4. Click "Create codespace on main"
+
+### Development in Codespaces
+
+Once the Codespace is created and set up:
+
+1. The container includes Ruby 3.2, PostgreSQL, Redis, and other dependencies
+2. Run the test suite: `cd test/dummy && bin/rails test`
+3. Start the Rails server: `cd test/dummy && bin/rails server`
+4. Access the application at the GitHub Codespaces forwarded port (usually port 3000)
+```
+
+## Development with GitHub Codespaces
+
+This project is configured to work with GitHub Codespaces, providing a consistent development environment.
+
+### Opening in Codespaces
+
+1. Navigate to the GitHub repository
+2. Click the "Code" button
+3. Select the "Codespaces" tab
+4. Click "Create codespace on main"
+
+### Development in Codespaces
+
+Once the Codespace is created and set up:
+
+1. The container includes Ruby 3.2, PostgreSQL, Redis, and other dependencies
+2. Run the test suite: `cd test/dummy && bin/rails test`
+3. Start the Rails server: `cd test/dummy && bin/rails server`
+4. Access the application at the Codespaces forwarded port (usually port 3000)
 end
 ```
 

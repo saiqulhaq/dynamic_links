@@ -1,0 +1,21 @@
+name: Validate Devcontainer
+
+on:
+  push:
+    paths:
+      - ".devcontainer/**"
+  pull_request:
+    paths:
+      - ".devcontainer/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Validate devcontainer.json
+        uses: devcontainers/validate@v1
+        with:
+          path: .devcontainer/devcontainer.json

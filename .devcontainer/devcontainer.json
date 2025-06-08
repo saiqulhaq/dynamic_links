@@ -1,0 +1,94 @@
+{
+  "name": "Ruby on Rails Dynamic Links",
+  "dockerFile": "Dockerfile",
+  "forwardPorts": [3000, 6379, 5432],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "ruby.useBundler": true,
+        "ruby.useLanguageServer": true,
+        "ruby.lint": {
+          "rubocop": true
+        },
+        "editor.tabSize": 2,
+        "files.associations": {
+          "*.erb": "erb",
+          "Gemfile": "ruby",
+          "Rakefile": "ruby",
+          "*.rake": "ruby"
+        },
+        "[ruby]": {
+          "editor.tabSize": 2,
+          "editor.insertSpaces": true
+        },
+        "ruby.format": "rubocop",
+        "sqltools.connections": [
+          {
+            "name": "PostgreSQL",
+            "driver": "PostgreSQL",
+            "server": "localhost",
+            "port": 5432,
+            "username": "vscode",
+            "password": "vscode",
+            "database": "dynamic_links_development"
+          }
+        ]
+      },
+      "extensions": [
+        "rebornix.ruby",
+        "castwide.solargraph",
+        "kaiwood.endwise",
+        "aliariff.vscode-erb-beautify",
+        "misogi.ruby-rubocop",
+        "wingrunr21.vscode-ruby",
+        "editorconfig.editorconfig",
+        "davidanson.vscode-markdownlint",
+        "esbenp.prettier-vscode",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "eamodio.gitlens",
+        "streetsidesoftware.code-spell-checker",
+        "donjayamanne.githistory",
+        "aki77.rails-db-schema"
+      ]
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/setup-environment.sh",
+  "postStartCommand": "bash .devcontainer/on-create-command.sh && bash .devcontainer/init-services.sh",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/ruby:1": {
+      "version": "3.2"
+    }
+  },
+  "portsAttributes": {
+    "3000": {
+      "label": "Rails Server",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "6379": {
+      "label": "Redis",
+      "onAutoForward": "silent"
+    }
+  },
+  "waitFor": "postCreateCommand",
+  "updateContentCommand": "bundle install",
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "RAILS_ENV": "development"
+  }
+}

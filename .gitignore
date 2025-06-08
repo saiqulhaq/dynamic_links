@@ -13,6 +13,13 @@ coverage
 
 # VS Code and Devcontainer specific
 .vscode/*
+# Uncomment the following lines if these configurations contain user-specific settings
+# that shouldn't be shared with other developers
+#!.vscode/settings.json
+#!.vscode/tasks.json
+#!.vscode/launch.json
+#!.vscode/extensions.json
+# Comment out the following lines if you want to share project-specific configurations
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json

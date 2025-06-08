@@ -57,7 +57,7 @@
       ]
     }
   },
-  "postCreateCommand": "bundle install && cd test/dummy && bin/rails db:create db:migrate",
+  "postCreateCommand": "sudo chown -R vscode /usr/local/bundle && bundle install && cd test/dummy && bin/rails db:create db:migrate",
   "postStartCommand": "bash .devcontainer/on-create-command.sh",
   "portsAttributes": {
     "3000": {
@@ -74,7 +74,7 @@
     }
   },
   "waitFor": "postCreateCommand",
-  "updateContentCommand": "bundle install",
+  "updateContentCommand": "sudo chown -R vscode /usr/local/bundle && bundle install",
   "remoteUser": "vscode",
   "containerEnv": {
     "RAILS_ENV": "development",

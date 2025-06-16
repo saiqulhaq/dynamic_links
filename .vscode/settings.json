@@ -1,0 +1,32 @@
+{
+  "ruby.useBundler": true,
+  "ruby.useLanguageServer": true,
+  "ruby.lint": {
+    "rubocop": {
+      "useBundler": true
+    }
+  },
+  "ruby.format": "rubocop",
+  "ruby.rubocop.executePath": "/workspaces/dynamic_links/bin/",
+  "ruby.rubocop.configFilePath": "/workspaces/dynamic_links/.rubocop.yml",
+  "ruby.rubocop.onSave": true,
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "[ruby]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "cSpell.words": [
+    "Codespaces",
+    "devcontainer",
+    "dotenv",
+    "Gemfile",
+    "nanoid",
+    "rubocop",
+    "sidekiq",
+    "solargraph"
+  ]
+}

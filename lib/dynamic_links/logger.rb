@@ -12,5 +12,21 @@ module DynamicLinks
     def self.log_error(message)
       instance.error(message)
     end
+
+    def self.log_warn(message)
+      instance.warn(message)
+    end
+
+    def self.log_debug(message)
+      instance.debug(message)
+    end
+
+    def self.log_fatal(message)
+      instance.fatal(message)
+    end
+
+    def self.log_unknown(message)
+      instance.unknown(message)
+    end
   end
 end

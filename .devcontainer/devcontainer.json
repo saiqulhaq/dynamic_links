@@ -1,0 +1,79 @@
+{
+  "name": "Ruby on Rails Dynamic Links",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "app",
+  "workspaceFolder": "/workspaces/dynamic_links",
+  "forwardPorts": [3000, 6379, 5432],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "ruby.useBundler": true,
+        "ruby.useLanguageServer": true,
+        "ruby.lint": {
+          "rubocop": true
+        },
+        "editor.tabSize": 2,
+        "files.associations": {
+          "*.erb": "erb",
+          "Gemfile": "ruby",
+          "Rakefile": "ruby",
+          "*.rake": "ruby"
+        },
+        "[ruby]": {
+          "editor.tabSize": 2,
+          "editor.insertSpaces": true
+        },
+        "ruby.format": "rubocop",
+        "sqltools.connections": [
+          {
+            "name": "PostgreSQL",
+            "driver": "PostgreSQL",
+            "server": "postgres",
+            "port": 5432,
+            "username": "postgres",
+            "password": "postgres",
+            "database": "dynamic_links_development"
+          }
+        ]
+      },
+      "extensions": [
+        "rebornix.ruby",
+        "castwide.solargraph",
+        "kaiwood.endwise",
+        "aliariff.vscode-erb-beautify",
+        "misogi.ruby-rubocop",
+        "wingrunr21.vscode-ruby",
+        "editorconfig.editorconfig",
+        "davidanson.vscode-markdownlint",
+        "esbenp.prettier-vscode",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "eamodio.gitlens",
+        "streetsidesoftware.code-spell-checker",
+        "donjayamanne.githistory",
+        "aki77.rails-db-schema"
+      ]
+    }
+  },
+  "postCreateCommand": "sudo chown -R vscode /usr/local/bundle && bundle install && cd test/dummy # && bin/rails db:create db:migrate",
+  "postStartCommand": "bash .devcontainer/on-create-command.sh",
+  "portsAttributes": {
+    "3000": {
+      "label": "Rails Server",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "6379": {
+      "label": "Redis",
+      "onAutoForward": "silent"
+    }
+  },
+  "waitFor": "postCreateCommand",
+  "updateContentCommand": "sudo chown -R vscode /usr/local/bundle && bundle install",
+  "remoteUser": "vscode"
+}

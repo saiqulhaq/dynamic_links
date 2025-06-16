@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "rdbg",
+      "name": "Debug Rails server",
+      "request": "launch",
+      "script": "${workspaceRoot}/test/dummy/bin/rails",
+      "args": [
+        "server"
+      ],
+      "askParameters": false
+    },
+    {
+      "type": "rdbg",
+      "name": "Debug current file",
+      "request": "launch",
+      "script": "${file}",
+      "askParameters": false
+    },
+    {
+      "type": "rdbg",
+      "name": "Debug Rails tests",
+      "request": "launch",
+      "script": "${workspaceRoot}/test/dummy/bin/rails",
+      "args": [
+        "test"
+      ],
+      "askParameters": true
+    }
+  ]
+}

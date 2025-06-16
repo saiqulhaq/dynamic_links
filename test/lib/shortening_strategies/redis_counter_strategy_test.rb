@@ -5,7 +5,7 @@ class DynamicLinks::ShorteningStrategies::RedisCounterStrategyTest < ActiveSuppo
   def setup
     # Make sure we're using the redis host from environment
     redis_config = {
-      host: ENV.fetch('REDIS_HOST', 'redis'),
+      host: ENV.fetch('REDIS_HOST', 'localhost'),
       port: ENV.fetch('REDIS_PORT', 6379).to_i,
       db: ENV.fetch('REDIS_DB', 0).to_i
     }

@@ -76,6 +76,7 @@ jobs:
         POSTGRES_PORT: 5432
         RAILS_MAX_THREADS: 5
         SHORTENING_STRATEGY: md5
+        REDIS_HOST: localhost
       run: |
         bundle exec rails db:drop db:create db:migrate
         bundle exec rails db:test:prepare
@@ -93,6 +94,7 @@ jobs:
         RAILS_MAX_THREADS: 5
         CITUS_ENABLED: 'true'
         SHORTENING_STRATEGY: md5
+        REDIS_HOST: localhost
       run: |
         bundle exec rails db:drop db:create db:migrate
         bundle exec rails db:test:prepare

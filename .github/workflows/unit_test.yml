@@ -2,9 +2,9 @@ name: Unit Tests
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [master, main]
   pull_request:
-    branches: [ master, main ]
+    branches: [master, main]
 
 jobs:
   test:
@@ -38,69 +38,71 @@ jobs:
 
     strategy:
       matrix:
-        db_type: ['standard', 'citus']
+        db_type: ["standard", "citus"]
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.2'
-        bundler-cache: false
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: false
 
-    - name: Install gem dependencies
-      run: gem install bundler
+      - name: Install gem dependencies
+        run: gem install bundler
 
-    - name: Install bundle dependencies for standard PostgreSQL
-      if: matrix.db_type == 'standard'
-      env:
-        CITUS_ENABLED: 'false'
-      run: bundle install --jobs 4 --retry 3
+      - name: Install bundle dependencies for standard PostgreSQL
+        if: matrix.db_type == 'standard'
+        env:
+          CITUS_ENABLED: "false"
+        run: bundle install --jobs 4 --retry 3
 
-    - name: Install bundle dependencies for Citus
-      if: matrix.db_type == 'citus'
-      env:
-        CITUS_ENABLED: 'true'
-      run: bundle install --jobs 4 --retry 3
+      - name: Install bundle dependencies for Citus
+        if: matrix.db_type == 'citus'
+        env:
+          CITUS_ENABLED: "true"
+        run: bundle install --jobs 4 --retry 3
 
-    - name: Run tests with standard PostgreSQL
-      if: matrix.db_type == 'standard'
-      env:
-        RAILS_ENV: test
-        POSTGRES_DB: dynamic_links
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_HOST: localhost
-        POSTGRES_PORT: 5432
-        RAILS_MAX_THREADS: 5
-        SHORTENING_STRATEGY: md5
-      run: |
-        bundle exec rails db:drop db:create db:migrate
-        bundle exec rails db:test:prepare
-        bundle exec rails test
+      - name: Run tests with standard PostgreSQL
+        if: matrix.db_type == 'standard'
+        env:
+          RAILS_ENV: test
+          POSTGRES_DB: dynamic_links
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          RAILS_MAX_THREADS: 5
+          SHORTENING_STRATEGY: md5
+          REDIS_HOST: localhost
+        run: |
+          bundle exec rails db:drop db:create db:migrate
+          bundle exec rails db:test:prepare
+          bundle exec rails test
 
-    - name: Run tests with Citus
-      if: matrix.db_type == 'citus'
-      env:
-        RAILS_ENV: test
-        POSTGRES_DB: dynamic_links
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_HOST: localhost
-        POSTGRES_PORT: 5432
-        RAILS_MAX_THREADS: 5
-        CITUS_ENABLED: 'true'
-        SHORTENING_STRATEGY: md5
-      run: |
-        bundle exec rails db:drop db:create db:migrate
-        bundle exec rails db:test:prepare
-        bundle exec rails test
+      - name: Run tests with Citus
+        if: matrix.db_type == 'citus'
+        env:
+          RAILS_ENV: test
+          POSTGRES_DB: dynamic_links
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          RAILS_MAX_THREADS: 5
+          CITUS_ENABLED: "true"
+          SHORTENING_STRATEGY: md5
+          REDIS_HOST: localhost
+        run: |
+          bundle exec rails db:drop db:create db:migrate
+          bundle exec rails db:test:prepare
+          bundle exec rails test
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: coverage-report
-        path: coverage/
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-${{ matrix.db_type }}
+          path: coverage/

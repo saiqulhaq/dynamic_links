@@ -4,7 +4,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 # Specify your gem's dependencies in dynamic_links.gemspec.
 gemspec
 
-gem 'dotenv-rails', require: 'dotenv/rails-now'
+gem 'dotenv-rails', require: 'dotenv/load'
 
 gem 'puma'
 
@@ -24,5 +24,5 @@ end
 # gem "debug", ">= 1.0.0"
 
 if ENV['CITUS_ENABLED'] == 'true'
-  gem 'activerecord-multi-tenant'
+  gem 'activerecord-multi-tenant', github: 'citusdata/activerecord-multi-tenant', branch: 'master'
 end

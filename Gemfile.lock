@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/citusdata/activerecord-multi-tenant.git
+  revision: 3b21347810d662d8a9ff3c1d62f9b28f933b97d8
+  branch: master
+  specs:
+    activerecord-multi-tenant (2.4.0)
+      rails (>= 6)
+
 PATH
   remote: .
   specs:
@@ -231,6 +239,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  activerecord-multi-tenant!
   annotate
   dotenv-rails
   dynamic_links!

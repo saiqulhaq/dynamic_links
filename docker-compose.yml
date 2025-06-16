@@ -11,6 +11,8 @@ services:
       - citus
       - redis
     command: sleep infinity # Keep container running
+    environment:
+      CITUS_ENABLED: "true"
     user: vscode
 
   citus:

@@ -57,7 +57,7 @@
       ]
     }
   },
-  "postCreateCommand": "sudo chown -R vscode /usr/local/bundle && bundle install && cd test/dummy && bin/rails db:create db:migrate",
+  "postCreateCommand": "sudo chown -R vscode /usr/local/bundle && bundle install && cd test/dummy # && bin/rails db:create db:migrate",
   "postStartCommand": "bash .devcontainer/on-create-command.sh",
   "portsAttributes": {
     "3000": {
@@ -75,10 +75,5 @@
   },
   "waitFor": "postCreateCommand",
   "updateContentCommand": "sudo chown -R vscode /usr/local/bundle && bundle install",
-  "remoteUser": "vscode",
-  "containerEnv": {
-    "RAILS_ENV": "development",
-    "DATABASE_URL": "postgres://postgres:postgres@postgres:5432/dynamic_links_development",
-    "REDIS_URL": "redis://redis:6379/1"
-  }
+  "remoteUser": "vscode"
 }

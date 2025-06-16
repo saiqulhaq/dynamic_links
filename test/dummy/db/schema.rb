@@ -10,8 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_28_030419) do
+ActiveRecord::Schema[7.2].define(version: 2024_01_28_030419) do
+  create_schema "citus"
+  create_schema "citus_internal"
+  create_schema "columnar"
+  create_schema "columnar_internal"
+
   # These are extensions that must be enabled in order to support this database
+  enable_extension "citus"
+  enable_extension "citus_columnar"
   enable_extension "plpgsql"
 
   create_table "dynamic_links_clients", force: :cascade do |t|
@@ -26,9 +33,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_28_030419) do
     t.index ["name"], name: "index_dynamic_links_clients_on_name"
   end
 
-  create_table "dynamic_links_shortened_urls", primary_key: ["id", "client_id"], force: :cascade do |t|
-    t.bigserial "id", null: false
-    t.bigint "client_id", null: false
+  create_table "dynamic_links_shortened_urls", force: :cascade do |t|
+    t.bigint "client_id"
     t.string "url", limit: 2083, null: false
     t.string "short_url", limit: 20, null: false
     t.datetime "expires_at"

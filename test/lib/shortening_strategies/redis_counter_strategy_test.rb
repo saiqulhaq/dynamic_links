@@ -3,6 +3,17 @@ require_relative './../../../lib/dynamic_links/strategy_factory'
 
 class DynamicLinks::ShorteningStrategies::RedisCounterStrategyTest < ActiveSupport::TestCase
   def setup
+    # Make sure we're using the redis host from environment
+    redis_config = {
+      host: ENV.fetch('REDIS_HOST', 'redis'),
+      port: ENV.fetch('REDIS_PORT', 6379).to_i,
+      db: ENV.fetch('REDIS_DB', 0).to_i
+    }
+
+    # Create a new configuration with the proper Redis settings
+    config = DynamicLinks::RedisConfig.new(redis_config)
+    DynamicLinks.configuration.redis_counter_config = config
+
     @url_shortener = DynamicLinks::StrategyFactory.get_strategy(:redis_counter)
   end
 

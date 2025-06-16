@@ -24,5 +24,5 @@ end
 # gem "debug", ">= 1.0.0"
 
 if ENV['CITUS_ENABLED'] == 'true'
-  gem 'activerecord-multi-tenant'
+  gem 'activerecord-multi-tenant', github: 'citusdata/activerecord-multi-tenant', branch: 'master'
 end

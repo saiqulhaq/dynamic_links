@@ -19,6 +19,7 @@ DynamicLinks.configure do |config|
   config.redis_pool_size = 10  # Redis connection pool size
   config.redis_pool_timeout = 3  # Redis connection pool timeout in seconds
   config.enable_rest_api = true  # Enable or disable REST API feature
+end
 ```
 
 ## Development Environment

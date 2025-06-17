@@ -1,8 +1,16 @@
+GIT
+  remote: https://github.com/citusdata/activerecord-multi-tenant.git
+  revision: 3b21347810d662d8a9ff3c1d62f9b28f933b97d8
+  branch: master
+  specs:
+    activerecord-multi-tenant (2.4.0)
+      rails (>= 6)
+
 PATH
   remote: .
   specs:
     dynamic_links (0.2.0)
-      rails (>= 5)
+      rails (>= 5, <= 8)
 
 GEM
   remote: https://rubygems.org/
@@ -232,18 +240,19 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  annotate
+  activerecord-multi-tenant!
+  annotate (>= 3, < 4)
   dotenv-rails
   dynamic_links!
   mocha
-  nanoid (~> 2.0)
+  nanoid (>= 2, < 3)
   pg (>= 0.18, < 2.0)
   puma
-  redis (>= 4)
+  redis (>= 4, < 6)
   sidekiq
   simplecov
   sprockets-rails
-  timecop
+  timecop (< 1)
 
 BUNDLED WITH
    2.4.10

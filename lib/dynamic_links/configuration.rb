@@ -7,7 +7,7 @@ module DynamicLinks
 
     VALID_DB_INFRA_STRATEGIES = [:standard, :sharding].freeze
 
-    DEFAULT_SHORTENING_STRATEGY = :nano_id
+    DEFAULT_SHORTENING_STRATEGY = :md5
     DEFAULT_ENABLE_REST_API = true
     DEFAULT_DB_INFRA_STRATEGY = :standard
     DEFAULT_ASYNC_PROCESSING = false

@@ -21,6 +21,10 @@ DynamicLinks.configure do |config|
   config.redis_pool_size = 10  # Redis connection pool size
   config.redis_pool_timeout = 3  # Redis connection pool timeout in seconds
   config.enable_rest_api = true  # Enable or disable REST API feature
+
+  # New configuration added in PR #88
+  config.enable_fallback_mode = false  # When true, falls back to Firebase URL if a short link is not found
+  config.firebase_host = "https://example.app.goo.gl"  # Firebase host URL for fallbacks
 end
 ```
 

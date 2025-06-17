@@ -68,4 +68,42 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
       post '/v1/shortLinks', params: { url: url, api_key: api_key }
     end
   end
+
+  test "should expand a valid short URL" do
+    short_url = 'abc123'
+    full_url = 'https://example.com/full-path'
+
+    DynamicLinks.stub :resolve_short_url, full_url do
+      get "/v1/shortLinks/#{short_url}", params: { api_key: @client.api_key }
+
+      assert_response :success
+      assert_equal "application/json; charset=utf-8", @response.content_type
+      body = JSON.parse(@response.body)
+      assert_equal full_url, body["full_url"]
+    end
+  end
+
+  test "should return not found for non-existent short URL" do
+    short_url = 'nonexistent'
+
+    DynamicLinks.stub :resolve_short_url, nil do
+      get "/v1/shortLinks/#{short_url}", params: { api_key: @client.api_key }
+
+      assert_response :not_found
+      body = JSON.parse(@response.body)
+      assert_equal 'Short link not found', body["error"]
+    end
+  end
+
+  test "should handle internal server error on expand" do
+    short_url = 'abc123'
+
+    DynamicLinks.stub :resolve_short_url, ->(_short_url) { raise StandardError, "Unexpected error" } do
+      get "/v1/shortLinks/#{short_url}", params: { api_key: @client.api_key }
+
+      assert_response :internal_server_error
+      body = JSON.parse(@response.body)
+      assert_equal 'An error occurred while processing your request', body["error"]
+    end
+  end
 end

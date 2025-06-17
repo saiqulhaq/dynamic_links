@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'mocha/minitest'
+require 'ostruct'
 
 module DynamicLinks
   module Async

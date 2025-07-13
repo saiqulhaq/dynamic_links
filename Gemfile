@@ -25,6 +25,5 @@ end
 # Start debugger with binding.b [https://github.com/ruby/debug]
 # gem "debug", ">= 1.0.0"
 
-if ENV['CITUS_ENABLED'] == 'true'
-  gem 'activerecord-multi-tenant', github: 'citusdata/activerecord-multi-tenant', branch: 'master'
-end
+require_multi_tenant = ENV['CITUS_ENABLED'] == 'true'
+gem 'activerecord-multi-tenant', github: 'citusdata/activerecord-multi-tenant', branch: 'master', require: require_multi_tenant

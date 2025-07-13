@@ -6,7 +6,7 @@ class DynamicLinks::ShorteningStrategies::BaseStrategyTest < ActiveSupport::Test
   end
 
   test "raise shorten method not implemented" do
-  	url = "https://example.com"
+    url = "https://example.com"
     assert_raises(NotImplementedError, "You must implement the shorten method") {@url_shortener.shorten(url)}
   end
 

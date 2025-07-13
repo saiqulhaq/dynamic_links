@@ -61,14 +61,25 @@ module DynamicLinks
     test 'valid redis cache_store should not raise error' do
       valid_cache_store = ActiveSupport::Cache::RedisCacheStore.new(url: 'redis://localhost:6379/0/cache')
       @config.cache_store = valid_cache_store
-      assert @config.cache_store, valid_cache_store
+      assert_equal @config.cache_store, valid_cache_store
     end
 
-    test 'valid memory cache_store should not raise error' do
+    test 'valid Memcached cache_store should not raise error' do
       valid_cache_store = ActiveSupport::Cache::MemCacheStore.new('localhost:11211')
       @config.cache_store = valid_cache_store
-      assert @config.cache_store, valid_cache_store
+      assert_equal @config.cache_store, valid_cache_store
+    end
+
+    test 'should raise error for nil redis_counter_config' do
+      assert_raises ArgumentError do
+        @config.redis_counter_config = nil
+      end
+    end
+
+    test 'should raise error for number redis_counter_config' do
+      assert_raises ArgumentError do
+        @config.redis_counter_config = 123
+      end
     end
   end
 end
-

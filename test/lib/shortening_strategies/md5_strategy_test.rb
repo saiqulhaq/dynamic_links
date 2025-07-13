@@ -5,7 +5,7 @@ class DynamicLinks::ShorteningStrategies::MD5StrategyTest < ActiveSupport::TestC
     @url_shortener = DynamicLinks::ShorteningStrategies::MD5Strategy.new
   end
 
-  test "is not generates a new shortened URL" do
+  test "always_growing? returns false" do
     assert_equal @url_shortener.always_growing?, false
   end
 

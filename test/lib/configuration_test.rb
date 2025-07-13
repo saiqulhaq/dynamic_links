@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'dalli'
 
 module DynamicLinks
   class ConfigurationTest < ActiveSupport::TestCase

@@ -11,14 +11,7 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.2].define(version: 2024_01_28_030419) do
-  create_schema "citus"
-  create_schema "citus_internal"
-  create_schema "columnar"
-  create_schema "columnar_internal"
-
   # These are extensions that must be enabled in order to support this database
-  enable_extension "citus"
-  enable_extension "citus_columnar"
   enable_extension "plpgsql"
 
   create_table "dynamic_links_clients", force: :cascade do |t|

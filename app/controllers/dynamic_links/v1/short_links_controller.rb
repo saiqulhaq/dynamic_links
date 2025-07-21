@@ -4,7 +4,7 @@ module DynamicLinks
 
     def create
       url = params.require(:url)
-      client = DynamicLinks::Client.find_by({ api_key: params.require(:api_key) })
+      client = DynamicLinks::Client.find_by(api_key: params.require(:api_key))
 
       unless client
         render json: { error: 'Invalid API key' }, status: :unauthorized
@@ -23,7 +23,7 @@ module DynamicLinks
 
     def expand
       api_key = params.require(:api_key)
-      client = DynamicLinks::Client.find_by({ api_key: api_key })
+      client = DynamicLinks::Client.find_by(api_key: api_key)
 
       unless client
         render json: { error: 'Invalid API key' }, status: :unauthorized
@@ -40,6 +40,32 @@ module DynamicLinks
           render json: { error: 'Short link not found' }, status: :not_found
         end
       end
+    rescue => e
+      DynamicLinks::Logger.log_error(e)
+      render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
+    end
+
+    def find_or_create
+      url = params.require(:url)
+      client = DynamicLinks::Client.find_by(api_key: params.require(:api_key))
+
+      unless client
+        render json: { error: 'Invalid API key' }, status: :unauthorized
+        return
+      end
+
+      multi_tenant(client) do
+        short_link = DynamicLinks.find_short_link(url, client)
+
+        if short_link
+          render json: { short_url: short_link[:short_url] }, status: :ok
+        else
+          new_link = DynamicLinks.generate_short_url(url, client)
+          render json: new_link, status: :created
+        end
+      end
+    rescue DynamicLinks::InvalidURIError
+      render json: { error: 'Invalid URL' }, status: :bad_request
     rescue => e
       DynamicLinks::Logger.log_error(e)
       render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error

@@ -58,10 +58,12 @@ module DynamicLinks
         short_link = DynamicLinks.find_short_link(url, client)
 
         if short_link
-          render json: { short_url: short_link[:short_url] }, status: :ok
+          render json: {
+            short_url: short_link[:short_url],
+            full_url: url
+          }, status: :ok
         else
-          new_link = DynamicLinks.generate_short_url(url, client)
-          render json: new_link, status: :created
+          render json: DynamicLinks.generate_short_url(url, client), status: :created
         end
       end
     rescue DynamicLinks::InvalidURIError

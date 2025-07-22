@@ -54,20 +54,24 @@ module DynamicLinks
         return
       end
 
+      unless valid_url?(url)
+        render json: { error: 'Invalid URL' }, status: :bad_request
+        return
+      end
+
       multi_tenant(client) do
         short_link = DynamicLinks.find_short_link(url, client)
 
         if short_link
           render json: {
-            short_url: short_link[:short_url],
-            full_url: url
+            shortLink: short_link[:short_url],
+            previewLink: "#{short_link[:short_url]}?preview=true",
+            warning: []
           }, status: :ok
         else
           render json: DynamicLinks.generate_short_url(url, client), status: :created
         end
       end
-    rescue DynamicLinks::InvalidURIError
-      render json: { error: 'Invalid URL' }, status: :bad_request
     rescue => e
       DynamicLinks::Logger.log_error(e)
       render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
@@ -79,6 +83,13 @@ module DynamicLinks
       unless DynamicLinks.configuration.enable_rest_api
         render json: { error: 'REST API feature is disabled' }, status: :forbidden
       end
+    end
+
+    def valid_url?(url)
+      uri = URI.parse(url)
+      uri.is_a?(URI::HTTP) && uri.host.present? && uri.scheme.present?
+    rescue URI::InvalidURIError
+      false
     end
   end
 end

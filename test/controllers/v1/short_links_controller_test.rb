@@ -122,7 +122,7 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
     url = "https://example.com/existing"
     client = @client
 
-    # Simulasikan existing link
+    # Simulate existing link
     existing = DynamicLinks::ShortenedUrl.create!(
       url: url,
       short_url: "exist123",

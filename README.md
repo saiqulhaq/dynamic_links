@@ -88,6 +88,147 @@ To shorten a URL, simply call:
 shortened_url = DynamicLinks.shorten_url("https://example.com")
 ```
 
+### Finding an Existing Short Link
+
+To find an existing short link for a URL:
+
+```ruby
+short_link_data = DynamicLinks.find_short_link("https://example.com", client)
+if short_link_data
+  puts short_link_data[:short_url]  # e.g., "https://client.com/abc123"
+  puts short_link_data[:full_url]   # e.g., "https://example.com"
+else
+  puts "No existing short link found"
+end
+```
+
+## REST API
+
+DynamicLinks provides a REST API for URL shortening operations when `enable_rest_api` is set to `true` in the configuration.
+
+### Authentication
+
+All API endpoints require an `api_key` parameter that corresponds to a registered client.
+
+### Endpoints
+
+#### Create Short Link
+
+Creates a new short link for a URL.
+
+**Endpoint:** `POST /v1/shortLinks`
+
+**Parameters:**
+
+- `url` (required): The URL to shorten
+- `api_key` (required): Client API key
+
+**Example Request:**
+
+```bash
+curl -X POST "http://localhost:3000/v1/shortLinks" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/long-url",
+    "api_key": "your-api-key"
+  }'
+```
+
+**Example Response:**
+
+```json
+{
+  "shortLink": "https://your-domain.com/abc123",
+  "previewLink": "https://your-domain.com/abc123?preview=true",
+  "warning": []
+}
+```
+
+#### Find or Create Short Link
+
+Finds an existing short link for a URL, or creates a new one if none exists. This prevents duplicate short links for the same URL and client.
+
+**Endpoint:** `POST /v1/shortLinks/findOrCreate`
+
+**Parameters:**
+
+- `url` (required): The URL to find or shorten
+- `api_key` (required): Client API key
+
+**Example Request:**
+
+```bash
+curl -X POST "http://localhost:3000/v1/shortLinks/findOrCreate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/long-url",
+    "api_key": "your-api-key"
+  }'
+```
+
+**Example Response (existing link found):**
+
+```json
+{
+  "shortLink": "https://your-domain.com/abc123",
+  "previewLink": "https://your-domain.com/abc123?preview=true",
+  "warning": []
+}
+```
+
+**Example Response (new link created):**
+
+```json
+{
+  "shortLink": "https://your-domain.com/def456",
+  "previewLink": "https://your-domain.com/def456?preview=true",
+  "warning": []
+}
+```
+
+#### Expand Short Link
+
+Retrieves the original URL from a short link.
+
+**Endpoint:** `GET /v1/shortLinks/{short_url}`
+
+**Parameters:**
+
+- `short_url` (in URL): The short URL code to expand
+- `api_key` (required): Client API key
+
+**Example Request:**
+
+```bash
+curl "http://localhost:3000/v1/shortLinks/abc123?api_key=your-api-key"
+```
+
+**Example Response:**
+
+```json
+{
+  "url": "https://example.com/long-url"
+}
+```
+
+### Error Responses
+
+The API returns appropriate HTTP status codes and error messages:
+
+- `400 Bad Request`: Invalid URL format
+- `401 Unauthorized`: Invalid or missing API key
+- `403 Forbidden`: REST API feature is disabled
+- `404 Not Found`: Short link not found (expand endpoint)
+- `500 Internal Server Error`: Server error
+
+**Example Error Response:**
+
+```json
+{
+  "error": "Invalid URL"
+}
+```
+
 ## Available Shortening Strategies
 
 DynamicLinks supports various shortening strategies. The default strategy is `MD5`, but you can choose among several others, including `NanoIdStrategy`, `RedisCounterStrategy`, `Sha256Strategy`, and more.
@@ -123,8 +264,13 @@ $ gem install dynamic_links
 
 ## Performance
 
-Shorten an URL using Ruby:
-Shorten an URL using API:
+Benchmarking scripts are available in the `benchmarks/` directory to measure performance:
+
+- `ruby_api.rb`: Benchmarks Ruby API URL shortening performance
+- `rest_api.py`: Benchmarks REST API URL shortening performance
+- `create_or_find.rb`: Compares performance of different `create_or_find` methods
+
+You can run these benchmarks to measure performance in your specific environment.
 
 ## How to run the unit test
 

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- [#101](https://github.com/saiqulhaq/dynamic_links/pull/101)
+
+  - New Feature: Added `find_or_create` REST API endpoint that finds existing short links or creates new ones
+  - New Feature: Added `DynamicLinks.find_short_link` method to search for existing short links by URL and client
+  - Enhancement: Improved URL validation in REST API controllers with dedicated `valid_url?` method
+  - Enhancement: Code cleanup - removed unnecessary hash brackets in `find_by` calls
+
 ## [0.2.0] - 2025-06-17
 
 - [#88](https://github.com/saiqulhaq/dynamic_links/pull/88)

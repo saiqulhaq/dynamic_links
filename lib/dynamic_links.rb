@@ -75,4 +75,16 @@ module DynamicLinks
   def self.resolve_short_url(short_link)
     DynamicLinks::ShortenedUrl.find_by(short_url: short_link)&.url
   end
+
+  def self.find_short_link(long_url, client)
+    short_link = DynamicLinks::ShortenedUrl.find_by(url: long_url, client_id: client.id)
+    if short_link
+      {
+        short_url: "#{client.scheme}://#{client.hostname}/#{short_link.short_url}",
+        full_url: long_url
+      }
+    else
+      nil
+    end
+  end
 end

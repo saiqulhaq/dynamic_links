@@ -114,4 +114,80 @@ class DynamicLinks::V1::ShortLinksControllerTest < ActionDispatch::IntegrationTe
       assert_equal 'An error occurred while processing your request', body["error"]
     end
   end
+
+  test "should return existing short URL if found" do
+    DynamicLinks.configuration.enable_rest_api = true
+    DynamicLinks.configuration.db_infra_strategy = :standard
+
+    url = "https://example.com/existing"
+    client = @client
+
+    # Simulate existing link
+    existing = DynamicLinks::ShortenedUrl.create!(
+      url: url,
+      short_url: "exist123",
+      client_id: client.id
+    )
+
+    post '/v1/shortLinks/findOrCreate', params: { url: url, api_key: client.api_key }
+
+    assert_response :ok
+    body = JSON.parse(response.body)
+    assert_equal "https://client-one.com/exist123", body["shortLink"]
+    assert_equal "https://client-one.com/exist123?preview=true", body["previewLink"]
+  end
+
+  test "should create short URL if not exists" do
+    DynamicLinks.configuration.enable_rest_api = true
+    DynamicLinks.configuration.db_infra_strategy = :standard
+
+    url = "https://example.com/new-page-#{SecureRandom.hex(4)}"
+    client = @client
+
+    post '/v1/shortLinks/findOrCreate', params: { url: url, api_key: client.api_key }
+
+    assert_response :created
+    body = JSON.parse(response.body)
+    assert_match(/http/, body["shortLink"])
+    assert_match(/\?preview=true/, body["previewLink"])
+  end
+
+  test "should create or find complex but valid URL" do
+    DynamicLinks.configuration.enable_rest_api = true
+    DynamicLinks.configuration.db_infra_strategy = :standard
+
+    url = "https://example.com/search?q=hello%20world&ref=abc&lang=en#top"
+    client = @client
+
+    post '/v1/shortLinks/findOrCreate', params: { url: url, api_key: client.api_key }
+
+    assert_response :created
+    body = JSON.parse(response.body)
+    assert_match(/http/, body["shortLink"])
+  end
+
+  test "should return bad request for invalid URL" do
+    DynamicLinks.configuration.enable_rest_api = true
+
+    post '/v1/shortLinks/findOrCreate', params: { url: 'http:/bad', api_key: @client.api_key }
+
+    assert_response :bad_request
+    assert_includes response.body, 'Invalid URL'
+  end
+
+  test "should return unauthorized for invalid API key" do
+    post '/v1/shortLinks/findOrCreate', params: { url: 'https://example.com', api_key: 'invalid_key' }
+
+    assert_response :unauthorized
+    assert_includes response.body, 'Invalid API key'
+  end
+
+  test "should return forbidden when REST API is disabled" do
+    DynamicLinks.configuration.enable_rest_api = false
+
+    post '/v1/shortLinks/findOrCreate', params: { url: 'https://example.com', api_key: @client.api_key }
+
+    assert_response :forbidden
+    assert_includes response.body, 'REST API feature is disabled'
+  end
 end

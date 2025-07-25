@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-07-25
+
 - [#101](https://github.com/saiqulhaq/dynamic_links/pull/101)
 
   - New Feature: Added `find_or_create` REST API endpoint that finds existing short links or creates new ones

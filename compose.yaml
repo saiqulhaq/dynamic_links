@@ -126,37 +126,37 @@ services:
       - "${DOCKER_WEB_PORT_FORWARD:-127.0.0.1:8000}:${PORT:-8000}"
     profiles: ["web"]
 
-  # sidekiq:
-  #   <<: *default-app
-  #   command: "bundle exec sidekiq -C config/sidekiq.yml"
-  #   entrypoint: []
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "${DOCKER_WORKER_CPUS:-0}"
-  #         memory: "${DOCKER_WORKER_MEMORY:-0}"
-  #   profiles: ["worker"]
+  sidekiq:
+    <<: *default-app
+    command: "bundle exec sidekiq -C config/sidekiq.yml"
+    entrypoint: []
+    deploy:
+      resources:
+        limits:
+          cpus: "${DOCKER_WORKER_CPUS:-0}"
+          memory: "${DOCKER_WORKER_MEMORY:-0}"
+    profiles: ["worker"]
 
-  # cable:
-  #   <<: *default-app
-  #   command: "puma -p 28080 cable/config.ru"
-  #   entrypoint: []
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: "${DOCKER_CABLE_CPUS:-0}"
-  #         memory: "${DOCKER_CABLE_MEMORY:-0}"
-  #   ports:
-  #     - "${DOCKER_CABLE_PORT_FORWARD:-127.0.0.1:28080}:${CABLE_PORT:-28080}"
-  #   profiles: ["cable"]
+  cable:
+    <<: *default-app
+    command: "puma -p 28080 cable/config.ru"
+    entrypoint: []
+    deploy:
+      resources:
+        limits:
+          cpus: "${DOCKER_CABLE_CPUS:-0}"
+          memory: "${DOCKER_CABLE_MEMORY:-0}"
+    ports:
+      - "${DOCKER_CABLE_PORT_FORWARD:-127.0.0.1:28080}:${CABLE_PORT:-28080}"
+    profiles: ["cable"]
 
-  # js:
-  #   <<: *default-assets
-  #   command: "yarn build"
+  js:
+    <<: *default-assets
+    command: "yarn build"
 
-  # css:
-  #   <<: *default-assets
-  #   command: "yarn build:css"
+  css:
+    <<: *default-assets
+    command: "yarn build:css"
 
   # elasticsearch:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0

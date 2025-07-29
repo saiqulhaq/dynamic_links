@@ -1,5 +1,5 @@
 PATH
-  remote: dynamic_links
+  remote: engines/dynamic_links
   specs:
     dynamic_links (0.3.0)
       rails (>= 5, < 9)

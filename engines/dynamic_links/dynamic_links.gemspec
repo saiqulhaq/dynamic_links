@@ -19,10 +19,10 @@ Gem::Specification.new do |spec|
     Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md', 'CHANGELOG.md']
   end
 
-  spec.add_dependency 'rails', '>= 5', '<= 8'
+  spec.add_dependency 'rails', '>= 5', '< 9'
   spec.add_development_dependency 'nanoid', '>= 2', '< 3'
   spec.add_development_dependency 'redis', '>= 4', '< 6'
-  spec.add_development_dependency 'annotate', '>= 3', '< 4'
+  # spec.add_development_dependency 'annotate', '>= 3', '< 4'
   spec.add_development_dependency 'timecop', '< 1'
   # add dotenv gem
   spec.add_development_dependency 'dotenv-rails', '>= 2', '< 3'

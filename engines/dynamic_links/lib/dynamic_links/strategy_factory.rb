@@ -1,7 +1,7 @@
 module DynamicLinks
   class StrategyFactory
-    VALID_SHORTENING_STRATEGIES = [:md5, :sha256, :crc32,
-                                   :nano_id, :redis_counter, :mock].freeze
+    VALID_SHORTENING_STRATEGIES = %i[md5 sha256 crc32
+                                     nano_id redis_counter mock].freeze
 
     def self.get_strategy(strategy_name)
       case strategy_name
@@ -25,11 +25,9 @@ module DynamicLinks
     end
 
     def self.ensure_nanoid_available
-      begin
-        require 'nanoid'
-      rescue LoadError
-        raise 'Missing dependency: Please add "nanoid" to your Gemfile to use NanoIdStrategy.'
-      end
+      require 'nanoid'
+    rescue LoadError
+      raise 'Missing dependency: Please add "nanoid" to your Gemfile to use NanoIdStrategy.'
     end
 
     def self.ensure_redis_available
@@ -47,4 +45,3 @@ module DynamicLinks
     end
   end
 end
-

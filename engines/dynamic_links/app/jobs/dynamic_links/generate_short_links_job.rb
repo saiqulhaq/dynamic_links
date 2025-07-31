@@ -28,4 +28,3 @@ module DynamicLinks
     end
   end
 end
-

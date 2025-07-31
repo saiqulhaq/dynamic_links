@@ -2,10 +2,10 @@ module DynamicLinks
   # @author Saiqul Haq <saiqulhaq@gmail.com>
   class Configuration
     attr_reader :shortening_strategy, :enable_rest_api, :db_infra_strategy,
-                  :async_processing, :redis_counter_config, :cache_store,
-                  :enable_fallback_mode, :firebase_host
+                :async_processing, :redis_counter_config, :cache_store,
+                :enable_fallback_mode, :firebase_host
 
-    VALID_DB_INFRA_STRATEGIES = [:standard, :sharding].freeze
+    VALID_DB_INFRA_STRATEGIES = %i[standard sharding].freeze
 
     DEFAULT_SHORTENING_STRATEGY = :md5
     DEFAULT_ENABLE_REST_API = true
@@ -45,39 +45,48 @@ module DynamicLinks
 
     def shortening_strategy=(strategy)
       unless StrategyFactory::VALID_SHORTENING_STRATEGIES.include?(strategy)
-        raise ArgumentError, "Invalid shortening strategy, provided strategy: #{strategy}. Valid strategies are: #{StrategyFactory::VALID_SHORTENING_STRATEGIES.join(', ')}" 
+        raise ArgumentError,
+              "Invalid shortening strategy, provided strategy: #{strategy}. Valid strategies are: #{StrategyFactory::VALID_SHORTENING_STRATEGIES.join(', ')}"
       end
 
       @shortening_strategy = strategy
     end
 
     def enable_rest_api=(value)
-      raise ArgumentError, "enable_rest_api must be a boolean" unless [true, false].include?(value)
+      raise ArgumentError, 'enable_rest_api must be a boolean' unless [true, false].include?(value)
+
       @enable_rest_api = value
     end
 
     def db_infra_strategy=(strategy)
-      raise ArgumentError, "Invalid DB infra strategy" unless VALID_DB_INFRA_STRATEGIES.include?(strategy)
+      raise ArgumentError, 'Invalid DB infra strategy' unless VALID_DB_INFRA_STRATEGIES.include?(strategy)
+
       @db_infra_strategy = strategy
     end
 
     def async_processing=(value)
-      raise ArgumentError, "async_processing must be a boolean" unless [true, false].include?(value)
+      raise ArgumentError, 'async_processing must be a boolean' unless [true, false].include?(value)
+
       @async_processing = value
     end
 
     def redis_counter_config=(config)
-      raise ArgumentError, "redis_counter_config must be an instance of RedisConfig" unless config.is_a?(RedisConfig)
+      raise ArgumentError, 'redis_counter_config must be an instance of RedisConfig' unless config.is_a?(RedisConfig)
+
       @redis_counter_config = config
     end
 
     def cache_store=(store)
-      raise ArgumentError, "cache_store must be an instance of ActiveSupport::Cache::Store" unless store.is_a?(ActiveSupport::Cache::Store)
+      unless store.is_a?(ActiveSupport::Cache::Store)
+        raise ArgumentError, 'cache_store must be an instance of ActiveSupport::Cache::Store'
+      end
+
       @cache_store = store
     end
 
     def enable_fallback_mode=(value)
-      raise ArgumentError, "enable_fallback_mode must be a boolean" unless [true, false].include?(value)
+      raise ArgumentError, 'enable_fallback_mode must be a boolean' unless [true, false].include?(value)
+
       @enable_fallback_mode = value
     end
 
@@ -92,8 +101,8 @@ module DynamicLinks
         uri = URI.parse(host.to_s)
         valid = uri.is_a?(URI::HTTP) && uri.host.present?
         raise unless valid
-      rescue
-        raise ArgumentError, "firebase_host must be a valid URL with a host"
+      rescue StandardError
+        raise ArgumentError, 'firebase_host must be a valid URL with a host'
       end
 
       @firebase_host = host

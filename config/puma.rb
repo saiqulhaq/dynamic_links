@@ -3,8 +3,8 @@
 # about methods provided by the DSL, see https://puma.io/puma/Puma/DSL.html.
 
 # Specify the bind host and environment.
-bind "tcp://0.0.0.0:#{ENV.fetch("PORT") { "8000" }}"
-environment ENV.fetch("RAILS_ENV") { "production" }
+bind "tcp://0.0.0.0:#{ENV.fetch('PORT') { '8000' }}"
+environment ENV.fetch('RAILS_ENV') { 'production' }
 
 # Puma starts a configurable number of processes (workers) and each process
 # serves each request in a thread from an internal thread pool.
@@ -24,7 +24,7 @@ environment ENV.fetch("RAILS_ENV") { "production" }
 # Any libraries that use a connection pool or another resource pool should
 # be configured to provide at least as many connections as the number of
 # threads. This includes Active Record's `pool` parameter in `database.yml`.
-threads_count = ENV.fetch("RAILS_MAX_THREADS") { 3 }
+threads_count = ENV.fetch('RAILS_MAX_THREADS') { 3 }
 threads threads_count, threads_count
 
 # Specifies the number of `workers` to boot in clustered mode.
@@ -32,11 +32,11 @@ threads threads_count, threads_count
 # the concurrency of the application would be max `threads` * `workers`.
 # Workers do not work on JRuby or Windows (both of which do not support
 # processes). It defaults to the number of (virtual cores * 2).
-workers = ENV.fetch("WEB_CONCURRENCY") { Etc.nprocessors * 2 }
+ENV.fetch('WEB_CONCURRENCY') { Etc.nprocessors * 2 }
 
 # Specifies the `worker_timeout` threshold that Puma will use to wait before
 # terminating a worker in development environments.
-worker_timeout 3600 if ENV.fetch("RAILS_ENV", "development") == "development"
+worker_timeout 3600 if ENV.fetch('RAILS_ENV', 'development') == 'development'
 
 # Use the `preload_app!` method when specifying a `workers` number.
 # This directive tells Puma to first boot the application and load code
@@ -48,4 +48,4 @@ preload_app!
 plugin :tmp_restart
 
 # Only use a pidfile when requested.
-pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
+pidfile ENV['PIDFILE'] if ENV['PIDFILE']

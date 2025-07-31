@@ -3,16 +3,16 @@ module DynamicLinks
     class BaseStrategy
       MIN_LENGTH = 5
 
-      BASE62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".freeze
+      BASE62_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.freeze
 
       def shorten(url)
-        raise NotImplementedError, "You must implement the shorten method"
+        raise NotImplementedError, 'You must implement the shorten method'
       end
 
       # Determines if the strategy always generates a new shortened URL
       # @return [Boolean]
       def always_growing?
-        false  # Default behavior is not to always grow
+        false # Default behavior is not to always grow
       end
 
       private
@@ -31,4 +31,3 @@ module DynamicLinks
     end
   end
 end
-

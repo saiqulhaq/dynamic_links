@@ -13,7 +13,8 @@ module DynamicLinks
 
         if link.nil?
           if DynamicLinks.configuration.enable_fallback_mode && DynamicLinks.configuration.firebase_host.present?
-            redirect_to "#{DynamicLinks.configuration.firebase_host}/#{short_url}", status: :found, allow_other_host: true
+            redirect_to "#{DynamicLinks.configuration.firebase_host}/#{short_url}", status: :found,
+                                                                                    allow_other_host: true
           else
             render plain: 'Not found', status: :not_found
           end

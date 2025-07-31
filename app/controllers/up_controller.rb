@@ -4,9 +4,7 @@ class UpController < ApplicationController
   end
 
   def databases
-    RedisConn.current.ping
-    ActiveRecord::Base.connection.execute("SELECT 1")
-
-    head :ok
+    DatabaseService.check_connections
+    render json: { status: 'ok', message: 'All services are up' }, status: :ok
   end
 end

@@ -13,6 +13,7 @@ module PerformanceTracking
   private
 
   def track_controller_action
+    # TODO: Uncomment this once authentication is implemented
     # Add user info if available, but we haven't implemented any authentication yet
     # if respond_to?(:current_user) && current_user
     #   AppPerformance.set_user(
@@ -26,7 +27,7 @@ module PerformanceTracking
     # path and method already tracked automatically by ElasticAPM
     AppPerformance.set_custom_context(
       request: {
-        query_parameters:  request.query_parameters.to_h,
+        query_parameters: request.query_parameters.to_h,
         remote_ip: request.remote_ip
       }
     )
@@ -35,6 +36,12 @@ module PerformanceTracking
 
   def track_error(exception)
     AppPerformance.report_error(exception, handled: true)
-    raise exception # Re-raise the exception after tracking it
+
+    # Log the error for debugging purposes
+    Rails.logger.error "Tracked error: #{exception.message}"
+    Rails.logger.error exception.backtrace.join("\n") if exception.backtrace
+
+    # Re-raise the exception to maintain normal error flow
+    raise exception
   end
 end

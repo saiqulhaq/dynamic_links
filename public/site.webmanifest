@@ -1,6 +1,6 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "Dynamic Links",
+    "short_name": "DynLinks",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",

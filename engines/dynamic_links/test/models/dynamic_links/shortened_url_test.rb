@@ -44,7 +44,8 @@ class DynamicLinks::ShortenedUrlTest < ActiveSupport::TestCase
 
   test 'should not save shortened url with duplicate short_url' do
     DynamicLinks::ShortenedUrl.create!(client: @client, url: 'https://example.com', short_url: 'abc123b')
-    duplicate_url = DynamicLinks::ShortenedUrl.new(client: @client, url: 'https://example.com/another', short_url: 'abc123b')
+    duplicate_url = DynamicLinks::ShortenedUrl.new(client: @client, url: 'https://example.com/another',
+                                                   short_url: 'abc123b')
     assert_not duplicate_url.save, 'Saved the shortened url with a duplicate short_url'
   end
 
@@ -52,7 +53,7 @@ class DynamicLinks::ShortenedUrlTest < ActiveSupport::TestCase
     client_one = dynamic_links_clients(:one)
     client_two = dynamic_links_clients(:two)
 
-    url_one = DynamicLinks::ShortenedUrl.create!(client: client_one, url: 'https://example.com', short_url: 'foobar')
+    DynamicLinks::ShortenedUrl.create!(client: client_one, url: 'https://example.com', short_url: 'foobar')
     url_two = DynamicLinks::ShortenedUrl.new(client: client_two, url: 'https://example.org', short_url: 'foobar')
 
     assert url_two.valid?, 'ShortenedUrl with duplicate short_url but different client should be valid'
@@ -67,16 +68,16 @@ class DynamicLinks::ShortenedUrlTest < ActiveSupport::TestCase
     assert_not duplicate_url.valid?, 'ShortenedUrl with duplicate short_url for the same client should not be valid'
   end
 
-  test "find_or_create returns existing record if it exists" do
+  test 'find_or_create returns existing record if it exists' do
     existing_record = DynamicLinks::ShortenedUrl.create!(client: @client, url: @url, short_url: @short_url)
     result = DynamicLinks::ShortenedUrl.find_or_create!(@client, @short_url, @url)
-    assert_equal existing_record, result, "Expected to return the existing record"
+    assert_equal existing_record, result, 'Expected to return the existing record'
   end
 
   test "find_or_create creates and returns a new record if it doesn't exist" do
     assert_difference 'DynamicLinks::ShortenedUrl.count', 1 do
       result = DynamicLinks::ShortenedUrl.find_or_create!(@client, @short_url, @url)
-      assert_not_nil result, "Expected a new ShortenedUrl record to be created"
+      assert_not_nil result, 'Expected a new ShortenedUrl record to be created'
       assert_equal @client, result.client
       assert_equal @url, result.url
       assert_equal @short_url, result.short_url
@@ -104,10 +105,10 @@ class DynamicLinks::ShortenedUrlTest < ActiveSupport::TestCase
   end
 
   test 'should validate uniqueness of short_url scoped to client_id' do
-    existing_record = DynamicLinks::ShortenedUrl.create!(client: @client, url: @url, short_url: @short_url)
+    DynamicLinks::ShortenedUrl.create!(client: @client, url: @url, short_url: @short_url)
     new_record = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: @short_url)
     assert_not new_record.valid?
-    assert_includes new_record.errors[:short_url], "has already been taken"
+    assert_includes new_record.errors[:short_url], 'has already been taken'
   end
 
   test 'find_or_create! should find existing record' do

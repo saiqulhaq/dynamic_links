@@ -19,7 +19,7 @@ DynamicLinks.configure do |config|
 
   # Fallback mode: redirect to Firebase if short link not found locally
   config.enable_fallback_mode = false
-  config.firebase_host = "https://example.app.goo.gl"
+  config.firebase_host = 'https://example.app.goo.gl'
 
   # Example cache store (using Redis)
   cache_store = ActiveSupport::Cache::RedisCacheStore.new(

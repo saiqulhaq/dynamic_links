@@ -9,7 +9,7 @@ module DynamicLinks
     # custom_strategy = DynamicLinks::ShorteningStrategies::RedisCounterStrategy.new(custom_redis_config)
     class RedisCounterStrategy < BaseStrategy
       MIN_LENGTH = 12
-      REDIS_COUNTER_KEY = "dynamic_links:counter".freeze
+      REDIS_COUNTER_KEY = 'dynamic_links:counter'.freeze
 
       # @param redis_config [Hash]
       def initialize(redis_config = nil)
@@ -22,7 +22,7 @@ module DynamicLinks
       end
 
       def always_growing?
-        true  # This strategy always generates a new shortened URL
+        true # This strategy always generates a new shortened URL
       end
 
       # Shortens the given URL using a Redis counter
@@ -39,4 +39,3 @@ module DynamicLinks
     end
   end
 end
-

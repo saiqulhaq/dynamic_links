@@ -1,20 +1,21 @@
 # @author Saiqul Haq <saiqulhaq@gmail.com>
 
 require 'benchmark/ips'
-require_relative '../test/dummy/config/environment.rb'
+require_relative '../test/dummy/config/environment'
 
-client = DynamicLinks::Client.find_or_create_by!(name: 'Benchmark Client 2', api_key: 'create_or_find', hostname: 'example2.com', scheme: 'http')
+client = DynamicLinks::Client.find_or_create_by!(name: 'Benchmark Client 2', api_key: 'create_or_find',
+                                                 hostname: 'example2.com', scheme: 'http')
 
 DynamicLinks::ShortenedUrl.where(client: client).delete_all
 
 Benchmark.ips do |x|
   x.config(time: 5, warmup: 2)
 
-  x.report("version 1") do |times|
+  x.report('version 1') do |times|
     DynamicLinks::ShortenedUrl.create_or_find_v1(client, "u2_#{times}", "https://e.com/#{times}")
   end
 
-  x.report("version 2") do |times|
+  x.report('version 2') do |times|
     DynamicLinks::ShortenedUrl.create_or_find_v2(client, "u_#{times}", "https://e.com/#{times}")
   end
 
@@ -58,4 +59,3 @@ end
 # rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
 #   find_by!(client: client, short_url: short_url)
 # end
-

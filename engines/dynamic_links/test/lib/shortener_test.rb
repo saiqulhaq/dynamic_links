@@ -1,5 +1,5 @@
-require "test_helper"
-require "minitest/mock"
+require 'test_helper'
+require 'minitest/mock'
 
 module DynamicLinks
   # @author Saiqul Haq <saiqulhaq@gmail.com>
@@ -67,7 +67,5 @@ module DynamicLinks
         @shortener.shorten_async(@client, @url)
       end
     end
-
   end
 end
-

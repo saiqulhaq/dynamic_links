@@ -11,15 +11,12 @@ module AppPerformance
     # @param context [Hash, nil] Optional context data for the span
     # @yield [span] If a block is given, the span will be ended when the block exits
     # @return [Object, nil] The return value of the block or nil if APM is disabled
-    def with_span(name, type = nil, context: nil)
+    def with_span(name, type = nil, context: nil, &)
       return yield(nil) if block_given? && !apm_available?
       return unless apm_available?
 
-      ElasticAPM.with_span(name, type, context: context) do |spn|
-        yield(spn)
-      end
+      ElasticAPM.with_span(name, type, context: context, &)
     end
-
 
     # Add a label to the current transaction.
     # Labels are basic key-value pairs that are indexed in your Elasticsearch database and therefore searchable.

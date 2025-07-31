@@ -1,4 +1,4 @@
-require "active_support/core_ext/integer/time"
+require 'active_support/core_ext/integer/time'
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -17,12 +17,12 @@ Rails.application.configure do
 
   # Enable/disable Action Controller caching. By default Action Controller caching is disabled.
   # Run rails dev:cache to toggle Action Controller caching.
-  if Rails.root.join("tmp/caching-dev.txt").exist?
+  if Rails.root.join('tmp/caching-dev.txt').exist?
     config.action_controller.perform_caching = true
     config.action_controller.enable_fragment_cache_logging = true
 
     config.cache_store = :memory_store
-    config.public_file_server.headers = { "cache-control" => "public, max-age=#{2.days.to_i}" }
+    config.public_file_server.headers = { 'cache-control' => "public, max-age=#{2.days.to_i}" }
   else
     config.action_controller.perform_caching = false
 
@@ -53,7 +53,7 @@ Rails.application.configure do
     Bullet.rails_logger = true
     Bullet.alert = true # JavaScript alerts in browser
     Bullet.add_footer = true # Adds warnings to the bottom of HTML pages
-    
+
     # Since we use elastic-apm, let's also log to it
     Bullet.raise = Rails.env.development? # Raise errors in development to be caught by elastic-apm
   end
@@ -96,6 +96,6 @@ Rails.application.configure do
   #
   # Docker supports a bunch of ranges so let's just support everything. This
   # isn't insecure due to only running in development.
-  config.web_console.allowed_ips = ["0.0.0.0/0"]
-  config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
+  config.web_console.allowed_ips = ['0.0.0.0/0']
+  config.log_level = ENV.fetch('RAILS_LOG_LEVEL', 'info')
 end

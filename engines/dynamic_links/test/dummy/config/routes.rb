@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  mount DynamicLinks::Engine => "/"
+  mount DynamicLinks::Engine => '/'
 end

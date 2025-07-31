@@ -14,6 +14,7 @@ Gem::Specification.new do |spec|
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = 'https://github.com/saiqulhaq/dynamic_links'
   spec.metadata['changelog_uri'] = 'https://github.com/saiqulhaq/dynamic_links/blob/master/CHANGELOG.md'
+  spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md', 'CHANGELOG.md']

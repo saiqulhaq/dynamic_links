@@ -1,23 +1,24 @@
 require 'benchmark/ips'
-require_relative '../test/dummy/config/environment.rb'
+require_relative '../test/dummy/config/environment'
 
 DynamicLinks.configure do |config|
   config.shortening_strategy = :md5
 end
 
 # Dummy client setup
-client = DynamicLinks::Client.find_or_create_by!(name: 'Benchmark Client', api_key: 'benchmark_key', hostname: 'example.com', scheme: 'http')
+client = DynamicLinks::Client.find_or_create_by!(name: 'Benchmark Client', api_key: 'benchmark_key',
+                                                 hostname: 'example.com', scheme: 'http')
 
 DynamicLinks::ShortenedUrl.where(client: client).delete_all
 
 Benchmark.ips do |x|
   x.config(time: 5, warmup: 2)
 
-  x.report("sync shorten_url") do |times|
+  x.report('sync shorten_url') do |times|
     DynamicLinks.shorten_url("https://example.com/#{times}", client, async: false)
   end
 
-  x.report("async shorten_url") do |times|
+  x.report('async shorten_url') do |times|
     DynamicLinks.shorten_url("https://example-async.com/#{times}", client, async: true)
   end
 

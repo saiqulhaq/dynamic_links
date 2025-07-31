@@ -25,16 +25,14 @@ module DynamicLinks
       # @param [Integer] expires_in, default is 60 seconds
       # @param [Block] block, the block to be executed if lock is acquired
       # @return [Boolean]
-      def lock_if_absent(lock_key, expires_in: 60, &block)
+      def lock_if_absent(lock_key, expires_in: 60)
         is_locked = false
         begin
           is_locked = cache_store.increment(lock_key, 1, expires_in: expires_in) == 1
           yield if is_locked && block_given?
 
-          unless is_locked
-            DynamicLinks::Logger.log_info "Unable to acquire lock for key: #{lock_key}"
-          end
-        rescue => e
+          DynamicLinks::Logger.log_info "Unable to acquire lock for key: #{lock_key}" unless is_locked
+        rescue StandardError => e
           DynamicLinks::Logger.log_error("Locking error: #{e.message}")
           raise e
         end
@@ -47,6 +45,7 @@ module DynamicLinks
       def unlock(lock_key)
         deleted = cache_store.delete(lock_key)
         raise LockReleaseError, "Unable to release lock for key: #{lock_key}" unless deleted
+
         deleted
       end
 

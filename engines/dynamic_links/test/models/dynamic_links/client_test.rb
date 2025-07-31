@@ -46,13 +46,15 @@ module DynamicLinks
 
     test 'should not save client with duplicate api_key' do
       Client.create!(name: 'Test Client', api_key: 'test_api_key', hostname: 'example.com', scheme: 'https')
-      duplicate_client = Client.new(name: 'Test Client 2', api_key: 'test_api_key', hostname: 'example2.com', scheme: 'https')
+      duplicate_client = Client.new(name: 'Test Client 2', api_key: 'test_api_key', hostname: 'example2.com',
+                                    scheme: 'https')
       assert_not duplicate_client.save, 'Saved client with a duplicate api_key'
     end
 
     test 'should not save client with duplicate name' do
       Client.create!(name: 'Test Client', api_key: 'test_api_key', hostname: 'example.com', scheme: 'https')
-      duplicate_client = Client.new(name: 'Test Client', api_key: 'test_api_key1', hostname: 'example2.com', scheme: 'https')
+      duplicate_client = Client.new(name: 'Test Client', api_key: 'test_api_key1', hostname: 'example2.com',
+                                    scheme: 'https')
       assert_not duplicate_client.save, 'Saved client with a duplicate name'
     end
 
@@ -65,7 +67,8 @@ module DynamicLinks
     end
 
     test 'should not save client with invalid hostname' do
-      refute Client.new(name: 'Test Client', api_key: 'test_api_key', hostname: 'invalid hostname', scheme: 'https').save
+      refute Client.new(name: 'Test Client', api_key: 'test_api_key', hostname: 'invalid hostname',
+                        scheme: 'https').save
     end
   end
 end

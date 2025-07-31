@@ -4,38 +4,38 @@ if ENV['RAILS_ENV'] == 'test'
   require 'simplecov'
 
   SimpleCov.start do
-    load_profile "test_frameworks"
+    load_profile 'test_frameworks'
 
     add_filter %r{^/config/}
     add_filter %r{^/db/}
 
-    add_group "Controllers", "app/controllers"
-    add_group "Channels", "app/channels"
-    add_group "Models", "app/models"
-    add_group "Mailers", "app/mailers"
-    add_group "Helpers", "app/helpers"
-    add_group "Jobs", %w[app/jobs app/workers]
-    add_group "DynamicLinks", "lib/"
+    add_group 'Controllers', 'app/controllers'
+    add_group 'Channels', 'app/channels'
+    add_group 'Models', 'app/models'
+    add_group 'Mailers', 'app/mailers'
+    add_group 'Helpers', 'app/helpers'
+    add_group 'Jobs', %w[app/jobs app/workers]
+    add_group 'DynamicLinks', 'lib/'
   end
 end
 
-require "dynamic_links/version"
-require "dynamic_links/engine"
-require "dynamic_links/logger"
-require "dynamic_links/error_classes"
-require "dynamic_links/redis_config"
-require "dynamic_links/configuration"
-require "dynamic_links/validator"
-require "dynamic_links/strategy_factory"
-require "dynamic_links/shortening_strategies/base_strategy"
-require "dynamic_links/shortening_strategies/sha256_strategy"
-require "dynamic_links/shortening_strategies/md5_strategy"
-require "dynamic_links/shortening_strategies/crc32_strategy"
-require "dynamic_links/shortening_strategies/nano_id_strategy"
-require "dynamic_links/shortening_strategies/redis_counter_strategy"
-require "dynamic_links/shortening_strategies/mock_strategy"
-require "dynamic_links/async/locker"
-require "dynamic_links/shortener"
+require 'dynamic_links/version'
+require 'dynamic_links/engine'
+require 'dynamic_links/logger'
+require 'dynamic_links/error_classes'
+require 'dynamic_links/redis_config'
+require 'dynamic_links/configuration'
+require 'dynamic_links/validator'
+require 'dynamic_links/strategy_factory'
+require 'dynamic_links/shortening_strategies/base_strategy'
+require 'dynamic_links/shortening_strategies/sha256_strategy'
+require 'dynamic_links/shortening_strategies/md5_strategy'
+require 'dynamic_links/shortening_strategies/crc32_strategy'
+require 'dynamic_links/shortening_strategies/nano_id_strategy'
+require 'dynamic_links/shortening_strategies/redis_counter_strategy'
+require 'dynamic_links/shortening_strategies/mock_strategy'
+require 'dynamic_links/async/locker'
+require 'dynamic_links/shortener'
 
 module DynamicLinks
   class << self
@@ -78,13 +78,11 @@ module DynamicLinks
 
   def self.find_short_link(long_url, client)
     short_link = DynamicLinks::ShortenedUrl.find_by(url: long_url, client_id: client.id)
-    if short_link
-      {
-        short_url: "#{client.scheme}://#{client.hostname}/#{short_link.short_url}",
-        full_url: long_url
-      }
-    else
-      nil
-    end
+    return unless short_link
+
+    {
+      short_url: "#{client.scheme}://#{client.hostname}/#{short_link.short_url}",
+      full_url: long_url
+    }
   end
 end

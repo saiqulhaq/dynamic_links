@@ -16,7 +16,7 @@ module DynamicLinks
       end
     rescue DynamicLinks::InvalidURIError
       render json: { error: 'Invalid URL' }, status: :bad_request
-    rescue => e
+    rescue StandardError => e
       DynamicLinks::Logger.log_error(e)
       render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
     end
@@ -40,7 +40,7 @@ module DynamicLinks
           render json: { error: 'Short link not found' }, status: :not_found
         end
       end
-    rescue => e
+    rescue StandardError => e
       DynamicLinks::Logger.log_error(e)
       render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
     end
@@ -72,7 +72,7 @@ module DynamicLinks
           render json: DynamicLinks.generate_short_url(url, client), status: :created
         end
       end
-    rescue => e
+    rescue StandardError => e
       DynamicLinks::Logger.log_error(e)
       render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
     end
@@ -80,9 +80,9 @@ module DynamicLinks
     private
 
     def check_rest_api_enabled
-      unless DynamicLinks.configuration.enable_rest_api
-        render json: { error: 'REST API feature is disabled' }, status: :forbidden
-      end
+      return if DynamicLinks.configuration.enable_rest_api
+
+      render json: { error: 'REST API feature is disabled' }, status: :forbidden
     end
 
     def valid_url?(url)

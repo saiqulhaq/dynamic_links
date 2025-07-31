@@ -16,7 +16,7 @@ module DynamicLinks
         end
         locker.unlock(lock_key)
         DynamicLinks::Logger.log_info("Lock key #{lock_key} deleted after ShortenUrlJob")
-      rescue => e
+      rescue StandardError => e
         DynamicLinks::Logger.log_error("Error in ShortenUrlJob: #{e.message}")
         raise e
       end

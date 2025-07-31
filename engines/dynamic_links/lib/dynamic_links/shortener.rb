@@ -24,8 +24,8 @@ module DynamicLinks
       else
         storage.find_or_create!(client, short_url, url)
       end
-      URI::Generic.build({scheme: client.scheme, host: client.hostname, path: "/#{short_url}"}).to_s
-    rescue => e
+      URI::Generic.build({ scheme: client.scheme, host: client.hostname, path: "/#{short_url}" }).to_s
+    rescue StandardError => e
       DynamicLinks::Logger.log_error("Error shortening URL: #{e.message}")
       raise e
     end
@@ -37,14 +37,14 @@ module DynamicLinks
 
       locker.lock_if_absent(lock_key) do
         short_url = strategy.shorten(url)
-        content = {
+        {
           url: url,
           short_url: short_url
         }
 
         async_worker.perform_later(client, url, short_url, lock_key)
       end
-    rescue => e
+    rescue StandardError => e
       DynamicLinks::Logger.log_error("Error shortening URL asynchronously: #{e.message}")
       raise e
     end

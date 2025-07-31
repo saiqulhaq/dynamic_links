@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class UpController < ApplicationController
   def index
     head :ok

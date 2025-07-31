@@ -5,9 +5,9 @@ DynamicLinks.configure do |config|
   # Enable or disable the REST API endpoints
   config.enable_rest_api = true
 
-  # Database infrastructure strategy: :standard, :sharding, or :citus (auto if CITUS_ENABLED)
-  config.db_infra_strategy = :standard
-  # config.db_infra_strategy = :citus if ENV['CITUS_ENABLED'].to_s == 'true'
+  # Database infrastructure strategy: :standard or :sharding
+  # Use :sharding for Citus-enabled environments
+  config.db_infra_strategy = ENV['CITUS_ENABLED'].to_s == 'true' ? :sharding : :standard
 
   # Asynchronous processing for shortening (uses ActiveJob)
   # config.async_processing = true

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   class RedirectsController < ApplicationController
     def show

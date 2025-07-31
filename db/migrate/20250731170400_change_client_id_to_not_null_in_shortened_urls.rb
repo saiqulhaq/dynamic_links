@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ChangeClientIdToNotNullInShortenedUrls < ActiveRecord::Migration[8.0]
   def change
     # Add null: false constraint to client_id in dynamic_links_shortened_urls table

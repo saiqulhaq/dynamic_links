@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateDynamicLinksShortenedUrls < ActiveRecord::Migration[7.1]
   def change
     create_table :dynamic_links_shortened_urls, id: false do |t|

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   module Generators
     class AddKgsMigrationGenerator < Rails::Generators::Base

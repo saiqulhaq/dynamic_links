@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 DynamicLinks.configure do |config|
   config.shortening_strategy = if ENV['SHORTENING_STRATEGY'].present?
                                  ENV['SHORTENING_STRATEGY'].to_sym

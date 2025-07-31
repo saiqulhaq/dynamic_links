@@ -1,4 +1,6 @@
-sidekiq_config = { url: ENV.fetch('REDIS_URL') { 'redis://redis:6379/1' } }
+# frozen_string_literal: true
+
+sidekiq_config = { url: ENV.fetch('REDIS_URL', 'redis://redis:6379/1') }
 
 Sidekiq.configure_server do |config|
   config.redis = sidekiq_config

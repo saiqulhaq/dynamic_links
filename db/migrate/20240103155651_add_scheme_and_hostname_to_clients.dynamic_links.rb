@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This migration comes from dynamic_links (originally 20240101102216)
 class AddSchemeAndHostnameToClients < ActiveRecord::Migration[7.1]
   def change

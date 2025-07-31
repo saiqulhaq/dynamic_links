@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   class InvalidURIError < ::URI::InvalidURIError; end
   class ConfigurationError < StandardError; end

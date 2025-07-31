@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   class ApplicationController < ActionController::API
     def multi_tenant(client, db_infra_strategy = DynamicLinks.configuration.db_infra_strategy, &)

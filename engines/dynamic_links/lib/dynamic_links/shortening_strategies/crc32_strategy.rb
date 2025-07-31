@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   module ShorteningStrategies
     class CRC32Strategy < BaseStrategy

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This migration comes from dynamic_links (originally 20231228175142)
 class CreateDynamicLinksShortenedUrls < ActiveRecord::Migration[7.1]
   def change

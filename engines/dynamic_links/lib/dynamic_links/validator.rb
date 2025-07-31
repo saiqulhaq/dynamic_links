@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   class Validator
     # Validates if the given URL is a valid HTTP or HTTPS URL

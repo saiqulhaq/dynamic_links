@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   module ShorteningStrategies
     # Shortens the given URL using Nano ID

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 DynamicLinks.configure do |config|
   # Shortening strategy: :md5 (default), :nanoid, :redis_counter, :sha256, etc.
   config.shortening_strategy = :md5

@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   # @author Saiqul Haq <saiqulhaq@gmail.com>
   class Logger
     def self.instance
-      @logger ||= Rails.logger
+      @instance ||= Rails.logger
     end
 
     def self.log_info(message)

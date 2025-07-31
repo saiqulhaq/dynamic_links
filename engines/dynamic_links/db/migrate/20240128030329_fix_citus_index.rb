@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class FixCitusIndex < ActiveRecord::Migration[7.1]
   def up
     return unless DynamicLinks.configuration.db_infra_strategy == :sharding

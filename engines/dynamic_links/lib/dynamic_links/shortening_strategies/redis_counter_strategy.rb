@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   module ShorteningStrategies
     # usage:
@@ -9,7 +11,7 @@ module DynamicLinks
     # custom_strategy = DynamicLinks::ShorteningStrategies::RedisCounterStrategy.new(custom_redis_config)
     class RedisCounterStrategy < BaseStrategy
       MIN_LENGTH = 12
-      REDIS_COUNTER_KEY = 'dynamic_links:counter'.freeze
+      REDIS_COUNTER_KEY = 'dynamic_links:counter'
 
       # @param redis_config [Hash]
       def initialize(redis_config = nil)

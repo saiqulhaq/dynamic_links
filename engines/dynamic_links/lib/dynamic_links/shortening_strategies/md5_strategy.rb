@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   module ShorteningStrategies
     class MD5Strategy < BaseStrategy

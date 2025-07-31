@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   class StrategyFactory
     VALID_SHORTENING_STRATEGIES = %i[md5 sha256 crc32

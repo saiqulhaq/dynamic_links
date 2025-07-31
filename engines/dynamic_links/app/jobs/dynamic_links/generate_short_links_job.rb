@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   # This job generates short links in the background for KGS strategy
   # It is intended to be run periodically

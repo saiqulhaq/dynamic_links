@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateDynamicLinksClients < ActiveRecord::Migration[7.1]
   def change
     create_table :dynamic_links_clients do |t|

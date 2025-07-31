@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # @author Saiqul Haq <saiqulhaq@gmail.com>
 
 require 'benchmark/ips'

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # @author Saiqul Haq <saiqulhaq@gmail.com>
 
 if ENV['RAILS_ENV'] == 'test'

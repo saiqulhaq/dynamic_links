@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DynamicLinks
   # @author Saiqul Haq <saiqulhaq@gmail.com>
   # This job is used to create a shortened url

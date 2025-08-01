@@ -1,9 +1,13 @@
 {
   "name": "Ruby on Rails Dynamic Links",
   "image": "mcr.microsoft.com/devcontainers/ruby:3.4-bookworm",
+  "mounts": [
+    "source=${localEnv:HOME}/.config/claude,target=/home/vscode/.config/claude,type=bind"
+  ],
   "workspaceFolder": "/workspaces/dynamic_links",
   "forwardPorts": [
     3000,
+    4180,
     6379,
     5432
   ],
@@ -66,11 +70,15 @@
     }
   },
   "onCreateCommand": "bash -c 'gem install bundler && bundle install && npm install -g yarn && yarn install'",
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y postgresql-client redis-tools",
-  "postStartCommand": "bash -c 'source .env && docker-compose --profile postgres --profile redis up -d && echo \"PostgreSQL (localhost:5432) and Redis (localhost:6379) services started via Docker Compose\"'",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y postgresql-client redis-tools && npm install -g @anthropic-ai/claude-code",
+  "postStartCommand": "bash -c 'source .env && docker compose --profile postgres --profile redis --profile oauth2-proxy up -d && echo \"PostgreSQL (localhost:5432), Redis (localhost:6379), and OAuth2-Proxy (localhost:4180) services started via Docker Compose\"'",
   "portsAttributes": {
     "3000": {
       "label": "Rails Server",
+      "onAutoForward": "notify"
+    },
+    "4180": {
+      "label": "OAuth2-Proxy",
       "onAutoForward": "notify"
     }
   },

@@ -18,12 +18,14 @@ Avo.configure do |config|
   end
 
   ## == Authentication ==
-  # config.current_user_method = :current_user
-  # config.authenticate_with do
-  # end
+  config.current_user_method = :current_user
+  config.authenticate_with do
+    # Authentication is handled by our custom AvoApplicationController
+    # which includes Oauth2ProxyAuthentication concern
+  end
 
   ## == Authorization ==
-  # config.is_admin_method = :is_admin
+  config.is_admin_method = :admin?
   # config.is_developer_method = :is_developer
   # config.authorization_methods = {
   #   index: 'index?',
@@ -114,7 +116,7 @@ Avo.configure do |config|
   # config.disabled_features = []
   # config.buttons_on_form_footers = true
   # config.field_wrapper_layout = true
-  # config.resource_parent_controller = "Avo::ResourcesController"
+  config.resource_parent_controller = "AvoApplicationController"
   # config.first_sorting_option = :desc # :desc or :asc
   # config.exclude_from_status = []
 
@@ -149,6 +151,10 @@ Avo.configure do |config|
     section "Dynamic Links", icon: "heroicons/outline/link" do
       resource :dynamic_links_client
       resource :dynamic_links_shortened_url
+    end
+
+    section "User Management", icon: "heroicons/outline/users" do
+      resource :user
     end
 
     section "Tools", icon: "heroicons/outline/wrench" do

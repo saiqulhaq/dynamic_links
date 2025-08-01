@@ -3,15 +3,12 @@
 module DynamicLinks
   # @author Saiqul Haq <saiqulhaq@gmail.com>
   class Configuration
-    attr_reader :shortening_strategy, :enable_rest_api, :db_infra_strategy,
+    attr_reader :shortening_strategy, :enable_rest_api,
                 :async_processing, :redis_counter_config, :cache_store,
                 :enable_fallback_mode, :firebase_host
 
-    VALID_DB_INFRA_STRATEGIES = %i[standard sharding].freeze
-
     DEFAULT_SHORTENING_STRATEGY = :md5
     DEFAULT_ENABLE_REST_API = true
-    DEFAULT_DB_INFRA_STRATEGY = :standard
     DEFAULT_ASYNC_PROCESSING = false
     DEFAULT_REDIS_COUNTER_CONFIG = RedisConfig.new
     # use any class that extends ActiveSupport::Cache::Store, default is MemoryStore
@@ -23,7 +20,6 @@ module DynamicLinks
     #     DynamicLinks.configure do |config|
     #       config.shortening_strategy = :md5 # or other strategy name, see StrategyFactory for available strategies
     #       config.enable_rest_api = true # or false. when false, the API requests will be rejected
-    #       config.db_infra_strategy = :standard # or :sharding. if sharding is used, then xxx
     #       config.async_processing = false # or true. if true, the shortening process will be done asynchronously using ActiveJob
     #       config.redis_counter_config = RedisConfig.new # see RedisConfig documentation for more details
     #       # if you use Redis
@@ -36,7 +32,6 @@ module DynamicLinks
     def initialize
       @shortening_strategy = DEFAULT_SHORTENING_STRATEGY
       @enable_rest_api = DEFAULT_ENABLE_REST_API
-      @db_infra_strategy = DEFAULT_DB_INFRA_STRATEGY
       @async_processing = DEFAULT_ASYNC_PROCESSING
       # config for RedisCounterStrategy
       @redis_counter_config = DEFAULT_REDIS_COUNTER_CONFIG
@@ -58,12 +53,6 @@ module DynamicLinks
       raise ArgumentError, 'enable_rest_api must be a boolean' unless [true, false].include?(value)
 
       @enable_rest_api = value
-    end
-
-    def db_infra_strategy=(strategy)
-      raise ArgumentError, 'Invalid DB infra strategy' unless VALID_DB_INFRA_STRATEGIES.include?(strategy)
-
-      @db_infra_strategy = strategy
     end
 
     def async_processing=(value)

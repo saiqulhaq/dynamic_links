@@ -1,4 +1,4 @@
-# Rails dynamic links
+# Rails Dynamic Links
 
 This Rails app is an alternative to Firebase Dynamic Links, aiming for 100% compatibility. It provides a self-hosted URL shortener and dynamic link service.
 
@@ -16,28 +16,89 @@ This Rails app is an alternative to Firebase Dynamic Links, aiming for 100% comp
 
 For users migrating from Firebase, download your short links data from https://takeout.google.com/takeout/custom/firebase_dynamic_links and import it on the `/import` page.
 
-This Rails app is based on the ![Docker Rails Example](https://github.com/nickjj/docker-rails-example?ref=https://github.com/saiqulhaq/rails_dynamic_links) project.
-
-* [Explanation on YouTube](https://youtu.be/cL1ByYwAgQk?si=KXzUN5U5_JNXeQPs)
-* [Diagram on draw.io](https://drive.google.com/file/d/1KwLzK7rENinnj9Zo6ZK9Y3hG3yJRtr61/view?usp=sharing)
+- [Explanation on YouTube](https://youtu.be/cL1ByYwAgQk?si=KXzUN5U5_JNXeQPs)
+- [Diagram on draw.io](https://drive.google.com/file/d/1KwLzK7rENinnj9Zo6ZK9Y3hG3yJRtr61/view?usp=sharing)
 
 # Project Status
+
 Check out our [Project Board](https://github.com/users/saiqulhaq/projects/3/views/1) to see what's been completed and what's still in development.
 
 # Documentation
 
 - [ElasticAPM Integration](docs/elastic_apm.md) - Performance monitoring setup and usage
-- [Docker ElasticAPM Setup](docs/docker_elastic_apm.md) - How to use ElasticAPM with Docker Compose
+
+# Getting Started
+
+## Prerequisites
+
+Make sure you have the following installed on your system:
+
+- Ruby 3.4.4
+- Node.js 22+
+- PostgreSQL
+- Redis (optional, required for some strategies)
+
+## Development Setup
+
+### Using VS Code Dev Containers (Recommended)
+
+This project includes a complete VS Code development container configuration with all dependencies pre-installed.
+
+1. Install [Visual Studio Code](https://code.visualstudio.com/)
+2. Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+3. Clone this repository
+4. Open the project in VS Code
+5. When prompted, click "Reopen in Container" or run the command `Dev Containers: Reopen in Container`
+
+The dev container will automatically:
+
+- Set up Ruby 3.4.4
+- Install Node.js 22
+- Install all required system dependencies
+- Install Ruby gems and Node packages
+- Configure VS Code with recommended extensions and settings
+
+### Manual Setup
+
+If you prefer to set up the development environment manually:
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/saiqulhaq/dynamic_links.git
+   cd dynamic_links
+   ```
+
+2. **Copy environment variables:**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Install dependencies:**
+
+   ```bash
+   bundle install
+   yarn install
+   ```
+
+4. **Set up the database:**
+
+   ```bash
+   rails db:create
+   rails dynamic_links:install:migrations
+   rails db:migrate
+   ```
+
+5. **Start the development server:**
+
+   ```bash
+   rails server
+   ```
+
+   Visit http://localhost:3000 in your browser.
 
 # Usage
-
-Import the migration files from the `dynamic_links` gem:
-
-```bash
-bin/rails db:create
-bin/rails dynamic_links:install:migrations
-bin/rails db:migrate
-```
 
 Each shortened URL belongs to a client. Create your first client in the Rails console:
 
@@ -45,7 +106,7 @@ Each shortened URL belongs to a client. Create your first client in the Rails co
 DynamicLinks::Client.create!(name: 'Default client', api_key: 'foo', hostname: 'google.com', scheme: 'http')
 ```
 
-To shorten a link via the REST API, send a POST request to `http://localhost:8000/v1/shortLinks` with this payload:
+To shorten a link via the REST API, send a POST request to `http://localhost:3000/v1/shortLinks` with this payload:
 
 ```json
 {
@@ -64,11 +125,25 @@ The response will look like:
 }
 ```
 
+# Testing
+
+Run the test suite with:
+
+```bash
+rails test
+```
+
+To run tests with asset building:
+
+```bash
+yarn build
+yarn build:css
+rails test
+```
 
 # Configuration
 
 ## DynamicLinks Engine Configuration
-
 
 You can configure the `dynamic_links` engine in an initializer (e.g., `config/initializers/dynamic_links.rb`). Example:
 
@@ -93,7 +168,6 @@ end
 
 This feature helps provide a seamless migration experience from Firebase Dynamic Links to your own self-hosted solution.
 
-
 See the [dynamic_links README](../dynamic_links/README.md) for all available options and strategies.
 
 ### Optional dependencies
@@ -104,7 +178,6 @@ See the [dynamic_links README](../dynamic_links/README.md) for all available opt
 ---
 
 To configure rate limiting, edit `config/initializers/rack_attack.rb`. See https://github.com/rack/rack-attack#throttling
-
 
 ### Back-end
 
@@ -122,106 +195,37 @@ To configure rate limiting, edit `config/initializers/rack_attack.rb`. See https
 - [TailwindCSS](https://tailwindcss.com/)
 - [Heroicons](https://heroicons.com/)
 
+## Production Deployment
 
-#### Setup the initial database:
+For production deployment, you'll need to:
 
-```sh
-# You can run this from a 2nd terminal.
-./run rails db:setup
-```
+1. Set up PostgreSQL and Redis servers
+2. Configure environment variables in `.env` file
+3. Set `RAILS_ENV=production` and `NODE_ENV=production`
+4. Run `rails assets:precompile` to build assets
+5. Use a process manager like systemd or supervisor to manage Rails and Sidekiq processes
+6. Set up a reverse proxy (nginx/Apache) to serve static files and proxy requests
 
-*We'll go over that `./run` script in a bit!*
+## Development Tools
 
-#### Check it out in a browser:
+- Code formatting: `bundle exec rubocop -a`
+- Linting: `bundle exec rubocop`
+- Asset building: `yarn build && yarn build:css`
 
-Visit <http://localhost:8000> in your favorite browser.
+## Environment Variables
 
-#### Running the test suite:
+All configuration is managed through environment variables. Copy `.env.example` to `.env` and adjust the values for your setup. Key variables include:
 
-```sh
-# You can run this from the same terminal as before.
-./run test
-```
+- `DATABASE_URL` - PostgreSQL connection string
+- `REDIS_URL` - Redis connection string
+- `SECRET_KEY_BASE` - Rails secret key
+- `RAILS_ENV` - Environment (development/production)
 
-You can also run `./run test -b` with does the same thing but builds your JS
-and CSS bundles. This could come in handy in fresh environments such as CI
-where your assets haven't changed and you haven't visited the page in a
-browser.
+## Contributing
 
-#### Stopping everything:
-
-```sh
-# Stop the containers and remove a few Docker related resources associated to this project.
-docker compose down
-```
-
-You can start things up again with `docker compose up` and unlike the first
-time it should only take seconds.
-
-### `.env`
-
-This file is ignored from version control so it will never be commit. There's a
-number of environment variables defined here that control certain options and
-behavior of the application. Everything is documented there.
-
-Feel free to add new variables as needed. This is where you should put all of
-your secrets as well as configuration that might change depending on your
-environment (specific dev boxes, CI, production, etc.).
-
-### `run`
-
-You can run `./run` to get a list of commands and each command has
-documentation in the `run` file itself.
-
-It's a shell script that has a number of functions defined to help you interact
-with this project. It's basically a `Makefile` except with [less
-limitations](https://nickjanetakis.com/blog/replacing-make-with-a-shell-script-for-running-your-projects-tasks).
-For example as a shell script it allows us to pass any arguments to another
-program.
-
-This comes in handy to run various Docker commands because sometimes these
-commands can be a bit long to type. Feel free to add as many convenience
-functions as you want. This file's purpose is to make your experience better!
-
-*If you get tired of typing `./run` you can always create a shell alias with
-`alias run=./run` in your `~/.bash_aliases` or equivalent file. Then you'll be
-able to run `run` instead of `./run`.*
-
-## Start and setup the project:
-
-### If you don't use Docker
-
-Copy `.env.example` to `.env`, then execute `source .env`.  
-Then run any rails command as usual, we can run the test `rails test` or the server `rails server`
-
-### If you use Docker
-
-Copy `.env.example` file to `.env` then run following command
-
-```sh
-docker compose up --build
-
-# Then in a 2nd terminal once it's up and ready.
-./run rails db:setup
-
-./run test # to run the test
-./run bundle:install # to install the dependencies
-./run bundle:update # to update the dependencies
-```
-
-If you need to run with Citus:
-
-```sh
-docker compose -f docker-compose-citus.yml up --build
-```
-
-*If you get an error upping the project related to `RuntimeError: invalid
-bytecode` then you have old `tmp/` files sitting around related to the old
-project name, you can run `./run clean` to clear all temporary files and fix
-the error.*
-
-If you need to run ElasticAPM with Docker Compose, you can use the `elastic-apm` profile:
-
-```sh
-docker compose --profile elastic-apm up -d
-```
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request

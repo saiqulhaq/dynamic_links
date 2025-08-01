@@ -22,8 +22,7 @@ module RailsDynamicLinks
     config.active_support.message_serializer = :message_pack
     config.action_dispatch.cookies_serializer = :message_pack
 
-    # Log to STDOUT because Docker expects all processes to log here. You could
-    # then collect logs using journald, syslog or forward them somewhere else.
+    # Log to STDOUT for better development and production visibility
     config.logger = ActiveSupport::TaggedLogging.logger($stdout)
     # config.logger = ActiveSupport::Logger.new(STDOUT)
     #   .tap  { |logger| logger.formatter = ::Logger::Formatter.new }
@@ -34,7 +33,7 @@ module RailsDynamicLinks
 
     # Set Redis as the back-end for the cache.
     config.cache_store = :redis_cache_store, {
-      url: ENV.fetch('REDIS_URL', 'redis://redis:6379/1'),
+      url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/1'),
       namespace: 'cache',
       serializer: :message_pack
     }

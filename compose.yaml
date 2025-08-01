@@ -8,28 +8,17 @@ x-app: &default-app
       - "RAILS_ENV=${RAILS_ENV:-production}"
       - "NODE_ENV=${NODE_ENV:-production}"
   depends_on:
-    master: # citus master
+    postgres:
       condition: "service_started"
       required: false
     redis:
       condition: "service_started"
       required: false
-    # apm-server:
-    #   condition: "service_healthy"
-    #   required: false
   env_file:
     - ".env"
-  environment:
-    # ElasticAPM will only be enabled if ELASTIC_APM_ENABLED=true and elastic-apm profile is active
-    - ELASTIC_APM_SERVER_URL=${ELASTIC_APM_SERVER_URL:-http://apm-server:8200}
-    - ELASTIC_APM_SERVICE_NAME=${ELASTIC_APM_SERVICE_NAME:-rails-dynamic-links}
-    - ELASTIC_APM_ENVIRONMENT=${ELASTIC_APM_ENVIRONMENT:-${RAILS_ENV:-production}}
   restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
   stop_grace_period: "3s"
   tty: true
-  networks:
-    - default
-    - elastic_network
   volumes:
     - "${DOCKER_WEB_VOLUME:-./public:/app/public}"
 
@@ -52,47 +41,24 @@ x-assets: &default-assets
     - ".:/app"
 
 services:
-  master:
-    container_name: "${COMPOSE_PROJECT_NAME:-citus}_master"
-    image: "citusdata/citus:13.0.3"
-    ports: ["${COORDINATOR_EXTERNAL_PORT:-5432}:5432"]
-    labels: ["com.citusdata.role=Master"]
-    environment: &AUTH
-      POSTGRES_USER: "${POSTGRES_USER:-postgres}"
+  postgres:
+    deploy:
+      resources:
+        limits:
+          cpus: "${DOCKER_POSTGRES_CPUS:-0}"
+          memory: "${DOCKER_POSTGRES_MEMORY:-0}"
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      PGUSER: "${POSTGRES_USER:-postgres}"
-      PGPASSWORD: "${POSTGRES_PASSWORD}"
-      POSTGRES_HOST_AUTH_METHOD: "${POSTGRES_HOST_AUTH_METHOD:-trust}"
-
-  worker:
-    image: "citusdata/citus:13.0.2"
-    labels: ["com.citusdata.role=Worker"]
-    depends_on: [manager]
-    environment: *AUTH
-    command: "/wait-for-manager.sh"
+      # POSTGRES_DB: "${POSTGRES_DB}"
+    image: "postgres:17.5-bookworm"
+    ports:
+      - "5432:5432"
+    profiles: ["postgres"]
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    stop_grace_period: "3s"
     volumes:
-      - healthcheck-volume:/healthcheck
-
-  manager:
-    container_name: "${COMPOSE_PROJECT_NAME:-citus}_manager"
-    image: "citusdata/membership-manager:0.3.0"
-    volumes:
-      - "${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock"
-      - healthcheck-volume:/healthcheck
-    depends_on: [master]
-    environment: *AUTH
-
-  # pgadmin:
-  #   container_name: pgadmin
-  #   image: dpage/pgadmin4
-  #   restart: always
-  #   profiles: ["postgres"]
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
-  #     PGADMIN_DEFAULT_PASSWORD: root
-  #     PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
-  #   ports:
-  #     - "5050:80"
+      - "postgres:/var/lib/postgresql/data"
 
   redis:
     deploy:
@@ -100,7 +66,9 @@ services:
         limits:
           cpus: "${DOCKER_REDIS_CPUS:-0}"
           memory: "${DOCKER_REDIS_MEMORY:-0}"
-    image: "redis:8.0.2-bookworm"
+    image: "redis:8.0.3-bookworm"
+    ports:
+      - "6379:6379"
     profiles: ["redis"]
     restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
     stop_grace_period: "3s"
@@ -120,13 +88,11 @@ services:
       timeout: "3s"
       start_period: "5s"
       retries: 3
-    env_file:
-      - ".env"
     ports:
       - "${DOCKER_WEB_PORT_FORWARD:-127.0.0.1:8000}:${PORT:-8000}"
     profiles: ["web"]
 
-  sidekiq:
+  worker:
     <<: *default-app
     command: "bundle exec sidekiq -C config/sidekiq.yml"
     entrypoint: []
@@ -158,72 +124,6 @@ services:
     <<: *default-assets
     command: "yarn build:css"
 
-  # elasticsearch:
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
-  #   environment:
-  #     - discovery.type=single-node
-  #     - ES_JAVA_OPTS=-Xms512m -Xmx512m
-  #     - xpack.security.enabled=false
-  #   ports:
-  #     - "9200:9200"
-  #   volumes:
-  #     - elasticsearch-data:/usr/share/elasticsearch/data
-  #   networks:
-  #     - elastic_network
-  #   profiles: ["elastic-apm"]
-  #   healthcheck:
-  #     interval: 20s
-  #     retries: 10
-  #     test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
-
-  # kibana:
-  #   image: docker.elastic.co/kibana/kibana:7.14.0
-  #   ports:
-  #     - "5601:5601"
-  #   depends_on:
-  #     elasticsearch:
-  #       condition: service_healthy
-  #   networks:
-  #     - elastic_network
-  #   profiles: ["elastic-apm"]
-  #   healthcheck:
-  #     interval: 10s
-  #     retries: 20
-  #     test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:5601/api/status
-
-  # apm-server:
-  #   image: docker.elastic.co/apm/apm-server:7.14.0
-  #   depends_on:
-  #     elasticsearch:
-  #       condition: service_healthy
-  #     kibana:
-  #       condition: service_healthy
-  #   cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
-  #   cap_drop: ["ALL"]
-  #   ports:
-  #     - "8200:8200"
-  #   networks:
-  #     - elastic_network
-  #   profiles: ["elastic-apm"]
-  #   command: >
-  #     apm-server -e
-  #       -E apm-server.rum.enabled=true
-  #       -E setup.kibana.host=kibana:5601
-  #       -E setup.template.settings.index.number_of_replicas=0
-  #       -E apm-server.kibana.enabled=true
-  #       -E apm-server.kibana.host=kibana:5601
-  #       -E output.elasticsearch.hosts=["elasticsearch:9200"]
-  #   healthcheck:
-  #     interval: 10s
-  #     retries: 12
-  #     test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8200/
-
 volumes:
   postgres: {}
   redis: {}
-  elasticsearch-data: {}
-  healthcheck-volume: {}
-
-networks:
-  elastic_network:
-    driver: bridge

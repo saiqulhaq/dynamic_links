@@ -82,9 +82,15 @@ group :test do
   gem 'selenium-webdriver'
   gem 'simplecov'
   gem 'webdrivers'
+
+  # Engine test dependencies
+  gem 'dalli', '~> 2.7', '>= 2.7.6', require: false
+  gem 'mocha'
+  gem 'timecop'
 end
 
-gem 'activerecord-multi-tenant'
+# Removed Citus and activerecord-multi-tenant dependencies
+# Now using Rails 8 multi-database features
 gem 'dynamic_links', path: 'engines/dynamic_links'
 gem 'nanoid'
 gem 'rack-attack', '~> 6.7'

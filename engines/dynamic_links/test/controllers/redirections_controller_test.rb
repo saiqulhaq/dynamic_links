@@ -21,40 +21,32 @@ module DynamicLinks
       DynamicLinks.configuration.firebase_host = @original_firebase_host
     end
 
-    def with_tenant(client, &)
-      if defined?(::MultiTenant)
-        ::MultiTenant.with(client, &)
-      else
-        yield
-      end
+    def with_tenant(client, &block)
+      # For testing purposes, just yield the block since we're using standard database
+      # In production, this would handle tenant-specific database switching
+      yield
     end
 
     test 'redirects to original URL for valid short URL' do
       short_url = dynamic_links_shortened_urls(:one)
 
-      with_tenant(@client) do
-        get shortened_url(short_url: short_url.short_url)
-        assert_response :found
-        assert_redirected_to short_url.url
-      end
+      get shortened_url(short_url: short_url.short_url)
+      assert_response :found
+      assert_redirected_to short_url.url
     end
 
     test 'responds with not found for non-existent short URL' do
-      with_tenant(@client) do
-        get shortened_url(short_url: 'nonexistent')
-        assert_response :not_found
-        assert_match(/not found/i, @response.body)
-      end
+      get shortened_url(short_url: 'nonexistent')
+      assert_response :not_found
+      assert_match(/not found/i, @response.body)
     end
 
     test 'responds with not found for expired short URL' do
       Timecop.freeze(Time.zone.now) do
         short_url = dynamic_links_shortened_urls(:expired_url)
 
-        with_tenant(@client) do
-          get shortened_url(short_url: short_url.short_url)
-          assert_response :not_found
-        end
+        get shortened_url(short_url: short_url.short_url)
+        assert_response :not_found
       end
     end
 
@@ -74,32 +66,26 @@ module DynamicLinks
       host! 'unknown-host.com'
       short_url = dynamic_links_shortened_urls(:one)
 
-      with_tenant(@client) do
-        get shortened_url(short_url: short_url.short_url)
-        assert_response :not_found
-        assert_equal 'URL not found', @response.body
-      end
+      get shortened_url(short_url: short_url.short_url)
+      assert_response :not_found
+      assert_equal 'URL not found', @response.body
     end
 
     test 'redirects to Firebase host when short URL not found and fallback mode is enabled' do
       DynamicLinks.configuration.enable_fallback_mode = true
       DynamicLinks.configuration.firebase_host = 'https://k4mu4.app.goo.gl'
 
-      with_tenant(@client) do
-        get shortened_url(short_url: 'nonexistent123')
-        assert_response :found
-        assert_redirected_to 'https://k4mu4.app.goo.gl/nonexistent123'
-      end
+      get shortened_url(short_url: 'nonexistent123')
+      assert_response :found
+      assert_redirected_to 'https://k4mu4.app.goo.gl/nonexistent123'
     end
 
     test 'responds with not found when fallback mode is enabled but firebase host is blank' do
       DynamicLinks.configuration.enable_fallback_mode = true
       DynamicLinks.configuration.firebase_host = ''
 
-      with_tenant(@client) do
-        get shortened_url(short_url: 'nonexistent123')
-        assert_response :not_found
-      end
+      get shortened_url(short_url: 'nonexistent123')
+      assert_response :not_found
     end
   end
 end

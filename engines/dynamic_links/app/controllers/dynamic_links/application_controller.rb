@@ -2,19 +2,15 @@
 
 module DynamicLinks
   class ApplicationController < ActionController::API
-    def multi_tenant(client, db_infra_strategy = DynamicLinks.configuration.db_infra_strategy, &)
-      if db_infra_strategy == :sharding
-        if defined?(::MultiTenant)
-          ::MultiTenant.with(client, &)
-        else
-          # Rails.logger.warn 'MultiTenant gem is not installed. Please install it to use sharding strategy'
-          DynamicLinks::Logger.log_warn('MultiTenant gem is not installed. Please install it to use sharding strategy')
-
-          yield
-        end
-      else
-        yield
-      end
+    # Handle tenant-specific database operations using Rails multi-database features
+    # This replaces the previous multi-tenant database strategy approach
+    def multi_tenant(client, &block)
+      # For now, just yield the block since we're using standard single database
+      # In the future, this will switch to tenant-specific databases using Rails 8 features
+      yield
     end
+
+    # Legacy alias for backward compatibility
+    alias_method :with_tenant_database, :multi_tenant
   end
 end

@@ -5,7 +5,7 @@ module DynamicLinks
     class BaseStrategy
       MIN_LENGTH = 5
 
-      BASE62_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      BASE62_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.freeze
 
       def shorten(url)
         raise NotImplementedError, 'You must implement the shorten method'
@@ -23,7 +23,7 @@ module DynamicLinks
       def base62_encode(integer)
         return '0' if integer.zero?
 
-        result = ''
+        result = +'' # Use unary plus to create an unfrozen string
         while integer.positive?
           result.prepend(BASE62_CHARS[integer % 62])
           integer /= 62

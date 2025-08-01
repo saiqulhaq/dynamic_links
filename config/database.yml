@@ -10,13 +10,24 @@ default: &default
   pool: "<%= ENV.fetch('RAILS_MAX_THREADS') { 5 } %>"
 
 development:
-  <<: *default
-  database: "<%= ENV.fetch('POSTGRES_DB') { 'rails_dynamic_links' } %>_development"
+  primary:
+    <<: *default
+    database: "<%= ENV.fetch('POSTGRES_DB') { 'rails_dynamic_links' } %>_development"
+  # Add additional databases here for multi-tenant support when needed
+  # tenant_1:
+  #   <<: *default
+  #   database: "<%= ENV.fetch('POSTGRES_DB') { 'rails_dynamic_links' } %>_tenant_1_development"
 
 test:
-  <<: *default
-  database: "<%= ENV.fetch('POSTGRES_DB') { 'rails_dynamic_links' } %>_test"
+  primary:
+    <<: *default
+    database: "<%= ENV.fetch('POSTGRES_DB') { 'rails_dynamic_links' } %>_test"
 
 production:
-  <<: *default
-  database: "<%= ENV.fetch('POSTGRES_DB') { 'rails_dynamic_links' } %>_production"
+  primary:
+    <<: *default
+    database: "<%= ENV.fetch('POSTGRES_DB') { 'rails_dynamic_links' } %>_production"
+  # Add additional databases here for multi-tenant support when needed
+  # tenant_1:
+  #   <<: *default
+  #   database: "<%= ENV.fetch('POSTGRES_DB') { 'rails_dynamic_links' } %>_tenant_1_production"

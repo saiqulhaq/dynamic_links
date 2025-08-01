@@ -8,12 +8,10 @@ module DynamicLinks
       setup do
         @client = dynamic_links_clients(:one)
         @original_rest_api_setting = DynamicLinks.configuration.enable_rest_api
-        @original_db_infra_strategy = DynamicLinks.configuration.db_infra_strategy
       end
 
       teardown do
         DynamicLinks.configuration.enable_rest_api = @original_rest_api_setting
-        DynamicLinks.configuration.db_infra_strategy = @original_db_infra_strategy
       end
 
       test 'should create a shortened URL' do
@@ -47,7 +45,7 @@ module DynamicLinks
         end
       end
 
-      test 'should return internal server error if multi_tenant block raises an error' do
+      test 'should return internal server error if an error occurs' do
         DynamicLinks.stubs(:generate_short_url).raises(StandardError)
         post '/v1/shortLinks', params: { url: 'https://example.com', api_key: @client.api_key }
 
@@ -61,24 +59,6 @@ module DynamicLinks
         post '/v1/shortLinks', params: { url: 'https://example.com', api_key: @client.api_key }
         assert_response :forbidden
         assert_includes @response.body, 'REST API feature is disabled'
-      end
-
-      if defined?(::MultiTenant)
-        test 'should use MultiTenant.with when db_infra_strategy is :sharding' do
-          DynamicLinks.configuration.db_infra_strategy = :sharding
-          ::MultiTenant.expects(:with).with(@client).once
-          url = 'https://example.com/'
-          api_key = @client.api_key
-          post '/v1/shortLinks', params: { url: url, api_key: api_key }
-        end
-
-        test 'should not use MultiTenant.with when db_infra_strategy is not :sharding' do
-          DynamicLinks.configuration.db_infra_strategy = :standard
-          url = 'https://example.com/'
-          api_key = @client.api_key
-          ::MultiTenant.expects(:with).with(@client).never
-          post '/v1/shortLinks', params: { url: url, api_key: api_key }
-        end
       end
 
       test 'should expand a valid short URL' do
@@ -121,7 +101,6 @@ module DynamicLinks
 
       test 'should return existing short URL if found' do
         DynamicLinks.configuration.enable_rest_api = true
-        DynamicLinks.configuration.db_infra_strategy = :standard
 
         url = 'https://example.com/existing'
         client = @client
@@ -143,7 +122,6 @@ module DynamicLinks
 
       test 'should create short URL if not exists' do
         DynamicLinks.configuration.enable_rest_api = true
-        DynamicLinks.configuration.db_infra_strategy = :standard
 
         url = "https://example.com/new-page-#{SecureRandom.hex(4)}"
         client = @client
@@ -158,7 +136,6 @@ module DynamicLinks
 
       test 'should create or find complex but valid URL' do
         DynamicLinks.configuration.enable_rest_api = true
-        DynamicLinks.configuration.db_infra_strategy = :standard
 
         url = 'https://example.com/search?q=hello%20world&ref=abc&lang=en#top'
         client = @client

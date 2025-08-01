@@ -9,7 +9,7 @@ module DynamicLinks
         return
       end
 
-      multi_tenant(client) do
+      with_tenant_database(client) do
         short_url = params[:short_url]
         link = ShortenedUrl.find_by(short_url: short_url)
 

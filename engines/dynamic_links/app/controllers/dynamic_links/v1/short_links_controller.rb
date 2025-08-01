@@ -14,7 +14,7 @@ module DynamicLinks
           return
         end
 
-        multi_tenant(client) do
+        with_tenant_database(client) do
           render json: DynamicLinks.generate_short_url(url, client), status: :created
         end
       rescue DynamicLinks::InvalidURIError
@@ -33,7 +33,7 @@ module DynamicLinks
           return
         end
 
-        multi_tenant(client) do
+        with_tenant_database(client) do
           short_link = params.require(:short_url)
           full_url = DynamicLinks.resolve_short_url(short_link)
 
@@ -62,7 +62,7 @@ module DynamicLinks
           return
         end
 
-        multi_tenant(client) do
+        with_tenant_database(client) do
           short_link = DynamicLinks.find_short_link(url, client)
 
           if short_link

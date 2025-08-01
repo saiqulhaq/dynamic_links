@@ -20,7 +20,6 @@
 module DynamicLinks
   class ShortenedUrl < ApplicationRecord
     belongs_to :client
-    multi_tenant :client if respond_to?(:multi_tenant)
 
     validates :url, presence: true
     validates :short_url, presence: true, uniqueness: { scope: :client_id }

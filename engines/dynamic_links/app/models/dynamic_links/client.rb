@@ -19,6 +19,8 @@ module DynamicLinks
   class Client < ApplicationRecord
     VALID_SCHEMES = %w[http https].freeze
 
+    has_many :shortened_urls, dependent: :destroy
+
     validates :name, presence: true, uniqueness: true
     validates :api_key, presence: true, uniqueness: true
     validates :hostname, presence: true, uniqueness: true

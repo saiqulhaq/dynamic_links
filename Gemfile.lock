@@ -102,8 +102,6 @@ GEM
     concurrent-ruby (1.3.5)
     connection_pool (2.5.3)
     crass (1.0.6)
-    cssbundling-rails (1.4.3)
-      railties (>= 6.0.0)
     dalli (2.7.11)
     date (3.4.1)
     debug (1.11.0)
@@ -170,8 +168,6 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
-    jsbundling-rails (1.3.1)
-      railties (>= 6.0.0)
     json (2.12.2)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
@@ -400,7 +396,6 @@ PLATFORMS
 DEPENDENCIES
   bullet
   capybara
-  cssbundling-rails
   dalli (~> 2.7, >= 2.7.6)
   debug
   dynamic_links!
@@ -408,7 +403,6 @@ DEPENDENCIES
   firebase_dynamic_link
   hotwire-spark (~> 0.1)
   jbuilder
-  jsbundling-rails
   mocha
   msgpack (>= 1.7.0)
   nanoid

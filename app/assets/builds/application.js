@@ -8546,4 +8546,4 @@
   Copyright © 2025 37signals LLC
    *)
 */
-//# sourceMappingURL=application.js.map
+//# sourceMappingURL=/assets/application.js.map

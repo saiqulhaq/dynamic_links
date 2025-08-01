@@ -4,7 +4,7 @@
     {
       "label": "Rails: Run Server",
       "type": "shell",
-      "command": "cd test/dummy && bin/rails server -b 0.0.0.0",
+      "command": "bin/rails server -b 0.0.0.0",
       "group": "none",
       "presentation": {
         "reveal": "always",

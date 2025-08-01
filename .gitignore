@@ -6,6 +6,7 @@
 /test/dummy/db/*.sqlite3
 /test/dummy/db/*.sqlite3-*
 /test/dummy/log/*.log
+/engines/dynamic_links/test/dummy/log/*.log
 /test/dummy/storage/
 /test/dummy/tmp/
 .env
@@ -30,3 +31,4 @@ coverage
 .history/
 .DS_Store
 .ruby-version
+node_modules

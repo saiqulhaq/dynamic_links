@@ -1,300 +1,231 @@
-# DynamicLinks
+# Rails Dynamic Links
 
-[![Unit Tests](https://github.com/saiqulhaq/dynamic_links/actions/workflows/unit_test.yml/badge.svg)](https://github.com/saiqulhaq/dynamic_links/actions/workflows/unit_test.yml)
+This Rails app is an alternative to Firebase Dynamic Links, aiming for 100% compatibility. It provides a self-hosted URL shortener and dynamic link service.
 
-DynamicLinks is a flexible URL shortening Ruby gem, designed to provide various strategies for URL shortening, similar to Firebase Dynamic Links.
+**Core functionality is provided by the [`dynamic_links`](../dynamic_links) gem, a Rails engine included in this app.**
 
-By default, encoding strategies such as MD5 will generate the same short URL for the same input URL. This behavior ensures consistency and prevents the creation of multiple records for identical URLs. For scenarios requiring unique short URLs for each request, strategies like RedisCounterStrategy can be used, which generate a new short URL every time, regardless of the input URL.
+### Features (via `dynamic_links` gem)
 
-## Usage
+- Multiple URL shortening strategies: MD5 (default), NanoId, RedisCounter, Sha256, and more
+- Consistent or unique short links depending on strategy
+- Fallback mode: Optionally redirect to Firebase Dynamic Links if a short link is not found
+- REST API for programmatic access (can be enabled/disabled)
+- Redis support for advanced strategies
+- Import/export for Firebase Dynamic Links data
+- Optional performance monitoring with ElasticAPM (disabled by default)
 
-To use DynamicLinks, you need to configure the shortening strategy and other settings in an initializer or before you start shortening URLs.
+For users migrating from Firebase, download your short links data from https://takeout.google.com/takeout/custom/firebase_dynamic_links and import it on the `/import` page.
 
-### Configuration
+- [Explanation on YouTube](https://youtu.be/cL1ByYwAgQk?si=KXzUN5U5_JNXeQPs)
+- [Diagram on draw.io](https://drive.google.com/file/d/1KwLzK7rENinnj9Zo6ZK9Y3hG3yJRtr61/view?usp=sharing)
 
-In your Rails initializer or similar setup code, configure DynamicLinks like this:
+# Project Status
+
+Check out our [Project Board](https://github.com/users/saiqulhaq/projects/3/views/1) to see what's been completed and what's still in development.
+
+# Documentation
+
+- [ElasticAPM Integration](docs/elastic_apm.md) - Performance monitoring setup and usage
+
+# Getting Started
+
+## Prerequisites
+
+Make sure you have the following installed on your system:
+
+- Ruby 3.4.4
+- Node.js 22+
+- PostgreSQL
+- Redis (optional, required for some strategies)
+
+## Development Setup
+
+### Using VS Code Dev Containers (Recommended)
+
+This project includes a complete VS Code development container configuration with all dependencies pre-installed.
+
+1. Install [Visual Studio Code](https://code.visualstudio.com/)
+2. Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+3. Clone this repository
+4. Open the project in VS Code
+5. When prompted, click "Reopen in Container" or run the command `Dev Containers: Reopen in Container`
+
+The dev container will automatically:
+
+- Set up Ruby 3.4.4
+- Install Node.js 22
+- Install all required system dependencies
+- Install Ruby gems and Node packages
+- Configure VS Code with recommended extensions and settings
+
+### Manual Setup
+
+If you prefer to set up the development environment manually:
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/saiqulhaq/dynamic_links.git
+   cd dynamic_links
+   ```
+
+2. **Copy environment variables:**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Install dependencies:**
+
+   ```bash
+   bundle install
+   yarn install
+   ```
+
+4. **Set up the database:**
+
+   ```bash
+   rails db:create
+   rails dynamic_links:install:migrations
+   rails db:migrate
+   ```
+
+5. **Start the development server:**
+
+   ```bash
+   rails server
+   ```
+
+   Visit http://localhost:3000 in your browser.
+
+# Usage
+
+Each shortened URL belongs to a client. Create your first client in the Rails console:
+
+```ruby
+DynamicLinks::Client.create!(name: 'Default client', api_key: 'foo', hostname: 'google.com', scheme: 'http')
+```
+
+To shorten a link via the REST API, send a POST request to `http://localhost:3000/v1/shortLinks` with this payload:
+
+```json
+{
+  "api_key": "foo",
+  "url": "https://github.com/rack/rack-attack"
+}
+```
+
+The response will look like:
+
+```json
+{
+  "shortLink": "http://google.com/a6LlbtC",
+  "previewLink": "http://google.com/a6LlbtC?preview=true",
+  "warning": []
+}
+```
+
+# Testing
+
+Run the test suite with:
+
+```bash
+rails test
+```
+
+To run tests with asset building:
+
+```bash
+yarn build
+yarn build:css
+rails test
+```
+
+# Configuration
+
+## DynamicLinks Engine Configuration
+
+You can configure the `dynamic_links` engine in an initializer (e.g., `config/initializers/dynamic_links.rb`). Example:
 
 ```ruby
 DynamicLinks.configure do |config|
-  config.shortening_strategy = :md5  # Default strategy
-  config.redis_config = { host: 'localhost', port: 6379 }  # Redis configuration
-  config.redis_pool_size = 10  # Redis connection pool size
-  config.redis_pool_timeout = 3  # Redis connection pool timeout in seconds
-  config.enable_rest_api = true  # Enable or disable REST API feature
-
-  # New configuration added in PR #88
-  config.enable_fallback_mode = false  # When true, falls back to Firebase URL if a short link is not found
-  config.firebase_host = "https://example.app.goo.gl"  # Firebase host URL for fallbacks
+  config.shortening_strategy = :md5  # :md5, :nanoid, :redis_counter, :sha256, etc.
+  config.redis_config = { host: 'localhost', port: 6379 }
+  config.redis_pool_size = 10
+  config.redis_pool_timeout = 3
+  config.enable_rest_api = true
+  config.enable_fallback_mode = false  # If true, fallback to Firebase if not found
+  config.firebase_host = "https://example.app.goo.gl"  # Used for fallback
 end
 ```
 
-## Development Environment
+### What is Fallback Mode?
 
-This project supports two development environment options: GitHub Codespaces and local Docker Compose.
+**Fallback Mode** allows your Rails app to redirect users to the original Firebase Dynamic Links service if a requested short link is not found in your local database. This is useful when you are migrating from Firebase and want to ensure that any links not yet imported or created in your self-hosted service will still work for end users.
 
-### Option 1: GitHub Codespaces
+- When `enable_fallback_mode` is set to `true`, and a short link is not found locally, the app will automatically redirect to the URL specified by `firebase_host` (with the same path and query parameters).
+- When set to `false`, missing links will return a standard 404 error.
 
-This project is configured to work with GitHub development containers, providing a consistent development environment.
+This feature helps provide a seamless migration experience from Firebase Dynamic Links to your own self-hosted solution.
 
-#### Opening in GitHub Codespaces
+See the [dynamic_links README](../dynamic_links/README.md) for all available options and strategies.
 
-1. Navigate to the GitHub repository
-2. Click the "Code" button
-3. Select the "Codespaces" tab
-4. Click "Create codespace on main"
+### Optional dependencies
 
-#### Development in the Codespace
+- For `:nanoid` strategy: add `gem 'nanoid', '~> 2.0'`
+- For `:redis_counter` strategy: ensure Redis is running and add `gem 'connection_pool'`
 
-Once the development container is created and set up:
+---
 
-1. The container includes Ruby 3.2, PostgreSQL, Redis, and other dependencies
-2. Run the test suite: `cd test/dummy && bin/rails test`
-3. Start the Rails server: `cd test/dummy && bin/rails server`
+To configure rate limiting, edit `config/initializers/rack_attack.rb`. See https://github.com/rack/rack-attack#throttling
 
-### Option 2: Local Development with Docker Compose
+### Back-end
 
-For local development, we use Docker Compose with VS Code's Remote - Containers extension.
+- [PostgreSQL](https://www.postgresql.org/)
+- [Redis](https://redis.io/) (optional, required for some strategies)
+- [Sidekiq](https://github.com/mperham/sidekiq)
+- [Action Cable](https://guides.rubyonrails.org/action_cable_overview.html)
+- [ERB](https://guides.rubyonrails.org/layouts_and_rendering.html)
 
-#### Prerequisites
+### Front-end
 
-1. Install [Docker](https://docs.docker.com/get-docker/)
-2. Install [VS Code](https://code.visualstudio.com/)
-3. Install the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- [esbuild](https://esbuild.github.io/)
+- [Hotwire Turbo](https://hotwired.dev/)
+- [StimulusJS](https://stimulus.hotwired.dev/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [Heroicons](https://heroicons.com/)
 
-#### Opening in VS Code with Containers
+## Production Deployment
 
-1. Clone the repository to your local machine
-2. Open the project folder in VS Code
-3. VS Code will detect the devcontainer configuration and prompt you to reopen in a container
-4. Click "Reopen in Container"
+For production deployment, you'll need to:
 
-#### Working with the Docker Compose Setup
+1. Set up PostgreSQL and Redis servers
+2. Configure environment variables in `.env` file
+3. Set `RAILS_ENV=production` and `NODE_ENV=production`
+4. Run `rails assets:precompile` to build assets
+5. Use a process manager like systemd or supervisor to manage Rails and Sidekiq processes
+6. Set up a reverse proxy (nginx/Apache) to serve static files and proxy requests
 
-- The setup includes three services: app (Ruby), postgres (PostgreSQL), and redis (Redis)
-- Database and Redis connections are automatically configured
-- Use VS Code tasks (F1 -> "Tasks: Run Task") for common operations like:
-  - Starting the Rails server
-  - Running tests
-  - Running the Rails console
-  - Managing Docker Compose services
+## Development Tools
 
-For more details on the Docker Compose setup, refer to the [Docker Compose documentation](DOCKER_COMPOSE.md). 4. Access the application at the forwarded port (usually port 3000)
+- Code formatting: `bundle exec rubocop -a`
+- Linting: `bundle exec rubocop`
+- Asset building: `yarn build && yarn build:css`
 
-### Shortening a URL
+## Environment Variables
 
-To shorten a URL, simply call:
+All configuration is managed through environment variables. Copy `.env.example` to `.env` and adjust the values for your setup. Key variables include:
 
-```ruby
-shortened_url = DynamicLinks.shorten_url("https://example.com")
-```
+- `DATABASE_URL` - PostgreSQL connection string
+- `REDIS_URL` - Redis connection string
+- `SECRET_KEY_BASE` - Rails secret key
+- `RAILS_ENV` - Environment (development/production)
 
-### Finding an Existing Short Link
+## Contributing
 
-To find an existing short link for a URL:
-
-```ruby
-short_link_data = DynamicLinks.find_short_link("https://example.com", client)
-if short_link_data
-  puts short_link_data[:short_url]  # e.g., "https://client.com/abc123"
-  puts short_link_data[:full_url]   # e.g., "https://example.com"
-else
-  puts "No existing short link found"
-end
-```
-
-## REST API
-
-DynamicLinks provides a REST API for URL shortening operations when `enable_rest_api` is set to `true` in the configuration.
-
-### Authentication
-
-All API endpoints require an `api_key` parameter that corresponds to a registered client.
-
-### Endpoints
-
-#### Create Short Link
-
-Creates a new short link for a URL.
-
-**Endpoint:** `POST /v1/shortLinks`
-
-**Parameters:**
-
-- `url` (required): The URL to shorten
-- `api_key` (required): Client API key
-
-**Example Request:**
-
-```bash
-curl -X POST "http://localhost:3000/v1/shortLinks" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://example.com/long-url",
-    "api_key": "your-api-key"
-  }'
-```
-
-**Example Response:**
-
-```json
-{
-  "shortLink": "https://your-domain.com/abc123",
-  "previewLink": "https://your-domain.com/abc123?preview=true",
-  "warning": []
-}
-```
-
-#### Find or Create Short Link
-
-Finds an existing short link for a URL, or creates a new one if none exists. This prevents duplicate short links for the same URL and client.
-
-**Endpoint:** `POST /v1/shortLinks/findOrCreate`
-
-**Parameters:**
-
-- `url` (required): The URL to find or shorten
-- `api_key` (required): Client API key
-
-**Example Request:**
-
-```bash
-curl -X POST "http://localhost:3000/v1/shortLinks/findOrCreate" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://example.com/long-url",
-    "api_key": "your-api-key"
-  }'
-```
-
-**Example Response (existing link found):**
-
-```json
-{
-  "shortLink": "https://your-domain.com/abc123",
-  "previewLink": "https://your-domain.com/abc123?preview=true",
-  "warning": []
-}
-```
-
-**Example Response (new link created):**
-
-```json
-{
-  "shortLink": "https://your-domain.com/def456",
-  "previewLink": "https://your-domain.com/def456?preview=true",
-  "warning": []
-}
-```
-
-#### Expand Short Link
-
-Retrieves the original URL from a short link.
-
-**Endpoint:** `GET /v1/shortLinks/{short_url}`
-
-**Parameters:**
-
-- `short_url` (in URL): The short URL code to expand
-- `api_key` (required): Client API key
-
-**Example Request:**
-
-```bash
-curl "http://localhost:3000/v1/shortLinks/abc123?api_key=your-api-key"
-```
-
-**Example Response:**
-
-```json
-{
-  "url": "https://example.com/long-url"
-}
-```
-
-### Error Responses
-
-The API returns appropriate HTTP status codes and error messages:
-
-- `400 Bad Request`: Invalid URL format
-- `401 Unauthorized`: Invalid or missing API key
-- `403 Forbidden`: REST API feature is disabled
-- `404 Not Found`: Short link not found (expand endpoint)
-- `500 Internal Server Error`: Server error
-
-**Example Error Response:**
-
-```json
-{
-  "error": "Invalid URL"
-}
-```
-
-## Available Shortening Strategies
-
-DynamicLinks supports various shortening strategies. The default strategy is `MD5`, but you can choose among several others, including `NanoIdStrategy`, `RedisCounterStrategy`, `Sha256Strategy`, and more.
-
-Depending on the strategy you choose, you may need to install additional dependencies.
-
-### Optional Dependencies
-
-- For `NanoIdStrategy`, add `gem 'nanoid', '~> 2.0'` to your Gemfile.
-- For `RedisCounterStrategy`, ensure Redis is available and configured. Redis strategy requires `connection_pool` gem too.
-
-Ensure you bundle these dependencies along with the DynamicLinks gem if you plan to use these strategies.
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem "dynamic_links"
-```
-
-And then execute:
-
-```bash
-$ bundle
-```
-
-Or install it yourself as:
-
-```bash
-$ gem install dynamic_links
-```
-
-## Performance
-
-Benchmarking scripts are available in the `benchmarks/` directory to measure performance:
-
-- `ruby_api.rb`: Benchmarks Ruby API URL shortening performance
-- `rest_api.py`: Benchmarks REST API URL shortening performance
-- `create_or_find.rb`: Compares performance of different `create_or_find` methods
-
-You can run these benchmarks to measure performance in your specific environment.
-
-## How to run the unit test
-
-### When using a Plain PostgreSQL DB
-
-```bash
-rails db:setup
-rails db:test:prepare
-rails test
-```
-
-### When using PostgreSQL DB with Citus
-
-```bash
-export CITUS_ENABLED=true
-rails db:setup
-rails db:test:prepare
-rails test
-```
-
-Note:
-Make sure the Citus extension already enabled on the installed PostgreSQL
-We don't manage it on Rails.
-
-## License
-
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request

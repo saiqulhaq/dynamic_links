@@ -1,29 +1,90 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-# Specify your gem's dependencies in dynamic_links.gemspec.
-gemspec
+ruby '3.4.4'
 
-gem 'dotenv-rails', require: 'dotenv/load'
+# Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
+gem 'rails', '~> 8.0'
 
-gem 'puma'
+# Efficient serialization [https://github.com/msgpack/msgpack-ruby]
+gem 'msgpack', '>= 1.7.0'
 
-gem 'pg', '>= 0.18', '< 2.0'
+# An improved asset pipeline for Rails [https://github.com/rails/propshaft]
+gem 'propshaft', '~> 1.1'
 
-gem 'sprockets-rails'
+# Use postgresql as the database for Active Record
+gem 'pg', '~> 1.1'
 
-# for dummy app
-gem 'sidekiq'
+# Use the Puma web server [https://github.com/puma/puma]
+gem 'puma', '~> 6.4'
+
+# Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
+gem 'turbo-rails'
+
+# Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
+gem 'stimulus-rails'
+
+# Build JSON APIs with ease [https://github.com/rails/jbuilder]
+gem 'jbuilder'
+
+# Use Redis adapter to run Action Cable in production
+gem 'redis', '~> 5.2'
+
+# Windows does not include zoneinfo files, so bundle the tzinfo-data gem
+gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
+
+# Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
+# gem "image_processing", "~> 1.2"
+
+# Execute jobs in the background [https://github.com/mperham/sidekiq]
+gem 'sidekiq', '~> 8.0'
+
+# Application Performance Monitoring (conditionally loaded based on configuration)
+require_elastic_apm = ENV.fetch('ELASTIC_APM_ENABLED', 'false').downcase == 'true'
+gem 'elastic-apm', require: require_elastic_apm
+
+group :development do
+  # Detect N+1 queries and unused eager loading
+  gem 'bullet'
+end
+
+group :development, :test do
+  # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
+  gem 'debug', platforms: %i[mri mingw x64_mingw], require: 'debug/prelude'
+
+  # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
+  gem 'rubocop-rails-omakase', require: false
+end
+
+group :development do
+  # Use console on exceptions pages [https://github.com/rails/web-console]
+  gem 'web-console'
+
+  # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
+  gem 'rack-mini-profiler'
+
+  # Live reloading for Hotwire applications [https://github.com/hotwired/spark]
+  gem 'hotwire-spark', '~> 0.1'
+end
 
 group :test do
+  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
+  gem 'capybara'
+  gem 'firebase_dynamic_link'
+  gem 'selenium-webdriver'
+  gem 'simplecov'
+  gem 'webdrivers'
+
+  # Engine test dependencies
   gem 'dalli', '~> 2.7', '>= 2.7.6', require: false
   gem 'mocha'
-  gem 'simplecov', require: false
   gem 'timecop'
 end
 
-# Start debugger with binding.b [https://github.com/ruby/debug]
-# gem "debug", ">= 1.0.0"
-
-require_multi_tenant = ENV['CITUS_ENABLED'] == 'true'
-gem 'activerecord-multi-tenant', github: 'citusdata/activerecord-multi-tenant', branch: 'master', require: require_multi_tenant
+# Removed Citus and activerecord-multi-tenant dependencies
+# Now using Rails 8 multi-database features
+gem 'dynamic_links', path: 'engines/dynamic_links'
+gem 'nanoid'
+gem 'rack-attack', '~> 6.7'

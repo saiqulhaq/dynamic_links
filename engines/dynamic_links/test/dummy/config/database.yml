@@ -1,0 +1,33 @@
+default: &default
+  adapter: "postgresql"
+  encoding: "unicode"
+  database: "dynamic_links"
+  username: "<%= ENV.fetch('POSTGRES_USER') { 'rails_dynamic_links_user' } %>"
+  password: "<%= ENV.fetch('POSTGRES_PASSWORD') { 'hardcoded_password' } %>"
+  host: "<%= ENV.fetch('POSTGRES_HOST') { 'localhost' } %>"
+  port: "<%= ENV.fetch('POSTGRES_PORT') { 5432 } %>"
+  # http://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: "<%= ENV.fetch('RAILS_MAX_THREADS') { 5 } %>"
+
+development:
+  primary:
+    <<: *default
+    database: "dynamic_links_development"
+  # Add additional databases here for multi-tenant support when needed
+  # tenant_1:
+  #   <<: *default
+  #   database: "dynamic_links_tenant_1_development"
+
+test:
+  primary:
+    <<: *default
+    database: "dynamic_links_test"
+
+production:
+  primary:
+    <<: *default
+    database: "dynamic_links_production"
+  # Add additional databases here for multi-tenant support when needed
+  # tenant_1:
+  #   <<: *default
+  #   database: "<%= ENV.fetch('POSTGRES_DB') { 'rails_dynamic_links' } %>_tenant_1_production"

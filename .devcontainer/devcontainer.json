@@ -1,9 +1,30 @@
 {
   "name": "Ruby on Rails Dynamic Links",
-  "dockerComposeFile": ["../docker-compose.yml"],
-  "service": "app",
+  "image": "mcr.microsoft.com/devcontainers/ruby:3.4-bookworm",
   "workspaceFolder": "/workspaces/dynamic_links",
-  "forwardPorts": [3000, 6379, 5432],
+  "forwardPorts": [
+    3000,
+    6379,
+    5432
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true,
+      "installOhMyZshConfig": true,
+      "upgradePackages": true
+    }
+  },
+  "runArgs": [
+    "--name",
+    "dynamic_links_devcontainer"
+  ],
   "customizations": {
     "vscode": {
       "settings": {
@@ -25,18 +46,7 @@
           "editor.tabSize": 2,
           "editor.insertSpaces": true
         },
-        "ruby.format": "rubocop",
-        "sqltools.connections": [
-          {
-            "name": "PostgreSQL",
-            "driver": "PostgreSQL",
-            "server": "postgres",
-            "port": 5432,
-            "username": "postgres",
-            "password": "postgres",
-            "database": "dynamic_links_development"
-          }
-        ]
+        "ruby.format": "rubocop"
       },
       "extensions": [
         "rebornix.ruby",
@@ -48,8 +58,6 @@
         "editorconfig.editorconfig",
         "davidanson.vscode-markdownlint",
         "esbenp.prettier-vscode",
-        "mtxr.sqltools",
-        "mtxr.sqltools-driver-pg",
         "eamodio.gitlens",
         "streetsidesoftware.code-spell-checker",
         "donjayamanne.githistory",
@@ -57,23 +65,14 @@
       ]
     }
   },
-  "postCreateCommand": "sudo chown -R vscode /usr/local/bundle && bundle install && cd test/dummy # && bin/rails db:create db:migrate",
-  "postStartCommand": "bash .devcontainer/on-create-command.sh",
+  "onCreateCommand": "bash -c 'gem install bundler && bundle install && npm install -g yarn && yarn install'",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y postgresql-client redis-tools",
+  "postStartCommand": "bash -c 'source .env && docker-compose --profile postgres --profile redis up -d && echo \"PostgreSQL (localhost:5432) and Redis (localhost:6379) services started via Docker Compose\"'",
   "portsAttributes": {
     "3000": {
       "label": "Rails Server",
       "onAutoForward": "notify"
-    },
-    "5432": {
-      "label": "PostgreSQL",
-      "onAutoForward": "silent"
-    },
-    "6379": {
-      "label": "Redis",
-      "onAutoForward": "silent"
     }
   },
-  "waitFor": "postCreateCommand",
-  "updateContentCommand": "sudo chown -R vscode /usr/local/bundle && bundle install",
   "remoteUser": "vscode"
 }

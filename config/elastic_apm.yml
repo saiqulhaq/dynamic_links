@@ -1,0 +1,53 @@
+# ElasticAPM Configuration
+# This file configures the ElasticAPM Ruby agent
+
+# APM Server connection settings
+server_url: <%= ENV.fetch('ELASTIC_APM_SERVER_URL', 'http://localhost:8200') %>
+secret_token: <%= ENV.fetch('ELASTIC_APM_SECRET_TOKEN', '') %>
+
+# Service information
+service_name: <%= ENV.fetch('ELASTIC_APM_SERVICE_NAME', 'rails-dynamic-links') %>
+service_version: <%= ENV.fetch('ELASTIC_APM_SERVICE_VERSION', '1.0.0') %>
+environment: <%= ENV.fetch('ELASTIC_APM_ENVIRONMENT', Rails.env) %>
+
+# Agent behavior
+enabled: <%= ENV.fetch('ELASTIC_APM_ENABLED', 'false').downcase == 'true' %>
+instrument: true
+disable_send: <%= !ENV.fetch('ELASTIC_APM_ENABLED', 'false').downcase == 'true' %>
+
+# Data collection settings
+transaction_sample_rate: <%= ENV.fetch('ELASTIC_APM_TRANSACTION_SAMPLE_RATE', '1.0').to_f %>
+transaction_max_spans: 500
+capture_body: errors
+capture_headers: false
+capture_env: false
+
+sanitize_field_names: ["password", "passwd", "pwd", "secret", ".*key", ".*token", ".*session.*", ".*credit.*", ".*card.*"]
+
+# Performance settings
+span_frames_min_duration: 5ms
+stack_trace_limit: 50
+
+# Logging
+log_level: <%= ENV.fetch('ELASTIC_APM_LOG_LEVEL', 'info') %>
+log_path: <%= ENV.fetch('ELASTIC_APM_LOG_PATH', 'log/elastic_apm.log') %>
+
+# Framework specific
+framework_name: "Ruby on Rails"
+framework_version: <%= Rails::VERSION::STRING %>
+
+# Ruby specific settings
+source_lines_error_app_frames: 5
+source_lines_span_app_frames: 5
+source_lines_error_library_frames: 0
+source_lines_span_library_frames: 0
+
+# Metrics collection
+metrics_interval: '30s'
+disable_metrics:
+  - system.memory
+  - system.process
+
+# Advanced options
+central_config: true
+verify_server_cert: true

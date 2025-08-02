@@ -56,7 +56,7 @@ module DynamicLinks
     end
 
     test 'valid redis cache_store should not raise error' do
-      valid_cache_store = ActiveSupport::Cache::RedisCacheStore.new(url: 'redis://localhost:6379/0/cache')
+      valid_cache_store = ActiveSupport::Cache::RedisCacheStore.new(url: 'redis://localhost:6379/0')
       @config.cache_store = valid_cache_store
       assert_equal @config.cache_store, valid_cache_store
     end

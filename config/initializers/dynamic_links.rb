@@ -21,7 +21,7 @@ DynamicLinks.configure do |config|
 
   # Example cache store (using Redis)
   cache_store = ActiveSupport::Cache::RedisCacheStore.new(
-    url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/0/cache'),
+    url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/0'),
     namespace: 'dynamic_links'
   )
   config.cache_store = cache_store

@@ -12,8 +12,7 @@ jobs:
 
     services:
       postgres:
-        # Use Citus image for Citus tests, regular PostgreSQL for standard tests
-        image: ${{ matrix.db_type == 'citus' && 'citusdata/citus:13.0.3' || 'postgres:16' }}
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -25,11 +24,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
-    strategy:
-      matrix:
-        db_type: ["standard", "citus"]
-      fail-fast: false
 
     steps:
       - uses: actions/checkout@v3
@@ -52,20 +46,10 @@ jobs:
       - name: Install JavaScript dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Install bundle dependencies for standard PostgreSQL
-        if: matrix.db_type == 'standard'
-        env:
-          CITUS_ENABLED: "false"
+      - name: Install bundle dependencies
         run: bundle install --jobs 4 --retry 3
 
-      - name: Install bundle dependencies for Citus
-        if: matrix.db_type == 'citus'
-        env:
-          CITUS_ENABLED: "true"
-        run: bundle install --jobs 4 --retry 3
-
-      - name: Run tests with standard PostgreSQL
-        if: matrix.db_type == 'standard'
+      - name: Run tests
         env:
           RAILS_ENV: test
           POSTGRES_DB: dynamic_links_test
@@ -74,29 +58,6 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
           RAILS_MAX_THREADS: 5
-          SHORTENING_STRATEGY: md5
-          REDIS_HOST: localhost
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY_BASE: test_secret_key_base_for_ci_environment
-          CITUS_ENABLED: "false"
-        run: |
-          bundle exec rails db:drop db:create db:migrate
-          bundle exec rails db:test:prepare
-          yarn build
-          yarn build:css
-          bundle exec rails test
-
-      - name: Run tests with Citus
-        if: matrix.db_type == 'citus'
-        env:
-          RAILS_ENV: test
-          POSTGRES_DB: dynamic_links_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          RAILS_MAX_THREADS: 5
-          CITUS_ENABLED: "true"
           SHORTENING_STRATEGY: md5
           REDIS_HOST: localhost
           REDIS_URL: redis://localhost:6379/0
@@ -113,5 +74,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-report-${{ matrix.db_type }}
+          name: coverage-report
           path: coverage/

@@ -89,7 +89,6 @@ group :test do
   gem 'mock_redis'
 end
 
-# Removed Citus and activerecord-multi-tenant dependencies
 # Now using Rails 8 multi-database features
 gem 'dynamic_links', path: 'engines/dynamic_links'
 gem 'nanoid'

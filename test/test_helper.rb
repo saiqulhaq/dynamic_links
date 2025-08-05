@@ -3,6 +3,14 @@
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 require 'rails/test_help'
+require 'mock_redis'
+
+# Override RedisConn for test environment
+module RedisConn
+  def self.current
+    @current ||= MockRedis.new
+  end
+end
 
 module ActiveSupport
   class TestCase

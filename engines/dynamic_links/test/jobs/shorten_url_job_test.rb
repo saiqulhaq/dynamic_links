@@ -16,7 +16,9 @@ module DynamicLinks
       @locker = DynamicLinks::Async::Locker.new
       @job = ShortenUrlJob.new
       StrategyFactory.stubs(:get_strategy).returns(@strategy)
-      @locker.cache_store.write(@lock_key, true)
+      
+      # Set up the lock using the locker's increment method to simulate proper lock acquisition
+      @locker.cache_store.write(@lock_key, 1, expires_in: 60)
     end
 
     test 'perform should create a shortened URL if strategy#always_growing? is true' do
@@ -46,7 +48,8 @@ module DynamicLinks
 
     test 'perform should log error and re-raise exception on failure' do
       @strategy.stubs(:always_growing?).returns(true)
-      ShortenedUrl.stubs(:create!).raises(ShorteningFailed.new('Creation failed'))
+      @job.stubs(:storage).returns(@storage)
+      @storage.stubs(:create!).raises(ShorteningFailed.new('Creation failed'))
       DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/Error in ShortenUrlJob/))
 
       assert_raises ShorteningFailed do

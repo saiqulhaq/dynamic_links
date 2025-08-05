@@ -2,7 +2,6 @@
 
 module DynamicLinks
   # Service to handle tenant-specific database connections using Rails 8 multi-database features
-  # This replaces the previous Citus-based multi-tenancy approach
   class TenantDatabaseService
     class << self
       # Execute a block with a specific tenant's database connection

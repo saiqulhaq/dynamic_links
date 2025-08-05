@@ -26,16 +26,6 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     strategy:
       matrix:
         db_type: ["standard", "citus"]
@@ -117,6 +107,7 @@ jobs:
           yarn build
           yarn build:css
           bundle exec rails test
+          bundle exec rails test engines/dynamic_links
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4

@@ -1,0 +1,65 @@
+name: Engine Tests
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dynamic_links_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4.4"
+          bundler-cache: false
+
+      - name: Install bundle dependencies
+        working-directory: ./engines/dynamic_links
+        run: bundle install --jobs 4 --retry 3
+
+      - name: Setup database and run tests
+        working-directory: ./engines/dynamic_links
+        env:
+          RAILS_ENV: test
+          POSTGRES_DB: dynamic_links_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          RAILS_MAX_THREADS: 5
+          SHORTENING_STRATEGY: md5
+          REDIS_HOST: localhost
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY_BASE: test_secret_key_base_for_ci_environment
+        run: |
+          bundle exec rails db:drop db:create db:migrate
+          bundle exec rails db:test:prepare
+          bundle exec rails test
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: engine-coverage-report
+          path: engines/dynamic_links/coverage/

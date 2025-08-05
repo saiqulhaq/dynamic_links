@@ -216,10 +216,22 @@ For production deployment, you'll need to:
 
 All configuration is managed through environment variables. Copy `.env.example` to `.env` and adjust the values for your setup. Key variables include:
 
+### Core Application
 - `DATABASE_URL` - PostgreSQL connection string
 - `REDIS_URL` - Redis connection string
 - `SECRET_KEY_BASE` - Rails secret key
 - `RAILS_ENV` - Environment (development/production)
+
+### Production Security & Networking
+- `ALLOWED_HOSTS` - Comma-separated list of allowed hostnames for DNS rebinding protection (default: `example.com,*.example.com`)
+- `TRUSTED_PROXIES` - Comma-separated list of CIDR ranges for trusted proxies (default: empty, configure for Kubernetes/Docker networks)
+- `RACK_ATTACK_TRUSTED_IPS` - Comma-separated list of IP addresses with higher rate limits (default: empty)
+
+### Kubernetes/Docker Deployment
+For Kubernetes deployment with ConfigMap, configure these variables:
+- Set `ALLOWED_HOSTS` to your domain(s), e.g., `myapp.com,*.myapp.com`
+- Set `TRUSTED_PROXIES` to your cluster's CIDR ranges, e.g., `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`
+- Optionally set `RACK_ATTACK_TRUSTED_IPS` for specific IPs that need higher rate limits
 
 ## Contributing
 

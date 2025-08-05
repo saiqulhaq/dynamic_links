@@ -119,6 +119,8 @@ GEM
     minitest (5.25.5)
     mocha (2.7.1)
       ruby2_keywords (>= 0.0.5)
+    mock_redis (0.51.0)
+      redis (~> 5)
     nanoid (2.0.0)
     net-imap (0.5.9)
       date
@@ -260,6 +262,7 @@ DEPENDENCIES
   dotenv-rails
   dynamic_links!
   mocha
+  mock_redis
   nanoid (>= 2, < 3)
   ostruct
   pg (>= 0.18, < 2.0)

@@ -1,78 +1,56 @@
 {
-  "name": "Ruby on Rails Dynamic Links",
-  "image": "mcr.microsoft.com/devcontainers/ruby:3.4-bookworm",
-  "workspaceFolder": "/workspaces/dynamic_links",
-  "forwardPorts": [
-    3000,
-    6379,
-    5432
-  ],
+  "name": "Dynamic Links Ruby on Rails",
+  "dockerComposeFile": "compose.yaml",
+  "service": "rails-app",
+  "forwardPorts": [3000],
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "22"
-    },
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": true,
-      "configureZshAsDefaultShell": true,
-      "installOhMyZsh": true,
-      "installOhMyZshConfig": true,
-      "upgradePackages": true
-    }
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/rails/devcontainer/features/activestorage": {},
+    "ghcr.io/rails/devcontainer/features/sqlite3": {}
   },
-  "runArgs": [
-    "--name",
-    "dynamic_links_devcontainer"
-  ],
+  // "runArgs": ["--cap-add=NET_ADMIN", "--cap-add=NET_RAW"],
   "customizations": {
     "vscode": {
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "editor.formatOnSave": true,
-        "ruby.useBundler": true,
-        "ruby.useLanguageServer": true,
-        "ruby.lint": {
-          "rubocop": true
-        },
-        "editor.tabSize": 2,
-        "files.associations": {
-          "*.erb": "erb",
-          "Gemfile": "ruby",
-          "Rakefile": "ruby",
-          "*.rake": "ruby"
-        },
-        "[ruby]": {
-          "editor.tabSize": 2,
-          "editor.insertSpaces": true
-        },
-        "ruby.format": "rubocop"
-      },
       "extensions": [
-        "rebornix.ruby",
-        "castwide.solargraph",
-        "kaiwood.endwise",
-        "aliariff.vscode-erb-beautify",
-        "misogi.ruby-rubocop",
-        "wingrunr21.vscode-ruby",
-        "editorconfig.editorconfig",
-        "davidanson.vscode-markdownlint",
+        "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "eamodio.gitlens",
-        "streetsidesoftware.code-spell-checker",
-        "donjayamanne.githistory",
-        "aki77.rails-db-schema"
-      ]
+        "shopify.ruby-lsp",
+        "koichisasada.vscode-rdbg",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-json",
+        "GitHub.vscode-github-actions"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          },
+          "zsh": {
+            "path": "zsh"
+          }
+        }
+      }
     }
   },
-  "onCreateCommand": "bash -c 'gem install bundler && bundle install && npm install -g yarn && yarn install'",
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y postgresql-client redis-tools",
-  "postStartCommand": "bash -c 'source .env && docker-compose --profile postgres --profile redis up -d && echo \"PostgreSQL (localhost:5432) and Redis (localhost:6379) services started via Docker Compose\"'",
-  "portsAttributes": {
-    "3000": {
-      "label": "Rails Server",
-      "onAutoForward": "notify"
-    }
+  "remoteUser": "node",
+  "mounts": [
+    "source=${localEnv:HOME}/.config/claude,target=/workspace/.claude-config,type=bind",
+    "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume"
+  ],
+  "containerEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=4096",
+    "CLAUDE_CONFIG_DIR": "/workspace/.claude-config",
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true"
   },
-  "remoteUser": "vscode"
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "bin/setup --skip-server"
 }

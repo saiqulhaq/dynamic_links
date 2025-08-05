@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 DynamicLinks.configure do |config|
-  # Shortening strategy: :md5 (default), :nanoid, :redis_counter, :sha256, etc.
-  config.shortening_strategy = :nanoid
+  # Shortening strategy: :md5 (default), :nano_id, :redis_counter, :sha256, etc.
+  config.shortening_strategy = :nano_id
 
   # Enable or disable the REST API endpoints
   config.enable_rest_api = true

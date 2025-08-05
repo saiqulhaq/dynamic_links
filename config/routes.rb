@@ -2,7 +2,7 @@
 
 Rails.application.routes.draw do
   mount_avo
-  root to: 'pages#home'
+  root to: 'up#databases'
 
   get '/up/', to: 'up#index', as: :up
   get '/up/databases', to: 'up#databases', as: :up_databases

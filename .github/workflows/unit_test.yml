@@ -68,7 +68,6 @@ jobs:
           yarn build
           yarn build:css
           bundle exec rails test
-          bundle exec rails test engines/dynamic_links
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4

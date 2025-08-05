@@ -217,6 +217,8 @@ GEM
     minitest (5.25.5)
     mocha (2.7.1)
       ruby2_keywords (>= 0.0.5)
+    mock_redis (0.51.0)
+      redis (~> 5)
     msgpack (1.8.0)
     nanoid (2.0.0)
     net-imap (0.5.9)
@@ -438,6 +440,7 @@ DEPENDENCIES
   hotwire-spark (~> 0.1)
   jbuilder
   mocha
+  mock_redis
   msgpack (>= 1.7.0)
   nanoid
   pg (~> 1.1)

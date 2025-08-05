@@ -84,6 +84,9 @@ group :test do
   gem 'dalli', '~> 2.7', '>= 2.7.6', require: false
   gem 'mocha'
   gem 'timecop'
+  
+  # Mock Redis for testing
+  gem 'mock_redis'
 end
 
 # Removed Citus and activerecord-multi-tenant dependencies

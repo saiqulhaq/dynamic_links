@@ -33,8 +33,7 @@ module RailsDynamicLinks
     # Set Redis as the back-end for the cache.
     config.cache_store = :redis_cache_store, {
       url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/1'),
-      namespace: 'cache',
-      serializer: :message_pack
+      namespace: 'cache'
     }
 
     # Set Sidekiq as the back-end for Active Job.

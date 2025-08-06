@@ -40,6 +40,14 @@
       }
     }
   },
+  "onCreateCommand": "bash -c 'gem install bundler && bundle install && npm install -g yarn && yarn install'",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y postgresql-client redis-tools && bin/setup --skip-server && npm install -g @anthropic-ai/claude-code",
+  "postStartCommand": "bash -c 'source .env && docker-compose --profile postgres --profile redis up -d && echo \"PostgreSQL (localhost:5432) and Redis (localhost:6379) services started via Docker Compose\"'",
+  "portsAttributes": {
+    "3000": {
+      "label": "Rails Server",
+      "onAutoForward": "notify"
+    }
   "remoteUser": "node",
   "mounts": [
     "source=${localEnv:HOME}/.config/claude,target=/workspace/.claude-config,type=bind",
@@ -51,6 +59,5 @@
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true"
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
-  "workspaceFolder": "/workspace",
-  "postCreateCommand": "bin/setup --skip-server"
+  "workspaceFolder": "/workspace"
 }

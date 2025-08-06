@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Engine Tests
 
 on:
   push:
@@ -29,28 +29,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-          cache: "yarn"
-
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4.4"
           bundler-cache: false
 
-      - name: Install gem dependencies
-        run: gem install bundler
-
-      - name: Install JavaScript dependencies
-        run: yarn install --frozen-lockfile
-
       - name: Install bundle dependencies
+        working-directory: ./engines/dynamic_links
         run: bundle install --jobs 4 --retry 3
 
-      - name: Run tests
+      - name: Setup database and run tests
+        working-directory: ./engines/dynamic_links
         env:
           RAILS_ENV: test
           POSTGRES_DB: dynamic_links_test
@@ -66,13 +56,11 @@ jobs:
         run: |
           bundle exec rails db:drop db:create db:migrate
           bundle exec rails db:test:prepare
-          yarn build
-          yarn build:css
           bundle exec rails test
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-report
-          path: coverage/
+          name: engine-coverage-report
+          path: engines/dynamic_links/coverage/

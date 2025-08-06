@@ -23,12 +23,4 @@ Gem::Specification.new do |spec|
   end
 
   spec.add_dependency 'rails', '>= 5', '< 9'
-  spec.add_development_dependency 'nanoid', '>= 2', '< 3'
-  spec.add_development_dependency 'redis', '>= 4', '< 6'
-  # spec.add_development_dependency 'annotate', '>= 3', '< 4'
-  spec.add_development_dependency 'timecop', '< 1'
-  # add dotenv gem
-  spec.add_development_dependency 'dotenv-rails', '>= 2', '< 3'
-  # add ostruct for Ruby 3.5+ compatibility
-  spec.add_development_dependency 'ostruct'
 end

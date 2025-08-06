@@ -32,3 +32,5 @@ coverage
 .DS_Store
 .ruby-version
 node_modules
+.claude-config
+.claude

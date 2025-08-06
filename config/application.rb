@@ -23,10 +23,9 @@ module RailsDynamicLinks
     config.action_dispatch.cookies_serializer = :message_pack
 
     # Log to STDOUT for better development and production visibility
-    config.logger = ActiveSupport::TaggedLogging.logger($stdout)
-    # config.logger = ActiveSupport::Logger.new(STDOUT)
-    #   .tap  { |logger| logger.formatter = ::Logger::Formatter.new }
-    #   .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
+    config.logger = ActiveSupport::Logger.new(STDOUT)
+                                         .tap  { |logger| logger.formatter = ::Logger::Formatter.new }
+                                         .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
 
     # Various functionality in Rails requires setting a host URL.
     routes.default_url_options[:host] = ENV.fetch('URL_HOST', 'localhost:8000')

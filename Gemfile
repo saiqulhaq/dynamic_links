@@ -41,6 +41,9 @@ gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 # Execute jobs in the background [https://github.com/mperham/sidekiq]
 gem 'sidekiq', '~> 8.0'
 
+# Admin interface [https://avohq.io]
+gem 'avo'
+
 # Application Performance Monitoring (conditionally loaded based on configuration)
 require_elastic_apm = ENV.fetch('ELASTIC_APM_ENABLED', 'false').downcase == 'true'
 gem 'elastic-apm', require: require_elastic_apm
@@ -81,9 +84,11 @@ group :test do
   gem 'dalli', '~> 2.7', '>= 2.7.6', require: false
   gem 'mocha'
   gem 'timecop'
+  
+  # Mock Redis for testing
+  gem 'mock_redis'
 end
 
-# Removed Citus and activerecord-multi-tenant dependencies
 # Now using Rails 8 multi-database features
 gem 'dynamic_links', path: 'engines/dynamic_links'
 gem 'nanoid'

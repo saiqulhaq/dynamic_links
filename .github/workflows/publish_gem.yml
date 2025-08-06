@@ -1,15 +1,23 @@
-name: Unit Tests
+name: Publish Gem
 
 on:
   push:
-    branches: [master, main]
-  pull_request:
-    branches: [master, main]
+    tags:
+      - 'v*'
   workflow_dispatch:
+    inputs:
+      gem_version:
+        description: 'Gem version to publish (e.g., 1.0.0)'
+        required: true
+        type: string
 
 jobs:
-  test:
+  publish:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: write
 
     services:
       postgres:
@@ -27,30 +35,21 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-          cache: "yarn"
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4.4"
+          ruby-version: '3.4.4'
           bundler-cache: false
 
-      - name: Install gem dependencies
-        run: gem install bundler
-
-      - name: Install JavaScript dependencies
-        run: yarn install --frozen-lockfile
-
       - name: Install bundle dependencies
+        working-directory: ./engines/dynamic_links
         run: bundle install --jobs 4 --retry 3
 
-      - name: Run tests
+      - name: Setup database and run tests
+        working-directory: ./engines/dynamic_links
         env:
           RAILS_ENV: test
           POSTGRES_DB: dynamic_links_test
@@ -66,13 +65,19 @@ jobs:
         run: |
           bundle exec rails db:drop db:create db:migrate
           bundle exec rails db:test:prepare
-          yarn build
-          yarn build:css
           bundle exec rails test
 
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-report
-          path: coverage/
+      - name: Build gem
+        working-directory: ./engines/dynamic_links
+        run: gem build dynamic_links.gemspec
+
+      - name: Set up authentication for GitHub Packages
+        run: |
+          mkdir -p $HOME/.gem
+          echo ":github: Bearer ${{ secrets.GITHUB_TOKEN }}" > $HOME/.gem/credentials
+          chmod 0600 $HOME/.gem/credentials
+
+      - name: Publish to GitHub Package Registry
+        working-directory: ./engines/dynamic_links
+        run: |
+          gem push --key github --host https://rubygems.pkg.github.com/${{ github.repository_owner }} *.gem

@@ -282,18 +282,6 @@ rails db:test:prepare
 rails test
 ```
 
-### When using PostgreSQL DB with Citus
-
-```bash
-export CITUS_ENABLED=true
-rails db:setup
-rails db:test:prepare
-rails test
-```
-
-Note:
-Make sure the Citus extension already enabled on the installed PostgreSQL
-We don't manage it on Rails.
 
 ## License
 

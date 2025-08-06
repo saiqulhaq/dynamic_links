@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 DynamicLinks.configure do |config|
-  # Shortening strategy: :md5 (default), :nanoid, :redis_counter, :sha256, etc.
-  config.shortening_strategy = :md5
+  # Shortening strategy: :md5 (default), :nano_id, :redis_counter, :sha256, etc.
+  config.shortening_strategy = :nano_id
 
   # Enable or disable the REST API endpoints
   config.enable_rest_api = true
@@ -16,12 +16,12 @@ DynamicLinks.configure do |config|
   # config.redis_pool_timeout = 3
 
   # Fallback mode: redirect to Firebase if short link not found locally
-  config.enable_fallback_mode = false
-  config.firebase_host = 'https://example.app.goo.gl'
+  config.enable_fallback_mode = ENV.fetch('FALLBACK_MODE', 'false') == 'true'
+  config.firebase_host = ENV.fetch('FIREBASE_HOST', 'https://your-firebase-project.firebaseio.com')
 
   # Example cache store (using Redis)
   cache_store = ActiveSupport::Cache::RedisCacheStore.new(
-    url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/0/cache'),
+    url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/0'),
     namespace: 'dynamic_links'
   )
   config.cache_store = cache_store

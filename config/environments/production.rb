@@ -81,11 +81,19 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [:id]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  #
+  # Configure allowed hosts from environment variable
+  allowed_hosts = ENV.fetch('ALLOWED_HOSTS', '').split(',').map(&:strip)
+  config.hosts = allowed_hosts.map do |host|
+    host.start_with?('*.') ? Regexp.new('\\A.*\\.' + Regexp.escape(host[2..-1]) + '\\z') : host
+  end
+
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  # Configure trusted proxies from environment variable
+  trusted_proxy_ranges = ENV.fetch('TRUSTED_PROXIES', '')
+                            .split(',')
+                            .map(&:strip)
+                            .reject(&:empty?)
+  config.action_dispatch.trusted_proxies = trusted_proxy_ranges.map { |range| IPAddr.new(range) }
 end

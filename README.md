@@ -206,6 +206,19 @@ For production deployment, you'll need to:
 5. Use a process manager like systemd or supervisor to manage Rails and Sidekiq processes
 6. Set up a reverse proxy (nginx/Apache) to serve static files and proxy requests
 
+### Puma Configuration
+
+The application uses Puma as the web server with intelligent worker configuration:
+
+- **Default behavior**: Uses `Etc.nprocessors * 2` workers with app preloading for optimal performance
+- **Containerized environments**: Set `WEB_CONCURRENCY=0` for single-process mode to avoid memory issues and child process warnings in limited memory containers (e.g., Kubernetes with 512Mi memory limit)
+- **Custom worker count**: Set `WEB_CONCURRENCY=N` to use exactly N workers
+
+**Container Deployment Recommendations:**
+- For containers with ≤512Mi memory: Use `WEB_CONCURRENCY=0` (single process)
+- For containers with ≥1Gi memory: Use `WEB_CONCURRENCY=1` or higher
+- The configuration automatically handles SIGCHLD signals to prevent "reaped unknown child process" warnings in containerized environments
+
 ## Development Tools
 
 - Code formatting: `bundle exec rubocop -a`

@@ -34,7 +34,8 @@ threads threads_count, threads_count
 # the concurrency of the application would be max `threads` * `workers`.
 # Workers do not work on JRuby or Windows (both of which do not support
 # processes). It defaults to the number of (virtual cores * 2).
-ENV.fetch('WEB_CONCURRENCY') { Etc.nprocessors * 2 }
+worker_count = ENV.fetch('WEB_CONCURRENCY') { Etc.nprocessors * 2 }.to_i
+workers worker_count
 
 # Specifies the `worker_timeout` threshold that Puma will use to wait before
 # terminating a worker in development environments.
@@ -44,7 +45,13 @@ worker_timeout 3600 if ENV.fetch('RAILS_ENV', 'development') == 'development'
 # This directive tells Puma to first boot the application and load code
 # before forking the application. This takes advantage of Copy On Write
 # process behavior so workers use less memory.
-preload_app!
+preload_app! if worker_count > 1
+
+# Prevent "reaped unknown child process" warnings by properly handling SIGCHLD
+on_worker_boot do
+  # Ignore SIGCHLD signals to prevent "reaped unknown child process" warnings
+  Signal.trap('CHLD', 'IGNORE')
+end
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart

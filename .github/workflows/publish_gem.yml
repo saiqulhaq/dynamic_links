@@ -42,25 +42,10 @@ jobs:
       - name: Build gem
         run: gem build dynamic_links.gemspec
 
-      - name: Publish to RubyGems.org
-        env:
-          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_AUTH_TOKEN }}
-          GEM_HOST_OTP_CODE: ${{ secrets.RUBYGEMS_OTP_SECRET }}
-        run: |
-          mkdir -p $HOME/.gem
-          echo ":rubygems_api_key: $GEM_HOST_API_KEY" > $HOME/.gem/credentials
-          chmod 0600 $HOME/.gem/credentials
-          if [ -n "$GEM_HOST_OTP_CODE" ]; then
-            gem push *.gem --otp "$GEM_HOST_OTP_CODE"
-          else
-            gem push *.gem
-          fi
-
       - name: Set up authentication for GitHub Packages
         run: |
           mkdir -p $HOME/.gem
-          echo "---" >> $HOME/.gem/credentials
-          echo ":github: Bearer ${{ secrets.GITHUB_TOKEN }}" >> $HOME/.gem/credentials
+          echo ":github: Bearer ${{ secrets.GITHUB_TOKEN }}" > $HOME/.gem/credentials
           chmod 0600 $HOME/.gem/credentials
 
       - name: Publish to GitHub Package Registry

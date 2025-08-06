@@ -1,0 +1,63 @@
+name: Publish Gem
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      gem_version:
+        description: 'Gem version to publish (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: engines/dynamic_links
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: engines/dynamic_links
+
+      - name: Install dependencies
+        run: bundle install
+
+      - name: Run tests
+        run: bundle exec rails test
+
+      - name: Build gem
+        run: gem build dynamic_links.gemspec
+
+      - name: Publish to RubyGems.org
+        env:
+          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_AUTH_TOKEN }}
+        run: |
+          mkdir -p $HOME/.gem
+          echo ":rubygems_api_key: $GEM_HOST_API_KEY" > $HOME/.gem/credentials
+          chmod 0600 $HOME/.gem/credentials
+          gem push *.gem
+
+      - name: Set up authentication for GitHub Packages
+        run: |
+          mkdir -p $HOME/.gem
+          echo "---" >> $HOME/.gem/credentials
+          echo ":github: Bearer ${{ secrets.GITHUB_TOKEN }}" >> $HOME/.gem/credentials
+          chmod 0600 $HOME/.gem/credentials
+
+      - name: Publish to GitHub Package Registry
+        run: |
+          gem push --key github --host https://rubygems.pkg.github.com/${{ github.repository_owner }} *.gem

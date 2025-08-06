@@ -14,13 +14,25 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: engines/dynamic_links
     
     permissions:
       contents: read
       packages: write
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dynamic_links_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -29,17 +41,34 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
-          bundler-cache: true
-          working-directory: engines/dynamic_links
+          ruby-version: '3.4.4'
+          bundler-cache: false
 
-      - name: Install dependencies
-        run: bundle install
+      - name: Install bundle dependencies
+        working-directory: ./engines/dynamic_links
+        run: bundle install --jobs 4 --retry 3
 
-      - name: Run tests
-        run: bundle exec rails test
+      - name: Setup database and run tests
+        working-directory: ./engines/dynamic_links
+        env:
+          RAILS_ENV: test
+          POSTGRES_DB: dynamic_links_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          RAILS_MAX_THREADS: 5
+          SHORTENING_STRATEGY: md5
+          REDIS_HOST: localhost
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY_BASE: test_secret_key_base_for_ci_environment
+        run: |
+          bundle exec rails db:drop db:create db:migrate
+          bundle exec rails db:test:prepare
+          bundle exec rails test
 
       - name: Build gem
+        working-directory: ./engines/dynamic_links
         run: gem build dynamic_links.gemspec
 
       - name: Set up authentication for GitHub Packages
@@ -49,5 +78,6 @@ jobs:
           chmod 0600 $HOME/.gem/credentials
 
       - name: Publish to GitHub Package Registry
+        working-directory: ./engines/dynamic_links
         run: |
           gem push --key github --host https://rubygems.pkg.github.com/${{ github.repository_owner }} *.gem

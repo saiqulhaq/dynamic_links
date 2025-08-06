@@ -48,6 +48,7 @@
       "label": "Rails Server",
       "onAutoForward": "notify"
     }
+  },
   "remoteUser": "node",
   "mounts": [
     "source=${localEnv:HOME}/.config/claude,target=/workspace/.claude-config,type=bind",

@@ -45,11 +45,16 @@ jobs:
       - name: Publish to RubyGems.org
         env:
           GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_AUTH_TOKEN }}
+          GEM_HOST_OTP_CODE: ${{ secrets.RUBYGEMS_OTP_SECRET }}
         run: |
           mkdir -p $HOME/.gem
           echo ":rubygems_api_key: $GEM_HOST_API_KEY" > $HOME/.gem/credentials
           chmod 0600 $HOME/.gem/credentials
-          gem push *.gem
+          if [ -n "$GEM_HOST_OTP_CODE" ]; then
+            gem push *.gem --otp "$GEM_HOST_OTP_CODE"
+          else
+            gem push *.gem
+          fi
 
       - name: Set up authentication for GitHub Packages
         run: |

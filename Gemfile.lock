@@ -252,6 +252,8 @@ GEM
       date
       stringio
     public_suffix (6.0.2)
+    puma (6.6.1)
+      nio4r (~> 2.0)
     racc (1.8.1)
     rack (3.2.0)
     rack-attack (6.7.0)
@@ -419,6 +421,7 @@ DEPENDENCIES
   nanoid
   pg (~> 1.1)
   propshaft (~> 1.1)
+  puma (~> 6.4)
   rack-attack (~> 6.7)
   rack-mini-profiler
   rails (~> 8.0)

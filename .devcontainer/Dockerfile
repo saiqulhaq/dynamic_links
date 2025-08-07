@@ -32,6 +32,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libyaml-dev \
   libffi-dev \
   curl \
+  postgresql-client \
+  libpq-dev \
+  redis-tools  \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install rbenv and ruby 3.4.4

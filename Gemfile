@@ -93,3 +93,5 @@ end
 gem 'dynamic_links', path: 'engines/dynamic_links'
 gem 'nanoid'
 gem 'rack-attack', '~> 6.7'
+
+gem "devise"

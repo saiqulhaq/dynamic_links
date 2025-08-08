@@ -19,6 +19,8 @@
 #
 module DynamicLinks
   class ShortenedUrl < ApplicationRecord
+    include DynamicLinksAnalytics::AnalyticsAssociation if defined?(DynamicLinksAnalytics::AnalyticsAssociation)
+    
     belongs_to :client
 
     validates :url, presence: true

@@ -1,4 +1,11 @@
 PATH
+  remote: engines/dynamic_links_analytics
+  specs:
+    dynamic_links_analytics (0.1.0)
+      pg (>= 1.1)
+      rails (>= 7.0.0)
+
+PATH
   remote: engines/dynamic_links
   specs:
     dynamic_links (0.3.0)
@@ -411,6 +418,7 @@ DEPENDENCIES
   dalli (~> 2.7, >= 2.7.6)
   debug
   dynamic_links!
+  dynamic_links_analytics!
   elastic-apm
   firebase_dynamic_link
   hotwire-spark (~> 0.1)

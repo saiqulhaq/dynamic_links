@@ -8,6 +8,10 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Require our custom engines
+require 'dynamic_links'
+require 'dynamic_links_analytics'
+
 module RailsDynamicLinks
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.

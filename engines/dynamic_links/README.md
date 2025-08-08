@@ -282,6 +282,81 @@ rails db:test:prepare
 rails test
 ```
 
+## Events and Analytics Integration
+
+The DynamicLinks engine publishes Rails instrumentation events that can be consumed by analytics engines or other services to track link usage and gather insights.
+
+### Event Publishing
+
+When a shortened link is accessed and redirected, the engine publishes a `link_clicked.dynamic_links` event using Rails' `ActiveSupport::Notifications` system. This approach provides a clean separation of concerns - the dynamic_links engine focuses on URL shortening while other engines can handle analytics.
+
+### Published Events
+
+#### `link_clicked.dynamic_links`
+
+This event is triggered when a shortened link is successfully accessed and before the redirect occurs.
+
+**Event Payload:**
+
+```ruby
+{
+  shortened_url: ShortenedUrl,  # The ShortenedUrl model instance
+  short_url: String,            # The short URL identifier (e.g., "abc123")
+  original_url: String,         # The original destination URL
+  user_agent: String,           # Browser user agent string
+  referrer: String,             # HTTP referrer header (may be nil)
+  ip: String,                   # Client IP address
+  utm_source: String,           # UTM source parameter (may be nil)
+  utm_medium: String,           # UTM medium parameter (may be nil)
+  utm_campaign: String,         # UTM campaign parameter (may be nil)
+  landing_page: String,         # The full requested URL including parameters
+  request: ActionDispatch::Request  # The full Rails request object
+}
+```
+
+### Consuming Events
+
+To consume these events in your application, create a subscriber:
+
+```ruby
+# In an initializer or engine
+ActiveSupport::Notifications.subscribe('link_clicked.dynamic_links') do |name, started, finished, unique_id, payload|
+  # Handle the click event
+  shortened_url = payload[:shortened_url]
+
+  # Example: Log the click
+  Rails.logger.info "Link clicked: #{payload[:short_url]} -> #{payload[:original_url]}"
+
+  # Example: Track analytics
+  YourAnalyticsService.track_click(
+    short_url: payload[:short_url],
+    original_url: payload[:original_url],
+    user_agent: payload[:user_agent],
+    ip: payload[:ip],
+    referrer: payload[:referrer],
+    utm_params: {
+      source: payload[:utm_source],
+      medium: payload[:utm_medium],
+      campaign: payload[:utm_campaign]
+    }
+  )
+end
+```
+
+### Analytics Engine Integration
+
+For a complete analytics solution, consider using the companion `dynamic_links_analytics` engine, which automatically subscribes to these events and provides:
+
+- Visit tracking and analytics
+- Click metrics and reporting
+- UTM parameter analysis
+- Geographic and device analytics (when configured)
+
+See the `engines/dynamic_links_analytics` documentation for more details on setting up comprehensive analytics.
+
+### Event Documentation
+
+For complete event documentation including payload structure and implementation details, see [EVENTS.md](docs/EVENTS.md).
 
 ## License
 

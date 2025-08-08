@@ -179,6 +179,10 @@ See the [dynamic_links README](../dynamic_links/README.md) for all available opt
 
 To configure rate limiting, edit `config/initializers/rack_attack.rb`. See https://github.com/rack/rack-attack#throttling
 
+## Events and Analytics
+
+The `dynamic_links` engine publishes Rails instrumentation events for tracking link usage. For detailed information about events, analytics integration, and available analytics engines, see the [dynamic_links engine documentation](engines/dynamic_links/README.md#events-and-analytics-integration).
+
 ### Back-end
 
 - [PostgreSQL](https://www.postgresql.org/)
@@ -215,6 +219,7 @@ The application uses Puma as the web server with intelligent worker configuratio
 - **Custom worker count**: Set `WEB_CONCURRENCY=N` to use exactly N workers
 
 **Container Deployment Recommendations:**
+
 - For containers with ≤512Mi memory: Use `WEB_CONCURRENCY=0` (single process)
 - For containers with ≥1Gi memory: Use `WEB_CONCURRENCY=1` or higher
 - The configuration automatically handles SIGCHLD signals to prevent "reaped unknown child process" warnings in containerized environments
@@ -230,18 +235,22 @@ The application uses Puma as the web server with intelligent worker configuratio
 All configuration is managed through environment variables. Copy `.env.example` to `.env` and adjust the values for your setup. Key variables include:
 
 ### Core Application
+
 - `DATABASE_URL` - PostgreSQL connection string
 - `REDIS_URL` - Redis connection string
 - `SECRET_KEY_BASE` - Rails secret key
 - `RAILS_ENV` - Environment (development/production)
 
 ### Production Security & Networking
+
 - `ALLOWED_HOSTS` - Comma-separated list of allowed hostnames for DNS rebinding protection (default: `example.com,*.example.com`)
 - `TRUSTED_PROXIES` - Comma-separated list of CIDR ranges for trusted proxies (default: empty, configure for Kubernetes/Docker networks)
 - `RACK_ATTACK_TRUSTED_IPS` - Comma-separated list of IP addresses with higher rate limits (default: empty)
 
 ### Kubernetes/Docker Deployment
+
 For Kubernetes deployment with ConfigMap, configure these variables:
+
 - Set `ALLOWED_HOSTS` to your domain(s), e.g., `myapp.com,*.myapp.com`
 - Set `TRUSTED_PROXIES` to your cluster's CIDR ranges, e.g., `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`
 - Optionally set `RACK_ATTACK_TRUSTED_IPS` for specific IPs that need higher rate limits

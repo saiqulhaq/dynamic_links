@@ -14,11 +14,19 @@ module DynamicLinks
 
       @original_fallback_mode = DynamicLinks.configuration.enable_fallback_mode
       @original_firebase_host = DynamicLinks.configuration.firebase_host
+
+      # Clear any existing event subscribers to avoid interference
+      @events_captured = []
+      @event_subscriber = ActiveSupport::Notifications.subscribe('link_clicked.dynamic_links') do |name, started, finished, unique_id, data|
+        @events_captured << data
+      end
     end
 
     teardown do
       DynamicLinks.configuration.enable_fallback_mode = @original_fallback_mode
       DynamicLinks.configuration.firebase_host = @original_firebase_host
+      ActiveSupport::Notifications.unsubscribe(@event_subscriber) if @event_subscriber
+      @events_captured = []
     end
 
     def with_tenant(client, &block)
@@ -86,6 +94,36 @@ module DynamicLinks
 
       get shortened_url(short_url: 'nonexistent123')
       assert_response :not_found
+    end
+
+    test 'publishes click event on successful redirect' do
+      short_url = dynamic_links_shortened_urls(:one)
+      initial_event_count = @events_captured.length
+
+      get shortened_url(short_url: short_url.short_url)
+      
+      assert_response :found
+      assert_redirected_to short_url.url
+      assert_equal initial_event_count + 1, @events_captured.length
+    end
+
+    test 'does not publish click event when URL not found' do
+      initial_event_count = @events_captured.length
+
+      get shortened_url(short_url: 'nonexistent')
+      
+      assert_response :not_found
+      assert_equal initial_event_count, @events_captured.length
+    end
+
+    test 'does not publish click event when URL is expired' do
+      initial_event_count = @events_captured.length
+      short_url = dynamic_links_shortened_urls(:expired_url)
+
+      get shortened_url(short_url: short_url.short_url)
+      
+      assert_response :not_found
+      assert_equal initial_event_count, @events_captured.length
     end
   end
 end

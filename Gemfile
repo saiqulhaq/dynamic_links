@@ -51,17 +51,7 @@ gem 'elastic-apm', require: require_elastic_apm
 group :development do
   # Detect N+1 queries and unused eager loading
   gem 'bullet'
-end
 
-group :development, :test do
-  # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem 'debug', platforms: %i[mri mingw x64_mingw], require: 'debug/prelude'
-
-  # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
-  gem 'rubocop-rails-omakase', require: false
-end
-
-group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem 'web-console'
 
@@ -70,6 +60,14 @@ group :development do
 
   # Live reloading for Hotwire applications [https://github.com/hotwired/spark]
   gem 'hotwire-spark', '~> 0.1'
+end
+
+group :development, :test do
+  # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
+  gem 'debug', platforms: %i[mri mingw x64_mingw], require: 'debug/prelude'
+
+  # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
+  gem 'rubocop-rails-omakase', require: false
 end
 
 group :test do
@@ -84,11 +82,12 @@ group :test do
   gem 'dalli', '~> 2.7', '>= 2.7.6', require: false
   gem 'mocha'
   gem 'timecop'
-  
+
   # Mock Redis for testing
   gem 'mock_redis'
 end
 
+gem 'ahoy_matey'
 # Now using Rails 8 multi-database features
 gem 'dynamic_links', path: 'engines/dynamic_links'
 gem 'nanoid'

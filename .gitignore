@@ -34,3 +34,4 @@ coverage
 node_modules
 .claude-config
 .claude
+.byebug_history

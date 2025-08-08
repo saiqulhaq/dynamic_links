@@ -134,26 +134,8 @@ GEM
     nio4r (2.7.4)
     nokogiri (1.18.9-aarch64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.18.9-aarch64-linux-musl)
-      racc (~> 1.4)
-    nokogiri (1.18.9-arm-linux-gnu)
-      racc (~> 1.4)
-    nokogiri (1.18.9-arm-linux-musl)
-      racc (~> 1.4)
-    nokogiri (1.18.9-arm64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.18.9-x86_64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.18.9-x86_64-linux-gnu)
-      racc (~> 1.4)
-    nokogiri (1.18.9-x86_64-linux-musl)
-      racc (~> 1.4)
-    ostruct (0.6.1)
-    pg (1.6.0)
-    pg (1.6.0-aarch64-linux)
-    pg (1.6.0-arm64-darwin)
-    pg (1.6.0-x86_64-darwin)
-    pg (1.6.0-x86_64-linux)
+    ostruct (0.6.3)
+    pg (1.6.1-aarch64-linux)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -247,15 +229,7 @@ GEM
     zeitwerk (2.7.3)
 
 PLATFORMS
-  aarch64-linux-gnu
-  aarch64-linux-musl
-  arm-linux-gnu
-  arm-linux-musl
-  arm64-darwin
-  x86_64-darwin
-  x86_64-linux
-  x86_64-linux-gnu
-  x86_64-linux-musl
+  aarch64-linux
 
 DEPENDENCIES
   dalli (~> 2.7, >= 2.7.6)
@@ -274,4 +248,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   2.6.7
+   2.7.1

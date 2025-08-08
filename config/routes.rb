@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  # devise_for :users
+  devise_for :users
   mount_avo
   root to: 'up#databases'
 

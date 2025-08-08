@@ -282,7 +282,6 @@ rails db:test:prepare
 rails test
 ```
 
-
 ## Events and Analytics Integration
 
 The DynamicLinks engine publishes Rails instrumentation events that can be consumed by analytics engines or other services to track link usage and gather insights.
@@ -324,10 +323,10 @@ To consume these events in your application, create a subscriber:
 ActiveSupport::Notifications.subscribe('link_clicked.dynamic_links') do |name, started, finished, unique_id, payload|
   # Handle the click event
   shortened_url = payload[:shortened_url]
-  
+
   # Example: Log the click
   Rails.logger.info "Link clicked: #{payload[:short_url]} -> #{payload[:original_url]}"
-  
+
   # Example: Track analytics
   YourAnalyticsService.track_click(
     short_url: payload[:short_url],
@@ -357,7 +356,7 @@ See the `engines/dynamic_links_analytics` documentation for more details on sett
 
 ### Event Documentation
 
-For complete event documentation including payload structure and implementation details, see [EVENTS.md](EVENTS.md).
+For complete event documentation including payload structure and implementation details, see [EVENTS.md](docs/EVENTS.md).
 
 ## License
 

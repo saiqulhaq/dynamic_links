@@ -10,7 +10,7 @@ module DynamicLinks
       @client = dynamic_links_clients(:one)
       @shortened_url = dynamic_links_shortened_urls(:one)
       @controller.request.host = @client.hostname
-      
+
       @events_captured = []
       @event_subscriber = ActiveSupport::Notifications.subscribe('link_clicked.dynamic_links') do |name, started, finished, unique_id, data|
         @events_captured << data
@@ -28,10 +28,10 @@ module DynamicLinks
       @controller.request.user_agent = 'Test Agent'
       @controller.request.headers['Referer'] = 'https://example.com/referrer'
       @controller.params = ActionController::Parameters.new({
-        utm_source: 'test_source',
-        utm_medium: 'test_medium', 
-        utm_campaign: 'test_campaign'
-      })
+                                                              utm_source: 'test_source',
+                                                              utm_medium: 'test_medium',
+                                                              utm_campaign: 'test_campaign'
+                                                            })
 
       # Call the private method directly for testing
       @controller.send(:publish_click_event, @shortened_url)
@@ -49,18 +49,20 @@ module DynamicLinks
       assert_equal 'test_medium', event_data[:utm_medium]
       assert_equal 'test_campaign', event_data[:utm_campaign]
       assert_not_nil event_data[:landing_page]
-      assert_not_nil event_data[:request]
+      assert_not_nil event_data[:request_method]
+      assert_not_nil event_data[:request_path]
+      assert_not_nil event_data[:request_query_string]
     end
 
     test 'publish_click_event handles nil shortened_url gracefully' do
       @controller.send(:publish_click_event, nil)
-      
+
       assert_equal 0, @events_captured.length
     end
 
     test 'publish_click_event handles missing utm parameters' do
       @controller.params = ActionController::Parameters.new({})
-      
+
       @controller.send(:publish_click_event, @shortened_url)
 
       assert_equal 1, @events_captured.length
@@ -71,21 +73,23 @@ module DynamicLinks
       assert_nil event_data[:utm_campaign]
     end
 
-    test 'publish_click_event includes request object' do
+    test 'publish_click_event includes request information' do
       @controller.send(:publish_click_event, @shortened_url)
 
       assert_equal 1, @events_captured.length
       event_data = @events_captured.first
 
-      assert_not_nil event_data[:request]
-      assert_respond_to event_data[:request], :user_agent
-      assert_respond_to event_data[:request], :ip
-      assert_equal @controller.request, event_data[:request]
+      assert_not_nil event_data[:request_method]
+      assert_not_nil event_data[:request_path]
+      assert_not_nil event_data[:request_query_string]
+      assert_equal @controller.request.method, event_data[:request_method]
+      assert_equal @controller.request.path, event_data[:request_path]
+      assert_equal @controller.request.query_string, event_data[:request_query_string]
     end
 
     test 'publish_click_event captures landing page URL correctly' do
       expected_url = @controller.request.original_url
-      
+
       @controller.send(:publish_click_event, @shortened_url)
 
       assert_equal 1, @events_captured.length
@@ -96,11 +100,11 @@ module DynamicLinks
 
     test 'publish_click_event works with partial utm parameters' do
       @controller.params = ActionController::Parameters.new({
-        utm_source: 'partial_test',
-        utm_campaign: 'campaign_only'
-        # utm_medium is missing
-      })
-      
+                                                              utm_source: 'partial_test',
+                                                              utm_campaign: 'campaign_only'
+                                                              # utm_medium is missing
+                                                            })
+
       @controller.send(:publish_click_event, @shortened_url)
 
       assert_equal 1, @events_captured.length
@@ -114,7 +118,7 @@ module DynamicLinks
     test 'publish_click_event handles missing request headers' do
       @controller.request.stubs(:user_agent).returns(nil)
       @controller.request.stubs(:referrer).returns(nil)
-      
+
       @controller.send(:publish_click_event, @shortened_url)
 
       assert_equal 1, @events_captured.length

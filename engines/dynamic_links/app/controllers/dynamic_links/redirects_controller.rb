@@ -33,21 +33,27 @@ module DynamicLinks
     def publish_click_event(link)
       return if link.blank?
 
-      event_data = {
-        shortened_url: link,
-        short_url: link.short_url,
-        original_url: link.url,
-        user_agent: request.user_agent,
-        referrer: request.referrer,
-        ip: request.ip,
-        utm_source: params[:utm_source],
-        utm_medium: params[:utm_medium],
-        utm_campaign: params[:utm_campaign],
-        landing_page: request.original_url,
-        request: request
-      }
+      begin
+        event_data = {
+          shortened_url: link,
+          short_url: link.short_url,
+          original_url: link.url,
+          user_agent: request.user_agent,
+          referrer: request.referrer,
+          ip: request.ip,
+          utm_source: params[:utm_source],
+          utm_medium: params[:utm_medium],
+          utm_campaign: params[:utm_campaign],
+          landing_page: request.original_url,
+          request_method: request.method,
+          request_path: request.path,
+          request_query_string: request.query_string
+        }
 
-      ActiveSupport::Notifications.instrument('link_clicked.dynamic_links', event_data)
+        ActiveSupport::Notifications.instrument('link_clicked.dynamic_links', event_data)
+      rescue StandardError => e
+        Rails.logger.error("Failed to publish click event: #{e.message}")
+      end
     end
   end
 end

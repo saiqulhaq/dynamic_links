@@ -19,7 +19,14 @@ The engine automatically subscribes to Rails instrumentation events when the app
 
 ```ruby
 ActiveSupport::Notifications.subscribe('link_clicked.dynamic_links') do |_name, _started, _finished, _unique_id, payload|
-  # Extract serializable data and enqueue for async processing
+  # Extract only serializable data for the job
+  shortened_url = payload[:shortened_url]
+  serializable_payload = payload.except(:shortened_url)
+
+  # Add serializable data from the shortened_url object
+  serializable_payload[:client_id] = shortened_url.client_id if shortened_url.respond_to?(:client_id)
+
+  # Process the event asynchronously to avoid blocking the redirect
   DynamicLinksAnalytics::ClickEventProcessor.perform_later(serializable_payload)
 end
 ```
@@ -32,9 +39,12 @@ The `LinkClick` model stores analytics data with:
 - Client identification (client_id)
 - Flexible metadata storage using JSONB for:
   - UTM parameters (source, medium, campaign)
-  - Browser and device information
-  - Referrer data
-  - Request details
+  - Browser and device information (including mobile detection)
+  - Referrer data and domain extraction
+  - Request details (method, path, query string)
+  - Browser language detection
+  - Geographic data (placeholder for IP-to-location mapping)
+  - Processing timestamp
 
 ### 3. Database Schema with PostgreSQL Optimizations
 
@@ -95,9 +105,10 @@ CREATE TABLE dynamic_links_analytics_link_clicks (
 The processor:
 
 - Extracts and validates click data from event payloads
-- Enriches data with additional metadata (mobile detection, browser parsing)
-- Stores records in the database with error handling and retries
-- Logs processing for monitoring
+- Enriches data with additional metadata (mobile detection, browser parsing, language extraction)
+- Stores records in the database with comprehensive error handling and exponential backoff retries
+- Logs processing for monitoring and debugging
+- Queues jobs in the `:analytics` queue for organized processing
 
 ### 5. Analytics Service (`app/services/dynamic_links_analytics/analytics_service.rb`)
 
@@ -181,9 +192,11 @@ DynamicLinksAnalytics::LinkClick.where("metadata ->> 'is_mobile' = 'true'")
 
 The analytics engine is automatically loaded when the main application starts:
 
-1. Add to `Gemfile`: `gem 'dynamic_links_analytics', path: 'engines/dynamic_links_analytics'`
+1. Add to main `Gemfile`: `gem 'dynamic_links_analytics', path: 'engines/dynamic_links_analytics'`
 2. Run migrations: `rails db:migrate`
 3. Events are automatically consumed when the dynamic_links engine publishes them
+
+**Note**: The `engines/dynamic_links_analytics/Gemfile` is intentionally empty as dependencies are managed through the gemspec file.
 
 ## Testing
 

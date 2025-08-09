@@ -1,0 +1,11 @@
+GEM
+  specs:
+
+PLATFORMS
+  aarch64-linux
+  ruby
+
+DEPENDENCIES
+
+BUNDLED WITH
+   2.7.1

@@ -37,17 +37,31 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4.4"
-          bundler-cache: false
+          bundler-cache: true
+          working-directory: ./engines/dynamic_links
+
+      - name: Cache bundle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            engines/dynamic_links/vendor/bundle
+            ~/.bundle
+          key: ${{ runner.os }}-bundler-dynamic-links-${{ hashFiles('engines/dynamic_links/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bundler-dynamic-links-
 
       - name: Install bundle dependencies
         working-directory: ./engines/dynamic_links
-        run: bundle install --jobs 4 --retry 3
+        run: |
+          bundle config set --local deployment 'true'
+          bundle config set --local path 'vendor/bundle'
+          bundle install --jobs 4 --retry 3
 
       - name: Setup database and run tests
         working-directory: ./engines/dynamic_links
@@ -67,6 +81,14 @@ jobs:
           bundle exec rails db:drop db:create db:migrate
           bundle exec rails db:test:prepare
           bundle exec rails test
+
+      - name: Cache test database schema
+        uses: actions/cache@v4
+        with:
+          path: engines/dynamic_links/db/schema.rb
+          key: ${{ runner.os }}-schema-dynamic-links-${{ hashFiles('engines/dynamic_links/db/migrate/**/*.rb') }}
+          restore-keys: |
+            ${{ runner.os }}-schema-dynamic-links-
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -104,13 +126,23 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4.4"
           bundler-cache: true
+
+      - name: Cache bundle dependencies for analytics
+        uses: actions/cache@v4
+        with:
+          path: |
+            engines/dynamic_links_analytics/vendor/bundle
+            ~/.bundle
+          key: ${{ runner.os }}-bundler-analytics-${{ hashFiles('engines/dynamic_links_analytics/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bundler-analytics-
 
       - name: Setup database and run analytics tests
         env:

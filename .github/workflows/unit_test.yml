@@ -27,25 +27,59 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "yarn"
+
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            ~/.cache/yarn
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4.4"
-          bundler-cache: false
+          bundler-cache: true
+
+      - name: Cache bundle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor/bundle
+            ~/.bundle
+          key: ${{ runner.os }}-bundler-main-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bundler-main-
 
       - name: Install gem dependencies
-        run: gem install bundler
+        run: |
+          gem install bundler
+          bundle config set --local deployment 'true'
+          bundle config set --local path 'vendor/bundle'
 
       - name: Install JavaScript dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/assets/builds
+            public/assets
+          key: ${{ runner.os }}-assets-${{ hashFiles('app/javascript/**/*', 'app/assets/stylesheets/**/*', 'package.json', 'yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-assets-
 
       - name: Install bundle dependencies
         run: bundle install --jobs 4 --retry 3

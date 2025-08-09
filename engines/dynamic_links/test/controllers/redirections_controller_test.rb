@@ -79,6 +79,22 @@ module DynamicLinks
       assert_equal 'URL not found', @response.body
     end
 
+    test 'validates host header for malicious injection attempts' do
+      short_url = dynamic_links_shortened_urls(:one)
+
+      get shortened_url(short_url: short_url.short_url), 
+          headers: { 'Host' => "example.com\r\nX-Injected-Header: malicious" }
+      assert_response :bad_request
+    end
+
+    test 'validates host header for line feed injection attempts' do
+      short_url = dynamic_links_shortened_urls(:one)
+
+      get shortened_url(short_url: short_url.short_url), 
+          headers: { 'Host' => "example.com\nX-Injected-Header: malicious" }
+      assert_response :bad_request
+    end
+
     test 'redirects to Firebase host when short URL not found and fallback mode is enabled' do
       DynamicLinks.configuration.enable_fallback_mode = true
       DynamicLinks.configuration.firebase_host = 'https://k4mu4.app.goo.gl'

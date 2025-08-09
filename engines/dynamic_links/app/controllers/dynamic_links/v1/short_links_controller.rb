@@ -128,14 +128,14 @@ module DynamicLinks
         # Limit request size to prevent DoS
         max_size = 50.kilobytes
         if request.content_length && request.content_length > max_size
-          render json: { error: 'Request too large' }, status: :payload_too_large
+          render json: { error: 'Request too large' }, status: :content_too_large
           return
         end
 
         # Also check parameter sizes
         return unless params[:url] && params[:url].length > 2083
 
-        render json: { error: 'URL too long' }, status: :payload_too_large
+        render json: { error: 'URL too long' }, status: :content_too_large
         nil
       end
 

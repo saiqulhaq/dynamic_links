@@ -1,6 +1,5 @@
 module DynamicLinks
   class RedirectsController < ApplicationController
-    skip_before_action :validate_host_header
 
     def show
       # Validate short URL parameter for path traversal
@@ -11,10 +10,6 @@ module DynamicLinks
       end
 
       client = DynamicLinks::Client.find_by({ hostname: request.host })
-      unless client
-        render plain: 'URL not found', status: :not_found
-        return
-      end
 
       with_tenant_database(client) do
         link = ShortenedUrl.find_by(short_url: short_url)

@@ -976,17 +976,20 @@
     }, "");
   }
   function uuid() {
-    return Array.from({ length: 36 }).map((_, i) => {
-      if (i == 8 || i == 13 || i == 18 || i == 23) {
-        return "-";
-      } else if (i == 14) {
-        return "4";
-      } else if (i == 19) {
-        return (Math.floor(Math.random() * 4) + 8).toString(16);
-      } else {
-        return Math.floor(Math.random() * 15).toString(16);
-      }
-    }).join("");
+    // Use window.crypto.getRandomValues for cryptographically secure random numbers
+    const bytes = new Uint8Array(16);
+    window.crypto.getRandomValues(bytes);
+    // Per RFC4122 version 4 UUID
+    bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+    bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 10
+    const hex = Array.from(bytes, b => b.toString(16).padStart(2, "0"));
+    return (
+      hex[0] + hex[1] + hex[2] + hex[3] + "-" +
+      hex[4] + hex[5] + "-" +
+      hex[6] + hex[7] + "-" +
+      hex[8] + hex[9] + "-" +
+      hex[10] + hex[11] + hex[12] + hex[13] + hex[14] + hex[15]
+    );
   }
   function getAttribute(attributeName, ...elements) {
     for (const value of elements.map((element) => element?.getAttribute(attributeName))) {

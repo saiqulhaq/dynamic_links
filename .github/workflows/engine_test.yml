@@ -44,7 +44,7 @@ jobs:
         with:
           ruby-version: "3.4.4"
           bundler-cache: true
-          working-directory: ./engines/dynamic_links/test/dummy
+          working-directory: ./engines/dynamic_links
 
       - name: Setup test database
         working-directory: ./engines/dynamic_links/test/dummy

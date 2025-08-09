@@ -3,18 +3,18 @@ name: Publish Gem
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
     inputs:
       gem_version:
-        description: 'Gem version to publish (e.g., 1.0.0)'
+        description: "Gem version to publish (e.g., 1.0.0)"
         required: true
         type: string
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
       packages: write
@@ -41,7 +41,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
+          ruby-version: "3.4.4"
           bundler-cache: true
           working-directory: ./engines/dynamic_links
 

@@ -29,10 +29,13 @@ module DynamicLinksAnalytics
       # Build metadata hash with all tracking information
       metadata = build_metadata(payload)
 
+      # Extract client_id from the shortened_url object
+      client_id = payload[:shortened_url]&.client_id
+
       {
         short_url: payload[:short_url],
         original_url: payload[:original_url],
-        client_id: payload[:client_id], # Now extracted from the engine
+        client_id: client_id,
         ip_address: payload[:ip],
         clicked_at: Time.current,
         metadata: metadata

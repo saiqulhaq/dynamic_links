@@ -26,6 +26,16 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -35,38 +45,11 @@ jobs:
           node-version: "18"
           cache: "yarn"
 
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.yarn/berry/cache
-            ~/.cache/yarn
-            node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4.4"
           bundler-cache: true
-
-      - name: Cache bundle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            vendor/bundle
-            ~/.bundle
-          key: ${{ runner.os }}-bundler-main-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-bundler-main-
-
-      - name: Install gem dependencies
-        run: |
-          gem install bundler
-          bundle config set --local deployment 'true'
-          bundle config set --local path 'vendor/bundle'
 
       - name: Install JavaScript dependencies
         run: yarn install --frozen-lockfile
@@ -81,8 +64,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-assets-
 
-      - name: Install bundle dependencies
-        run: bundle install --jobs 4 --retry 3
+      - name: Setup database and build assets
+        env:
+          RAILS_ENV: test
+          POSTGRES_DB: dynamic_links_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+        run: |
+          bundle exec rails db:drop db:create db:migrate
+          bundle exec rails db:test:prepare
+
+      - name: Build assets
+        run: |
+          yarn build
+          yarn build:css
 
       - name: Run tests
         env:
@@ -97,12 +94,7 @@ jobs:
           REDIS_HOST: localhost
           REDIS_URL: redis://localhost:6379/0
           SECRET_KEY_BASE: test_secret_key_base_for_ci_environment
-        run: |
-          bundle exec rails db:drop db:create db:migrate
-          bundle exec rails db:test:prepare
-          yarn build
-          yarn build:css
-          bundle exec rails test
+        run: rails test
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4

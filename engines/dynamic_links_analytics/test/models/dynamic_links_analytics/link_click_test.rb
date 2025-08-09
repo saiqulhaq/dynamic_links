@@ -6,7 +6,7 @@ module DynamicLinksAnalytics
       link_click = LinkClick.new(
         short_url: 'abc123',
         original_url: 'https://example.com',
-        client_id: 'client_1',
+        client_id: 1,
         ip_address: '192.168.1.1',
         clicked_at: Time.current,
         metadata: {
@@ -28,6 +28,7 @@ module DynamicLinksAnalytics
       assert_not link_click.valid?
       assert_includes link_click.errors[:short_url], "can't be blank"
       assert_includes link_click.errors[:original_url], "can't be blank"
+      assert_includes link_click.errors[:client_id], "can't be blank"
       assert_includes link_click.errors[:clicked_at], "can't be blank"
       assert_includes link_click.errors[:ip_address], "can't be blank"
     end
@@ -36,6 +37,7 @@ module DynamicLinksAnalytics
       link_click = LinkClick.new(
         short_url: 'abc123',
         original_url: 'not_a_url',
+        client_id: 1,
         ip_address: '192.168.1.1',
         clicked_at: Time.current
       )
@@ -48,6 +50,7 @@ module DynamicLinksAnalytics
       link_click = LinkClick.create!(
         short_url: 'abc123',
         original_url: 'https://example.com',
+        client_id: 1,
         ip_address: '192.168.1.1',
         clicked_at: Time.current,
         metadata: {
@@ -67,6 +70,7 @@ module DynamicLinksAnalytics
       link_click = LinkClick.create!(
         short_url: 'abc123',
         original_url: 'https://example.com',
+        client_id: 1,
         ip_address: '192.168.1.1',
         clicked_at: Time.current,
         metadata: {
@@ -82,7 +86,7 @@ module DynamicLinksAnalytics
       LinkClick.create!(
         short_url: 'abc123',
         original_url: 'https://example.com',
-        client_id: 'client_1',
+        client_id: 1,
         ip_address: '192.168.1.1',
         clicked_at: 2.days.ago,
         metadata: { utm_source: 'google' }
@@ -91,7 +95,7 @@ module DynamicLinksAnalytics
       LinkClick.create!(
         short_url: 'abc123',
         original_url: 'https://example.com',
-        client_id: 'client_1',
+        client_id: 1,
         ip_address: '192.168.1.2',
         clicked_at: 1.day.ago,
         metadata: { utm_source: 'facebook' }
@@ -100,7 +104,7 @@ module DynamicLinksAnalytics
       LinkClick.create!(
         short_url: 'def456',
         original_url: 'https://example.com',
-        client_id: 'client_2',
+        client_id: 2,
         ip_address: '192.168.1.3',
         clicked_at: Time.current,
         metadata: { utm_source: 'google' }
@@ -109,7 +113,7 @@ module DynamicLinksAnalytics
       # Test scopes
       assert_equal 2, LinkClick.for_short_url('abc123').count
       assert_equal 1, LinkClick.for_short_url('def456').count
-      assert_equal 2, LinkClick.for_client('client_1').count
+      assert_equal 2, LinkClick.for_client(1).count
       assert_equal 2, LinkClick.with_utm_source('google').count
       assert_equal 1, LinkClick.with_utm_source('facebook').count
     end
@@ -120,6 +124,7 @@ module DynamicLinksAnalytics
         LinkClick.create!(
           short_url: 'abc123',
           original_url: 'https://example.com',
+          client_id: 1,
           ip_address: "192.168.1.#{i + 1}",
           clicked_at: Time.current,
           metadata: {}
@@ -130,6 +135,7 @@ module DynamicLinksAnalytics
       LinkClick.create!(
         short_url: 'abc123',
         original_url: 'https://example.com',
+        client_id: 1,
         ip_address: '192.168.1.1',
         clicked_at: Time.current,
         metadata: {}

@@ -29,8 +29,14 @@ module DynamicLinksAnalytics
       # Build metadata hash with all tracking information
       metadata = build_metadata(payload)
 
-      # Extract client_id from the shortened_url object
-      client_id = payload[:shortened_url]&.client_id
+      # Extract client_id from the shortened_url object or payload
+      client_id = payload[:shortened_url]&.client_id || payload[:client_id]
+
+      # Ensure client_id is present and is an integer as it's now required
+      raise ArgumentError, 'client_id is required for analytics tracking' if client_id.blank?
+
+      # Ensure it's an integer (it should already be from the domain objects)
+      client_id = client_id.to_i unless client_id.is_a?(Integer)
 
       {
         short_url: payload[:short_url],

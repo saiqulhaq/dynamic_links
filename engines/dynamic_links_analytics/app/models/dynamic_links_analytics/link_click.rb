@@ -3,9 +3,13 @@ module DynamicLinksAnalytics
     # This model stores analytics data for link clicks
     # Uses JSONB for flexible metadata storage with proper indexing
 
+    # Associations
+    belongs_to :client, class_name: 'DynamicLinks::Client', foreign_key: 'client_id', optional: true
+
     # Validations
     validates :short_url, presence: true
     validates :original_url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp }
+    validates :client_id, presence: true
     validates :clicked_at, presence: true
     validates :ip_address, presence: true
 

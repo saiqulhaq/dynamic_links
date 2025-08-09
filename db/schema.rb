@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_08_000001) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_09_102115) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -18,7 +18,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_08_000001) do
   create_table "dynamic_links_analytics_link_clicks", force: :cascade do |t|
     t.string "short_url", null: false
     t.text "original_url", null: false
-    t.string "client_id"
+    t.integer "client_id", null: false
     t.inet "ip_address", null: false
     t.datetime "clicked_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.jsonb "metadata", default: {}, null: false

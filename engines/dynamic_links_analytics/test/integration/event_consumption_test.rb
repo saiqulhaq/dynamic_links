@@ -5,7 +5,7 @@ module DynamicLinksAnalytics
     test 'should consume link_clicked event and create analytics record' do
       # Mock event payload similar to what dynamic_links engine would send
       mock_shortened_url = Struct.new(:client_id, :short_url, :url).new(
-        'client_123',
+        123,
         'abc123',
         'https://example.com'
       )
@@ -39,7 +39,7 @@ module DynamicLinksAnalytics
       link_click = LinkClick.first
       assert_equal 'abc123', link_click.short_url
       assert_equal 'https://example.com', link_click.original_url
-      assert_equal 'client_123', link_click.client_id
+      assert_equal 123, link_click.client_id
       assert_equal '192.168.1.100', link_click.ip_address.to_s
 
       # Verify metadata
@@ -52,7 +52,7 @@ module DynamicLinksAnalytics
 
     test 'should handle event with minimal payload' do
       mock_shortened_url = Struct.new(:client_id, :short_url, :url).new(
-        nil,
+        456,
         'minimal123',
         'https://minimal.com'
       )
@@ -71,7 +71,7 @@ module DynamicLinksAnalytics
       link_click = LinkClick.first
       assert_equal 'minimal123', link_click.short_url
       assert_equal 'https://minimal.com', link_click.original_url
-      assert_nil link_click.client_id
+      assert_equal 456, link_click.client_id
       assert_equal '10.0.0.1', link_click.ip_address.to_s
     end
 
@@ -87,9 +87,33 @@ module DynamicLinksAnalytics
       assert_equal 0, LinkClick.count
     end
 
+    test 'should fail when client_id is missing' do
+      mock_shortened_url = Struct.new(:client_id, :short_url, :url).new(
+        nil,
+        'no_client',
+        'https://noclient.com'
+      )
+
+      event_payload = {
+        shortened_url: mock_shortened_url,
+        short_url: 'no_client',
+        original_url: 'https://noclient.com',
+        ip: '10.0.0.1'
+      }
+
+      processor = ClickEventProcessor.new
+
+      # Should raise an error when client_id is missing
+      assert_raises(ArgumentError, 'client_id is required for analytics tracking') do
+        processor.perform(event_payload)
+      end
+
+      assert_equal 0, LinkClick.count
+    end
+
     test 'should extract browser and device information' do
       mock_shortened_url = Struct.new(:client_id, :short_url, :url).new(
-        'client_mobile',
+        789,
         'mobile123',
         'https://mobile.com'
       )
@@ -114,7 +138,7 @@ module DynamicLinksAnalytics
 
     test 'should track UTM parameters correctly' do
       mock_shortened_url = Struct.new(:client_id, :short_url, :url).new(
-        'utm_client',
+        999,
         'utm123',
         'https://utm-test.com'
       )

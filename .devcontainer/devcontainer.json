@@ -20,7 +20,8 @@
         "koichisasada.vscode-rdbg",
         "bradlc.vscode-tailwindcss",
         "ms-vscode.vscode-json",
-        "GitHub.vscode-github-actions"
+        "GitHub.vscode-github-actions",
+        "Gruntfuggly.todo-tree"
       ],
       "settings": {
         "editor.formatOnSave": true,

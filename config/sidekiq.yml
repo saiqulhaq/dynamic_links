@@ -2,3 +2,4 @@
 :queues:
   - "default"
   - "mailers"
+  - "dynamic_links_analytics_analytics"

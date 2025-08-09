@@ -3,18 +3,21 @@ name: Publish Gem
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
     inputs:
       gem_version:
-        description: 'Gem version to publish (e.g., 1.0.0)'
+        description: "Gem version to publish (e.g., 1.0.0)"
         required: true
         type: string
+
+permissions:
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
       packages: write
@@ -41,12 +44,26 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.4'
-          bundler-cache: false
+          ruby-version: "3.4.4"
+          bundler-cache: true
+          working-directory: ./engines/dynamic_links
+
+      - name: Cache bundle dependencies for gem publishing
+        uses: actions/cache@v4
+        with:
+          path: |
+            engines/dynamic_links/vendor/bundle
+            ~/.bundle
+          key: ${{ runner.os }}-bundler-publish-${{ hashFiles('engines/dynamic_links/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bundler-publish-
 
       - name: Install bundle dependencies
         working-directory: ./engines/dynamic_links
-        run: bundle install --jobs 4 --retry 3
+        run: |
+          bundle config set --local deployment 'true'
+          bundle config set --local path 'vendor/bundle'
+          bundle install --jobs 4 --retry 3
 
       - name: Setup database and run tests
         working-directory: ./engines/dynamic_links
@@ -66,6 +83,14 @@ jobs:
           bundle exec rails db:drop db:create db:migrate
           bundle exec rails db:test:prepare
           bundle exec rails test
+
+      - name: Cache gem build artifacts
+        uses: actions/cache@v4
+        with:
+          path: engines/dynamic_links/*.gem
+          key: ${{ runner.os }}-gem-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-gem-
 
       - name: Build gem
         working-directory: ./engines/dynamic_links

@@ -7,6 +7,9 @@ on:
     branches: [master, main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -26,11 +29,21 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "yarn"
@@ -39,16 +52,37 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4.4"
-          bundler-cache: false
-
-      - name: Install gem dependencies
-        run: gem install bundler
+          bundler-cache: true
 
       - name: Install JavaScript dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Install bundle dependencies
-        run: bundle install --jobs 4 --retry 3
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/assets/builds
+            public/assets
+          key: ${{ runner.os }}-assets-${{ hashFiles('app/javascript/**/*', 'app/assets/stylesheets/**/*', 'package.json', 'yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-assets-
+
+      - name: Setup database and build assets
+        env:
+          RAILS_ENV: test
+          POSTGRES_DB: dynamic_links_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+        run: |
+          bundle exec rails db:drop db:create db:migrate
+          bundle exec rails db:test:prepare
+
+      - name: Build assets
+        run: |
+          yarn build
+          yarn build:css
 
       - name: Run tests
         env:
@@ -63,12 +97,7 @@ jobs:
           REDIS_HOST: localhost
           REDIS_URL: redis://localhost:6379/0
           SECRET_KEY_BASE: test_secret_key_base_for_ci_environment
-        run: |
-          bundle exec rails db:drop db:create db:migrate
-          bundle exec rails db:test:prepare
-          yarn build
-          yarn build:css
-          bundle exec rails test
+        run: bundle exec rails test
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4

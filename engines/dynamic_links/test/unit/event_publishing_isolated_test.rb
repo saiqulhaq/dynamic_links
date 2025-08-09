@@ -7,17 +7,16 @@ require 'rails/test_help'
 
 module DynamicLinks
   class EventPublishingIsolatedTest < ActiveSupport::TestCase
-    
     def setup
       @events_captured = []
       # Subscribe only to the specific event we want to test, avoiding any other subscribers
       @event_subscriber = ActiveSupport::Notifications.subscribe('link_clicked.dynamic_links') do |name, started, finished, unique_id, data|
-        @events_captured << { 
-          name: name, 
-          started: started, 
-          finished: finished, 
-          unique_id: unique_id, 
-          data: data 
+        @events_captured << {
+          name: name,
+          started: started,
+          finished: finished,
+          unique_id: unique_id,
+          data: data
         }
       end
 
@@ -60,13 +59,13 @@ module DynamicLinks
       ActiveSupport::Notifications.instrument('link_clicked.dynamic_links', event_data)
 
       assert_equal 1, @events_captured.length
-      
+
       captured_event = @events_captured.first
       assert_equal 'link_clicked.dynamic_links', captured_event[:name]
       assert_instance_of Time, captured_event[:started]
       assert_instance_of Time, captured_event[:finished]
       assert_not_nil captured_event[:unique_id]
-      
+
       # Verify all expected data is present
       captured_data = captured_event[:data]
       assert_equal @shortened_url, captured_data[:shortened_url]
@@ -92,11 +91,11 @@ module DynamicLinks
 
       assert_equal 1, @events_captured.length
       captured_data = @events_captured.first[:data]
-      
+
       assert_equal @shortened_url, captured_data[:shortened_url]
       assert_equal 'abc123', captured_data[:short_url]
       assert_equal 'https://example.com/target', captured_data[:original_url]
-      
+
       # Other fields should be accessible even if nil
       assert captured_data.key?(:user_agent) == false || captured_data[:user_agent].nil?
     end
@@ -119,7 +118,7 @@ module DynamicLinks
 
       assert_equal 1, @events_captured.length
       captured_data = @events_captured.first[:data]
-      
+
       # Should not raise any errors
       assert_equal @shortened_url, captured_data[:shortened_url]
       assert_nil captured_data[:user_agent]
@@ -163,7 +162,7 @@ module DynamicLinks
 
       begin
         event_data = { shortened_url: @shortened_url, test_id: 'multi_subscriber' }
-        
+
         ActiveSupport::Notifications.instrument('link_clicked.dynamic_links', event_data)
 
         # Both subscribers should receive the event
@@ -206,16 +205,16 @@ module DynamicLinks
       thread1 = Thread.new do
         ActiveSupport::Notifications.instrument('link_clicked.dynamic_links', { test: 'first' })
       end
-      
-      thread2 = Thread.new do 
+
+      thread2 = Thread.new do
         ActiveSupport::Notifications.instrument('link_clicked.dynamic_links', { test: 'second' })
       end
-      
+
       thread1.join
       thread2.join
 
       assert_equal 2, @events_captured.length
-      
+
       first_id = @events_captured.first[:unique_id]
       second_id = @events_captured.last[:unique_id]
 
@@ -227,18 +226,18 @@ module DynamicLinks
     test 'controller publish_click_event method behavior simulation' do
       # Simulate the exact logic from the controller method
       link = @shortened_url
-      
+
       # Test early return condition
-      assert_not link.blank?, "Link should not be blank"
-      
+      assert_not link.blank?, 'Link should not be blank'
+
       # Simulate building event data structure like the controller does
       mock_request = Struct.new(:user_agent, :referrer, :remote_ip, :original_url).new(
         'Mock Browser 1.0',
         'https://referring-site.com',
-        '192.168.1.100', 
+        '192.168.1.100',
         'https://test.com/abc123'
       )
-      
+
       mock_params = { utm_source: 'google', utm_medium: 'organic', utm_campaign: 'summer2024' }
 
       # Build event data exactly as controller would

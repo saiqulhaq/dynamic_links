@@ -10,6 +10,7 @@ ActiveRecord::Migrator.migrations_paths << File.expand_path('../db/migrate', __d
 require 'rails/test_help'
 require 'mocha/minitest'
 require 'timecop'
+require 'pry'
 
 # Load fixtures from the engine
 if ActiveSupport::TestCase.respond_to?(:fixture_paths=)

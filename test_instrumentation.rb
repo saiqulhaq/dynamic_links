@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
 # Test script to verify that Rails instrumentation events are properly consumed
-require_relative './config/environment'
+require_relative 'config/environment'
 
-puts "=== Testing Rails Instrumentation Event Consumption ==="
+puts '=== Testing Rails Instrumentation Event Consumption ==='
 puts
 
 # Track events received
@@ -36,13 +36,13 @@ test_payload = {
   utm_campaign: 'integration_test'
 }
 
-puts "🚀 Publishing Rails instrumentation event..."
+puts '🚀 Publishing Rails instrumentation event...'
 ActiveSupport::Notifications.instrument('link_clicked.dynamic_links', test_payload)
 
 # Give a moment for async processing
 sleep(0.1)
 
-puts "✅ Event published"
+puts '✅ Event published'
 puts "📬 Events received by test subscriber: #{events_received.count}"
 
 if events_received.any?
@@ -57,35 +57,35 @@ end
 # For this test, we'll process it synchronously
 if events_received.any?
   puts
-  puts "🔄 Processing event synchronously for testing..."
+  puts '🔄 Processing event synchronously for testing...'
   processor = DynamicLinksAnalytics::ClickEventProcessor.new
   processor.perform(test_payload)
-  
+
   puts "📊 Analytics records after processing: #{DynamicLinksAnalytics::LinkClick.count}"
-  
+
   # Check the stored record
   record = DynamicLinksAnalytics::LinkClick.last
   if record&.short_url == 'test123'
-    puts "✅ Analytics record created successfully!"
+    puts '✅ Analytics record created successfully!'
     puts "   Short URL: #{record.short_url}"
     puts "   UTM Source: #{record.metadata['utm_source']}"
   else
-    puts "❌ Analytics record not found or incorrect"
+    puts '❌ Analytics record not found or incorrect'
   end
 end
 
 # Cleanup
 ActiveSupport::Notifications.unsubscribe(test_subscriber)
 puts
-puts "🧹 Test subscriber unsubscribed"
-puts "🎯 Rails instrumentation test completed!"
+puts '🧹 Test subscriber unsubscribed'
+puts '🎯 Rails instrumentation test completed!'
 
 # Verify the analytics engine's subscription is still active
 engine_subscriptions = ActiveSupport::Notifications.notifier.listeners_for('link_clicked.dynamic_links')
 puts "🔗 Active subscriptions for 'link_clicked.dynamic_links': #{engine_subscriptions.count}"
 
 if engine_subscriptions.any?
-  puts "✅ Analytics engine subscription is active and ready!"
+  puts '✅ Analytics engine subscription is active and ready!'
 else
-  puts "⚠️  No active subscriptions found"
+  puts '⚠️  No active subscriptions found'
 end

@@ -100,4 +100,9 @@ Rails.application.configure do
   # isn't insecure due to only running in development.
   config.web_console.allowed_ips = ['0.0.0.0/0']
   config.log_level = ENV.fetch('RAILS_LOG_LEVEL', 'info')
+
+  # Allow all local development hosts including dynamic client hostnames
+  # This is safe for development environment
+  config.hosts.clear if config.hosts
+  config.host_authorization = { exclude: ->(_request) { true } }
 end

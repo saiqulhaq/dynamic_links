@@ -3,17 +3,17 @@
 # Demo script to test analytics event consumption
 # This simulates what happens when the dynamic_links engine publishes a click event
 
-require_relative './config/environment'
+require_relative 'config/environment'
 
-puts "=== Dynamic Links Analytics Event Consumption Demo ==="
+puts '=== Dynamic Links Analytics Event Consumption Demo ==='
 puts
 
 # Check if the analytics table is ready
 if DynamicLinksAnalytics::LinkClick.table_exists?
-  puts "✅ Analytics table exists and is ready"
+  puts '✅ Analytics table exists and is ready'
   puts "📊 Current analytics records: #{DynamicLinksAnalytics::LinkClick.count}"
 else
-  puts "❌ Analytics table not found"
+  puts '❌ Analytics table not found'
   exit 1
 end
 
@@ -42,7 +42,7 @@ demo_event_payload = {
   request_query_string: 'utm_source=google&utm_medium=cpc&utm_campaign=summer_demo_2024'
 }
 
-puts "🔥 Publishing demo event..."
+puts '🔥 Publishing demo event...'
 puts "   Short URL: #{demo_event_payload[:short_url]}"
 puts "   Original URL: #{demo_event_payload[:original_url]}"
 puts "   Client ID: #{demo_event_payload[:shortened_url].client_id}"
@@ -54,13 +54,13 @@ puts
 processor = DynamicLinksAnalytics::ClickEventProcessor.new
 processor.perform(demo_event_payload)
 
-puts "✅ Event processed successfully!"
+puts '✅ Event processed successfully!'
 puts
 
 # Verify the data was stored
 analytics_record = DynamicLinksAnalytics::LinkClick.last
 if analytics_record
-  puts "📊 Analytics record created:"
+  puts '📊 Analytics record created:'
   puts "   ID: #{analytics_record.id}"
   puts "   Short URL: #{analytics_record.short_url}"
   puts "   Original URL: #{analytics_record.original_url}"
@@ -72,30 +72,30 @@ if analytics_record
   puts "   User Agent: #{analytics_record.metadata['user_agent'][0..60]}..."
   puts "   Is Mobile: #{analytics_record.metadata['is_mobile']}"
   puts
-  
+
   # Test the analytics queries
-  puts "🔍 Testing analytics queries:"
+  puts '🔍 Testing analytics queries:'
   puts "   Total clicks for 'demo123': #{DynamicLinksAnalytics::LinkClick.clicks_count_for('demo123')}"
   puts "   Unique visitors for 'demo123': #{DynamicLinksAnalytics::LinkClick.unique_visitors_for('demo123')}"
-  
+
   utm_params = analytics_record.utm_params
   puts "   UTM Parameters: #{utm_params}"
   puts "   Referrer Domain: #{analytics_record.referrer_domain}"
-  
+
 else
-  puts "❌ No analytics record found!"
+  puts '❌ No analytics record found!'
 end
 
 puts
-puts "🎯 Demo completed successfully! The analytics engine is ready to consume events."
+puts '🎯 Demo completed successfully! The analytics engine is ready to consume events.'
 puts
 
 # Show current pg_stat_statements availability
 if DynamicLinksAnalytics::AnalyticsService.respond_to?(:query_performance_stats)
-  puts "📈 pg_stat_statements extension: Available"
-  puts "   Query performance monitoring is enabled"
+  puts '📈 pg_stat_statements extension: Available'
+  puts '   Query performance monitoring is enabled'
 else
-  puts "📊 pg_stat_statements extension: Not available in this environment"
+  puts '📊 pg_stat_statements extension: Not available in this environment'
 end
 
 puts

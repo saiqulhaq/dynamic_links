@@ -46,62 +46,62 @@
 ```mermaid
 graph TD
     subgraph "Core Gem: dynamic_links"
-        A[URL Shortening Service] 
+        A[URL Shortening Service]
         B[Redirection Service]
         C[Event Broadcasting System]
         D[(Database Layer)]
-        
+
         A --> D
         B --> D
         A --> C
         B --> C
     end
-    
+
     subgraph "Extension Gems"
         E[dynamic_links_analytics]
         F[dynamic_links_qrcode]
         G[dynamic_links_domains]
         H[dynamic_links_dashboard]
-        
+
         C -->|dynamic_links.create| E
         C -->|dynamic_links.redirect| E
         C -->|dynamic_links.expire| E
-        
+
         C -->|dynamic_links.create| F
-        
+
         C -->|dynamic_links.create| G
         C -->|dynamic_links.redirect| G
-        
+
         C -->|All events| H
         E -->|Analytics data| H
     end
-    
+
     subgraph "Client Applications"
         I[API Clients]
         J[End Users]
-        
+
         I --> A
         J --> B
         J --> H
     end
-    
+
     subgraph "Infrastructure"
         K[Web Server]
         L[DB Server]
         M[Redis]
-        
+
         K --> A
         K --> B
         K --> E
         K --> F
         K --> G
         K --> H
-        
+
         L --> D
         M --> D
         M --> E
     end
-    
+
     style H fill:#f9f,stroke:#333,stroke-width:2px
     style E fill:#bbf,stroke:#333,stroke-width:1px
     style F fill:#ddf,stroke:#333,stroke-width:1px
@@ -121,21 +121,23 @@ The highlighted `dynamic_links_dashboard` extension would provide an administrat
 ### Shortening Strategy
 
 Supports two methods for URL shortening:
+
 1. **By Algorithm**: Default method with options like MD5, SHA-256, CRC32, nanoid, and a counter-based approach using a Redis counter or MongoDB primary key.
 2. **By KGS (Key Generation Service)**: Requires ActiveJob to seed available short links.
 3. **Manual Entry**: Users can write custom shortened URL characters (max 16 characters).
 
 _Notes_:
+
 - Both methods support time expiration (default: 100 years). An ActiveJob worker deletes expired data nightly. The redirection controller sends a job to delete expired URLs before showing a 404 page.
 - System can switch to KGS for performance optimization.
 
 ### Analytics Tracking
 
 - Uses "HTTP 302 Redirect" to ensure all redirection requests reach the backend for analytics. This is crucial for functional requirements.
-- **Implementation**: 
+- **Implementation**:
   - Core functionality (`dynamic_links`) will trigger Rails Instrumentation events on redirect
   - Analytics tracking should be implemented in a separate gem (e.g., `dynamic_links_analytics`)
-  - The analytics gem subscribes to events from the core gem and processes them using Ahoy gem
+  - The analytics gem subscribes to events from the core gem and processes them with custom analytics models
   - This separation maintains a clean core codebase while allowing for optional analytics features
 
 ### API Design
@@ -145,17 +147,18 @@ _Notes_:
 ### Analytics and Monitoring
 
 - **Core Gem**:
+
   - Logging: Utilizes Rails' logging feature for basic operations
   - Event Broadcasting: Emits instrumentation events for all significant actions
 
 - **Analytics Plugin** (`dynamic_links_analytics`):
-  - Implemented using the Ahoy gem
+  - Implemented using custom analytics models with PostgreSQL and JSONB indexing
   - Subscribes to core events and records analytics data
   - Provides visualization and reporting capabilities
 
 ### Compliance and Privacy
 
-- Adheres to policies outlined by the Ahoy gem.
+- Adheres to standard data privacy practices for analytics collection.
 
 ### Deployment Strategy
 
@@ -164,11 +167,13 @@ _Notes_:
 ### Extension Points and Plugin Development
 
 - **Core Events**: The `dynamic_links` gem emits the following instrumentation events:
+
   - `dynamic_links.redirect`: Triggered when a short link is accessed and redirected
   - `dynamic_links.create`: Triggered when a new short link is created
   - `dynamic_links.expire`: Triggered when a link expires
 
 - **Plugin Development**: To create complementary gems:
+
   1. Subscribe to core events using Rails Instrumentation
   2. Implement additional functionality without modifying the core gem
   3. Follow naming convention: `dynamic_links_*` (e.g., `dynamic_links_analytics`, `dynamic_links_qrcode`)
@@ -177,12 +182,14 @@ _Notes_:
   ```ruby
   # In dynamic_links_analytics gem
   ActiveSupport::Notifications.subscribe('dynamic_links.redirect') do |name, start, finish, id, payload|
-    # Record the event using Ahoy
-    Ahoy::Event.track(
-      "Link Clicked", 
-      url: payload[:original_url],
+    # Record the event using custom analytics model
+    DynamicLinksAnalytics::LinkClick.create!(
+      original_url: payload[:original_url],
       short_code: payload[:short_code],
-      user_agent: payload[:user_agent]
+      user_agent: payload[:user_agent],
+      ip_address: payload[:ip_address],
+      referer: payload[:referer],
+      metadata: payload[:metadata] || {}
     )
   end
   ```
@@ -194,18 +201,21 @@ _Notes_:
 The dashboard extension will provide a web-based administrative interface with the following capabilities:
 
 - **Data Management**:
+
   - View and search all shortened URLs
   - Create, edit, and delete links manually
   - Bulk operations (import/export, enable/disable)
   - Filter links by status, creation date, expiration, etc.
 
 - **Analytics Visualization**:
+
   - Traffic overview with charts and graphs
   - Click-through rates and geographic distribution
   - Referrer analysis
   - User agent and device statistics
 
 - **System Management**:
+
   - Configuration of the core system
   - Extension management
   - API key administration

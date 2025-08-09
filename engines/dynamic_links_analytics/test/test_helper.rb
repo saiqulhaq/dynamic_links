@@ -1,4 +1,4 @@
-require "test_helper"
+require 'test_helper'
 
 # Simplified test helper for the analytics engine
 # In a real implementation, this would be more comprehensive

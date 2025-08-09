@@ -5,6 +5,7 @@ This document describes the implementation of the `dynamic_links_analytics` engi
 ## Architecture Overview
 
 The analytics engine follows a plugin-based architecture that:
+
 - Subscribes to `link_clicked.dynamic_links` events published by the core dynamic_links engine
 - Processes events asynchronously using ActiveJob/Sidekiq to avoid blocking redirects
 - Stores analytics data in PostgreSQL with optimized JSONB indexing
@@ -26,6 +27,7 @@ end
 ### 2. Data Model (`app/models/dynamic_links_analytics/link_click.rb`)
 
 The `LinkClick` model stores analytics data with:
+
 - Basic click information (short_url, original_url, ip_address, clicked_at)
 - Client identification (client_id)
 - Flexible metadata storage using JSONB for:
@@ -39,6 +41,7 @@ The `LinkClick` model stores analytics data with:
 The migration (`db/migrate/20250808000001_create_dynamic_links_analytics_link_clicks.rb`) creates:
 
 #### Core Table Structure
+
 ```sql
 CREATE TABLE dynamic_links_analytics_link_clicks (
   id BIGSERIAL PRIMARY KEY,
@@ -56,17 +59,20 @@ CREATE TABLE dynamic_links_analytics_link_clicks (
 #### Performance Indexes
 
 **Basic Indexes:**
+
 - `idx_link_clicks_short_url` - Fast lookups by short URL
 - `idx_link_clicks_client_id` - Client-based analytics
 - `idx_link_clicks_clicked_at` - Time-based queries
 - `idx_link_clicks_ip_address` - Unique visitor tracking
 
 **Composite Indexes:**
+
 - `idx_link_clicks_short_url_clicked_at` - Performance analytics per link
 - `idx_link_clicks_client_id_clicked_at` - Client performance over time
 - `idx_link_clicks_short_url_ip` - Unique visitors per link
 
 **JSONB Indexes:**
+
 - `idx_link_clicks_metadata_gin` - General JSONB queries using GIN index
 - `idx_link_clicks_utm_source` - UTM source queries
 - `idx_link_clicks_utm_medium` - UTM medium queries
@@ -75,16 +81,19 @@ CREATE TABLE dynamic_links_analytics_link_clicks (
 - `idx_link_clicks_user_agent` - Browser/device analysis
 
 **Partial Indexes (for efficiency):**
+
 - `idx_link_clicks_utm_source_not_null` - Only for non-null UTM sources
 - `idx_link_clicks_utm_campaign_not_null` - Only for non-null UTM campaigns
 - `idx_link_clicks_referrer_not_null` - Only for non-null referrers
 
 #### PostgreSQL Extensions
+
 - `pg_stat_statements` - Enabled for query performance monitoring
 
 ### 4. Asynchronous Processing (`app/jobs/dynamic_links_analytics/click_event_processor.rb`)
 
 The processor:
+
 - Extracts and validates click data from event payloads
 - Enriches data with additional metadata (mobile detection, browser parsing)
 - Stores records in the database with error handling and retries
@@ -93,6 +102,7 @@ The processor:
 ### 5. Analytics Service (`app/services/dynamic_links_analytics/analytics_service.rb`)
 
 Provides optimized query methods for:
+
 - Link-specific statistics (clicks, unique visitors, referrers, UTM breakdown)
 - Client-level analytics (performance across multiple links)
 - Global system statistics
@@ -178,12 +188,14 @@ The analytics engine is automatically loaded when the main application starts:
 ## Testing
 
 Comprehensive test coverage includes:
+
 - Model validations and scopes
 - Event consumption integration tests
 - Analytics query performance tests
 - Rails instrumentation verification
 
 Run tests with:
+
 ```bash
 bin/rails test engines/dynamic_links_analytics/test/
 ```

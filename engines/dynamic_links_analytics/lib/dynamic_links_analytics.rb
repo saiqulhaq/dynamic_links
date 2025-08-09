@@ -1,5 +1,5 @@
-require "dynamic_links_analytics/version"
-require "dynamic_links_analytics/engine"
+require 'dynamic_links_analytics/version'
+require 'dynamic_links_analytics/engine'
 
 module DynamicLinksAnalytics
   # This module provides analytics capabilities for the DynamicLinks engine

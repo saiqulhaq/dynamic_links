@@ -15,7 +15,9 @@ module DynamicLinksAnalytics
         serializable_payload = payload.except(:shortened_url)
 
         # Add serializable data from the shortened_url object
-        serializable_payload[:client_id] = shortened_url.client_id if shortened_url.respond_to?(:client_id)
+        if shortened_url && shortened_url.respond_to?(:client_id)
+          serializable_payload[:client_id] = shortened_url.client_id
+        end
 
         # Process the event asynchronously to avoid blocking the redirect
         if defined?(DynamicLinksAnalytics::ClickEventProcessor)

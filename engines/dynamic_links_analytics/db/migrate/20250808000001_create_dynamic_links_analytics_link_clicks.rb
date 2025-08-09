@@ -8,7 +8,7 @@ class CreateDynamicLinksAnalyticsLinkClicks < ActiveRecord::Migration[7.0]
       t.text :original_url, null: false
       t.string :client_id
       t.inet :ip_address, null: false
-      t.datetime :clicked_at, null: false, default: -> { 'CURRENT_TIMESTAMP' }
+      t.datetime :clicked_at, null: false, default: -> { 'NOW()' }
       t.jsonb :metadata, null: false, default: {}
 
       t.timestamps

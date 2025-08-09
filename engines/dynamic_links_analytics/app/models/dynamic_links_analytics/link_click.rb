@@ -15,8 +15,8 @@ module DynamicLinksAnalytics
     scope :for_client, ->(client_id) { where(client_id: client_id) }
     scope :with_utm_source, ->(source) { where("metadata ->> 'utm_source' = ?", source) }
     scope :with_utm_campaign, ->(campaign) { where("metadata ->> 'utm_campaign' = ?", campaign) }
-    scope :from_referrer, ->(referrer) { where("metadata ->> 'referrer' ILIKE ?", "%#{referrer}%") }
-    scope :by_user_agent, ->(user_agent) { where("metadata ->> 'user_agent' ILIKE ?", "%#{user_agent}%") }
+    scope :from_referrer, ->(referrer) { where("metadata ->> 'referrer' ILIKE ?", "%#{ActiveRecord::Base.sanitize_sql_like(referrer)}%") }
+    scope :by_user_agent, ->(user_agent) { where("metadata ->> 'user_agent' ILIKE ?", "%#{ActiveRecord::Base.sanitize_sql_like(user_agent)}%") }
     scope :in_date_range, ->(start_date, end_date) { where(clicked_at: start_date..end_date) }
 
     # Analytics methods
@@ -91,7 +91,7 @@ module DynamicLinksAnalytics
 
       begin
         URI.parse(metadata['referrer']).host
-      rescue URI::InvalidURIError
+      rescue URI::Error
         nil
       end
     end

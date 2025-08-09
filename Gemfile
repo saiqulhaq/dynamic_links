@@ -79,7 +79,7 @@ group :test do
   gem 'webdrivers'
 
   # Engine test dependencies
-  gem 'dalli', '~> 2.7', '>= 2.7.6', require: false
+  gem 'dalli', '>= 3.2.3', require: false
   gem 'mocha'
   gem 'timecop'
 

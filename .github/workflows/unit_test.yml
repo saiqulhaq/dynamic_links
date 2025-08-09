@@ -94,7 +94,7 @@ jobs:
           REDIS_HOST: localhost
           REDIS_URL: redis://localhost:6379/0
           SECRET_KEY_BASE: test_secret_key_base_for_ci_environment
-        run: rails test
+        run: bundle exec rails test
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4

@@ -44,10 +44,10 @@ jobs:
         with:
           ruby-version: "3.4.4"
           bundler-cache: true
-          working-directory: ./engines/dynamic_links
+          working-directory: ./engines/dynamic_links/test/dummy
 
       - name: Setup test database
-        working-directory: ./engines/dynamic_links
+        working-directory: ./engines/dynamic_links/test/dummy
         env:
           RAILS_ENV: test
           POSTGRES_DB: dynamic_links_test
@@ -61,7 +61,7 @@ jobs:
           bundle exec rails db:create db:schema:load
 
       - name: Run dynamic_links tests
-        working-directory: ./engines/dynamic_links
+        working-directory: ./engines/dynamic_links/test/dummy
         env:
           RAILS_ENV: test
           POSTGRES_DB: dynamic_links_test
@@ -81,7 +81,7 @@ jobs:
         if: always()
         with:
           name: dynamic-links-coverage-report
-          path: engines/dynamic_links/coverage/
+          path: engines/dynamic_links/test/dummy/coverage/
 
   test-dynamic-links-analytics:
     runs-on: ubuntu-latest
@@ -119,10 +119,8 @@ jobs:
         with:
           ruby-version: "3.4.4"
           bundler-cache: true
-          working-directory: ./engines/dynamic_links_analytics
 
       - name: Setup test database
-        working-directory: ./engines/dynamic_links_analytics
         env:
           RAILS_ENV: test
           POSTGRES_DB: dynamic_links_test
@@ -136,7 +134,6 @@ jobs:
           bundle exec rails db:create db:schema:load
 
       - name: Run analytics tests
-        working-directory: ./engines/dynamic_links_analytics
         env:
           RAILS_ENV: test
           POSTGRES_DB: dynamic_links_test

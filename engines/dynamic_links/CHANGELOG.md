@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-08-09
+
+### Added
+- **Comprehensive Security Testing**: Added extensive security test suites to prevent various attacks
+  - API security tests covering SQL injection, XSS, CSRF, and authentication bypass attempts
+  - Redirect security tests for URL validation and malicious redirect prevention
+  - General security tests for input validation and edge cases
+- **Dynamic Host Authorization**: Implemented flexible host authorization system
+  - Support for dynamic host configuration and validation
+  - Integration tests for host authorization scenarios
+  - Improved security for multi-tenant deployments
+- **Click Event Instrumentation**: Added Rails instrumentation for link click tracking
+  - Event publishing when users visit short URLs
+  - Comprehensive test coverage for event publishing and consumption
+  - Support for analytics integration through Rails instrumentation
+  - Documentation for click event integration and usage
+
+### Enhanced
+- **Event Publishing**: Improved click event publishing system with better error handling and testing
+- **Test Coverage**: Significantly expanded test coverage across security, events, and host authorization
+- **Documentation**: Added detailed documentation for click events and instrumentation
+
 ## [0.3.0] - 2025-07-25
 
 - [#101](https://github.com/saiqulhaq/dynamic_links/pull/101)

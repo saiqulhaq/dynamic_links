@@ -14,7 +14,7 @@ module DynamicLinks
       )
 
       @enterprise_client = DynamicLinks::Client.create!(
-        name: 'Enterprise Client', 
+        name: 'Enterprise Client',
         api_key: 'enterprise_key',
         hostname: 'go.enterprise.local',
         scheme: 'https'
@@ -77,7 +77,8 @@ module DynamicLinks
 
     test 'host authorization logic allows requests when client hostname matches without port' do
       request = create_mock_request('/report', 'go.enterprise.local', 'go.enterprise.local:3000')
-      assert DynamicLinks::HostAuthorization.allowed?(request), 'Should allow requests when hostname matches without port'
+      assert DynamicLinks::HostAuthorization.allowed?(request),
+             'Should allow requests when hostname matches without port'
     end
 
     test 'host authorization logic rejects unregistered hostname' do
@@ -86,10 +87,10 @@ module DynamicLinks
     end
 
     test 'host authorization logic rejects partial hostname matches' do
-      # Create client with 'example.com', test 'sub.example.com' 
+      # Create client with 'example.com', test 'sub.example.com'
       client = DynamicLinks::Client.create!(
         name: 'Example Client',
-        api_key: 'example_key', 
+        api_key: 'example_key',
         hostname: 'example.com',
         scheme: 'https'
       )
@@ -122,7 +123,7 @@ module DynamicLinks
       assert_redirected_to @demo_url.url
 
       get "/#{@enterprise_url.short_url}", headers: { 'Host' => 'go.enterprise.local:8080' }
-      assert_response :redirect  
+      assert_response :redirect
       assert_redirected_to @enterprise_url.url
     end
 
@@ -132,10 +133,10 @@ module DynamicLinks
       original_firebase = DynamicLinks.configuration.firebase_host
       DynamicLinks.configuration.enable_fallback_mode = false
       DynamicLinks.configuration.firebase_host = ''
-      
+
       begin
         # Request a URL that doesn't exist at all
-        get "/nonexistent", headers: { 'Host' => 'go.enterprise.local' }
+        get '/nonexistent', headers: { 'Host' => 'go.enterprise.local' }
         assert_response :not_found, 'Should return 404 for URLs that do not exist for the client'
       ensure
         DynamicLinks.configuration.enable_fallback_mode = original_fallback
@@ -146,10 +147,10 @@ module DynamicLinks
     test 'host authorization handles database connection errors gracefully' do
       # Mock database connection error
       DynamicLinks::Client.stubs(:exists?).raises(ActiveRecord::ConnectionNotEstablished.new('Database not available'))
-      
+
       request = create_mock_request('/test', 'unknown.example.com')
       assert DynamicLinks::HostAuthorization.allowed?(request), 'Should allow request when database is not available'
-      
+
       DynamicLinks::Client.unstub(:exists?)
     end
 

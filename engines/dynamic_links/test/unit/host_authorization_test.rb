@@ -10,7 +10,7 @@ module DynamicLinks
 
     test 'allows health check endpoints' do
       @mock_request.stubs(:path).returns('/up')
-      
+
       assert HostAuthorization.allowed?(@mock_request), 'Should allow health check endpoint'
     end
 
@@ -18,7 +18,7 @@ module DynamicLinks
       @mock_request.stubs(:host).returns('localhost')
       @mock_request.stubs(:host_with_port).returns('localhost:3000')
       @mock_request.stubs(:local?).returns(true)
-      
+
       assert HostAuthorization.allowed?(@mock_request), 'Should allow localhost'
     end
 
@@ -26,7 +26,7 @@ module DynamicLinks
       @mock_request.stubs(:host).returns('127.0.0.1')
       @mock_request.stubs(:host_with_port).returns('127.0.0.1:3000')
       @mock_request.stubs(:local?).returns(true)
-      
+
       assert HostAuthorization.allowed?(@mock_request), 'Should allow 127.0.0.1'
     end
 
@@ -34,7 +34,7 @@ module DynamicLinks
       @mock_request.stubs(:host).returns('example.org')
       @mock_request.stubs(:host_with_port).returns('example.org')
       @mock_request.stubs(:local?).returns(false)
-      
+
       assert HostAuthorization.allowed?(@mock_request), 'Should allow example.org'
     end
 
@@ -42,7 +42,7 @@ module DynamicLinks
       @mock_request.stubs(:host).returns('custom.local')
       @mock_request.stubs(:host_with_port).returns('custom.local:3000')
       @mock_request.stubs(:local?).returns(true)
-      
+
       assert HostAuthorization.allowed?(@mock_request), 'Should allow local request hosts'
     end
 
@@ -57,9 +57,9 @@ module DynamicLinks
       @mock_request.stubs(:host).returns('test.example.com')
       @mock_request.stubs(:host_with_port).returns('test.example.com:3000')
       @mock_request.stubs(:local?).returns(false)
-      
+
       assert HostAuthorization.allowed?(@mock_request), 'Should allow registered client hostname'
-      
+
       client.destroy
     end
 
@@ -74,9 +74,9 @@ module DynamicLinks
       @mock_request.stubs(:host).returns('test.example.com')
       @mock_request.stubs(:host_with_port).returns('test.example.com:8080')
       @mock_request.stubs(:local?).returns(false)
-      
+
       assert HostAuthorization.allowed?(@mock_request), 'Should allow registered client hostname with port'
-      
+
       client.destroy
     end
 
@@ -84,7 +84,7 @@ module DynamicLinks
       @mock_request.stubs(:host).returns('evil.hacker.com')
       @mock_request.stubs(:host_with_port).returns('evil.hacker.com')
       @mock_request.stubs(:local?).returns(false)
-      
+
       refute HostAuthorization.allowed?(@mock_request), 'Should reject unregistered hostname'
     end
 
@@ -92,10 +92,10 @@ module DynamicLinks
       @mock_request.stubs(:host).returns('unknown.example.com')
       @mock_request.stubs(:host_with_port).returns('unknown.example.com')
       @mock_request.stubs(:local?).returns(false)
-      
+
       # Mock database connection error
       DynamicLinks::Client.stubs(:exists?).raises(ActiveRecord::ConnectionNotEstablished.new('Database not available'))
-      
+
       assert HostAuthorization.allowed?(@mock_request), 'Should allow request when database is not available'
     end
 
@@ -103,23 +103,23 @@ module DynamicLinks
       @mock_request.stubs(:host).returns('unknown.example.com')
       @mock_request.stubs(:host_with_port).returns('unknown.example.com')
       @mock_request.stubs(:local?).returns(false)
-      
+
       # Mock table not found error
       DynamicLinks::Client.stubs(:exists?).raises(ActiveRecord::StatementInvalid.new('Table does not exist'))
-      
+
       assert HostAuthorization.allowed?(@mock_request), 'Should allow request when table does not exist'
     end
 
     test 'configure! sets development host authorization' do
       Rails.stubs(:env).returns(ActiveSupport::StringInquirer.new('development'))
-      
+
       hosts_mock = mock('hosts_array')
       hosts_mock.expects(:clear).once
-      
+
       config = mock('config')
       config.expects(:hosts).twice.returns(hosts_mock)
       config.expects(:host_authorization=).once
-      
+
       HostAuthorization.configure!(config)
     end
 
@@ -127,7 +127,7 @@ module DynamicLinks
       Rails.stubs(:env).returns(ActiveSupport::StringInquirer.new('production'))
       config = mock('config')
       config.expects(:host_authorization=).once
-      
+
       HostAuthorization.configure!(config)
     end
 
@@ -135,7 +135,7 @@ module DynamicLinks
       Rails.stubs(:env).returns(ActiveSupport::StringInquirer.new('test'))
       config = mock('config')
       config.expects(:host_authorization=).once
-      
+
       HostAuthorization.configure!(config)
     end
 

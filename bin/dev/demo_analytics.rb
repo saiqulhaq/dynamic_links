@@ -3,7 +3,7 @@
 # Demo script to test analytics event consumption
 # This simulates what happens when the dynamic_links engine publishes a click event
 
-require_relative 'config/environment'
+require_relative '../../config/environment'
 
 puts '=== Dynamic Links Analytics Event Consumption Demo ==='
 puts

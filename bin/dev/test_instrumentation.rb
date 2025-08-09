@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 # Test script to verify that Rails instrumentation events are properly consumed
-require_relative 'config/environment'
+require_relative '../../config/environment'
 
 puts '=== Testing Rails Instrumentation Event Consumption ==='
 puts

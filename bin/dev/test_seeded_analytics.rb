@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 # Test script to simulate clicking a seeded short URL and verify analytics are generated
-require_relative 'config/environment'
+require_relative '../../config/environment'
 
 puts '=== Testing Analytics with Seeded Data ==='
 puts

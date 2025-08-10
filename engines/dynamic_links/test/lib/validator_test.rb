@@ -62,12 +62,12 @@ module DynamicLinks
       # Reset configuration
       original_hosts = DynamicLinks.configuration.allowed_redirect_hosts
       DynamicLinks.configuration.allowed_redirect_hosts = []
-      
+
       # Should allow all hosts when allowlist is empty (original behavior)
       assert DynamicLinks::Validator.allowed_host?('example.com')
       assert DynamicLinks::Validator.allowed_host?('any-domain.com')
       assert DynamicLinks::Validator.allowed_host?('untrusted.com')
-      
+
       # Restore original configuration
       DynamicLinks.configuration.allowed_redirect_hosts = original_hosts
     end
@@ -75,7 +75,7 @@ module DynamicLinks
     test 'allowed_host? can be configured to check dynamic client hostnames' do
       # This test shows how to enable client hostname checking if desired
       # by configuring specific allowed hosts but having a fallback
-      
+
       # Create test client
       client = DynamicLinks::Client.create!(
         name: 'Test Client',
@@ -83,14 +83,14 @@ module DynamicLinks
         hostname: 'client.example.com',
         scheme: 'https'
       )
-      
+
       # When allowlist is empty, any host is allowed (backward compatibility)
       original_hosts = DynamicLinks.configuration.allowed_redirect_hosts
       DynamicLinks.configuration.allowed_redirect_hosts = []
-      
+
       assert DynamicLinks::Validator.allowed_host?('any-domain.com')
       assert DynamicLinks::Validator.allowed_host?('client.example.com')
-      
+
       # Clean up
       client.destroy!
       DynamicLinks.configuration.allowed_redirect_hosts = original_hosts
@@ -127,18 +127,18 @@ module DynamicLinks
     end
 
     test 'allowed_host? static allowlist behavior when configured' do
-      # Reset configuration  
+      # Reset configuration
       original_hosts = DynamicLinks.configuration.allowed_redirect_hosts
       DynamicLinks.configuration.allowed_redirect_hosts = ['static.com']
-      
+
       # Should allow static config hosts
       assert DynamicLinks::Validator.allowed_host?('static.com')
       assert DynamicLinks::Validator.allowed_host?('www.static.com')
-      
+
       # Should block hosts not in allowlist when allowlist is configured
       refute DynamicLinks::Validator.allowed_host?('evil.com')
       refute DynamicLinks::Validator.allowed_host?('untrusted.com')
-      
+
       # Restore original configuration
       DynamicLinks.configuration.allowed_redirect_hosts = original_hosts
     end

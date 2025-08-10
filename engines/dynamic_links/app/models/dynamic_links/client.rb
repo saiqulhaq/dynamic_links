@@ -28,5 +28,16 @@ module DynamicLinks
     validates :hostname,
               format: { with: /\A[a-z0-9]([a-z0-9\-]{,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]{,61}[a-z0-9])?)*\z/i,
                         message: 'must be a valid hostname' }
+
+    # Prevent hostname changes to avoid breaking existing short URLs
+    validate :hostname_immutable, on: :update
+
+    private
+
+    def hostname_immutable
+      return unless hostname_changed?
+
+      errors.add(:hostname, 'cannot be changed after creation as it would break existing short URLs')
+    end
   end
 end

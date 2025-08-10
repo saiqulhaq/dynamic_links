@@ -79,7 +79,7 @@ group :test do
   gem 'webdrivers'
 
   # Engine test dependencies
-  gem 'dalli', '~> 2.7', '>= 2.7.6', require: false
+  gem 'dalli', '>= 3.2.3', require: false
   gem 'mocha'
   gem 'timecop'
 
@@ -87,8 +87,8 @@ group :test do
   gem 'mock_redis'
 end
 
-gem 'ahoy_matey'
 # Now using Rails 8 multi-database features
 gem 'dynamic_links', path: 'engines/dynamic_links'
+gem 'dynamic_links_analytics', path: 'engines/dynamic_links_analytics'
 gem 'nanoid'
 gem 'rack-attack', '~> 6.7'

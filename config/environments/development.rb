@@ -100,4 +100,7 @@ Rails.application.configure do
   # isn't insecure due to only running in development.
   config.web_console.allowed_ips = ['0.0.0.0/0']
   config.log_level = ENV.fetch('RAILS_LOG_LEVEL', 'info')
+
+  # Host authorization is handled by the dynamic_links engine
+  # In development, it allows all hosts for convenience
 end

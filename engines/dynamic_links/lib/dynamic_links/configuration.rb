@@ -5,7 +5,7 @@ module DynamicLinks
   class Configuration
     attr_reader :shortening_strategy, :enable_rest_api,
                 :async_processing, :redis_counter_config, :cache_store,
-                :enable_fallback_mode, :firebase_host
+                :enable_fallback_mode, :firebase_host, :allowed_redirect_hosts
 
     DEFAULT_SHORTENING_STRATEGY = :md5
     DEFAULT_ENABLE_REST_API = true
@@ -15,6 +15,7 @@ module DynamicLinks
     DEFAULT_CACHE_STORE = ActiveSupport::Cache::MemoryStore.new
     DEFAULT_ENABLE_FALLBACK_MODE = false
     DEFAULT_FIREBASE_HOST = nil
+    DEFAULT_ALLOWED_REDIRECT_HOSTS = [].freeze # Empty array means no host restrictions
 
     # Usage:
     #     DynamicLinks.configure do |config|
@@ -26,6 +27,7 @@ module DynamicLinks
     #       config.cache_store = ActiveSupport::Cache::RedisCacheStore.new(url: 'redis://localhost:6379/0')
     #       # if you use Memcached
     #       config.cache_store = ActiveSupport::Cache::MemCacheStore.new('localhost:11211')
+    #       config.allowed_redirect_hosts = ['example.com', 'www.example.com', 'subdomain.example.com']
     #     end
     #
     # @return [Configuration]
@@ -38,6 +40,7 @@ module DynamicLinks
       @cache_store = DEFAULT_CACHE_STORE
       @enable_fallback_mode = DEFAULT_ENABLE_FALLBACK_MODE
       @firebase_host = DEFAULT_FIREBASE_HOST
+      @allowed_redirect_hosts = DEFAULT_ALLOWED_REDIRECT_HOSTS.dup
     end
 
     def shortening_strategy=(strategy)
@@ -97,6 +100,24 @@ module DynamicLinks
       end
 
       @firebase_host = host
+    end
+
+    def allowed_redirect_hosts=(hosts)
+      if hosts.nil?
+        @allowed_redirect_hosts = DEFAULT_ALLOWED_REDIRECT_HOSTS.dup
+        return
+      end
+
+      raise ArgumentError, 'allowed_redirect_hosts must be an array of strings' unless hosts.is_a?(Array)
+
+      # Validate each host in the array
+      hosts.each do |host|
+        unless host.is_a?(String) && host.strip.present?
+          raise ArgumentError, 'All allowed_redirect_hosts must be non-empty strings'
+        end
+      end
+
+      @allowed_redirect_hosts = hosts.map(&:downcase).freeze
     end
   end
 end

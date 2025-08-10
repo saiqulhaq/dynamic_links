@@ -141,6 +141,24 @@ yarn build:css
 rails test
 ```
 
+## Comprehensive Testing
+
+For testing the entire application including all engines, use the comprehensive test runner:
+
+```bash
+./bin/test_all
+```
+
+This script will:
+
+- Run tests for the main Rails application
+- Run tests for all engines (`dynamic_links`, `dynamic_links_analytics`)
+- Provide colored output with detailed reporting
+- Show execution time and summary of results
+- Return appropriate exit codes for CI/CD integration
+
+The script automatically detects the appropriate Rails command for each component and handles engine-specific test execution.
+
 # Configuration
 
 ## DynamicLinks Engine Configuration

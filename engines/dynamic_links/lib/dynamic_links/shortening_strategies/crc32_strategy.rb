@@ -13,7 +13,10 @@ module DynamicLinks
         short_url = base62_encode(hashed_url.to_i(16))
 
         # Ensure the short URL is at least #{min_length} characters long
-        short_url.ljust(min_length, '0')
+        short_url = short_url.ljust(min_length, '0')
+
+        # Ensure it doesn't exceed the maximum length
+        enforce_max_length(short_url)
       end
     end
   end

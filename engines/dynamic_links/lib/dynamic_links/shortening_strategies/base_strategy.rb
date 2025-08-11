@@ -11,6 +11,16 @@ module DynamicLinks
         raise NotImplementedError, 'You must implement the shorten method'
       end
 
+      # Ensures the generated short URL respects the maximum length configuration
+      # @param short_url [String] The generated short URL
+      # @return [String] The short URL truncated to the maximum allowed length
+      def enforce_max_length(short_url)
+        max_length = DynamicLinks.configuration.max_shortened_url_length
+        return short_url if short_url.length <= max_length
+
+        short_url[0...max_length]
+      end
+
       # Determines if the strategy always generates a new shortened URL
       # @return [Boolean]
       def always_growing?

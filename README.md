@@ -174,6 +174,7 @@ DynamicLinks.configure do |config|
   config.enable_rest_api = true
   config.enable_fallback_mode = false  # If true, fallback to Firebase if not found
   config.firebase_host = "https://example.app.goo.gl"  # Used for fallback
+  config.max_shortened_url_length = 15  # Maximum length for shortened URL tokens (default: 15)
 end
 ```
 

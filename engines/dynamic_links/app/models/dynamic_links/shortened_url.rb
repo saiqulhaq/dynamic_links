@@ -20,11 +20,12 @@
 module DynamicLinks
   class ShortenedUrl < ApplicationRecord
     include DynamicLinksAnalytics::AnalyticsAssociation if defined?(DynamicLinksAnalytics::AnalyticsAssociation)
-    
+
     belongs_to :client
 
     validates :url, presence: true
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
+    validate :short_url_length_within_limit
 
     def self.find_or_create!(client, short_url, url)
       transaction do
@@ -41,6 +42,16 @@ module DynamicLinks
 
     def expired?
       expires_at&.past?
+    end
+
+    private
+
+    def short_url_length_within_limit
+      max_length = DynamicLinks.configuration.max_shortened_url_length
+      return unless max_length.is_a?(Integer) && max_length.positive?
+      return unless short_url.present? && short_url.length > max_length
+
+      errors.add(:short_url, "is too long (maximum is #{max_length} characters)")
     end
   end
 end

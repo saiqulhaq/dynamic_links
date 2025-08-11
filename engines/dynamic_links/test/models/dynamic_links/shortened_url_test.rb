@@ -27,7 +27,7 @@ module DynamicLinks
     setup do
       @client = dynamic_links_clients(:one)
       @url = 'https://example.com'
-      @short_url = 'shortened_url'
+      @short_url = 'shorturl' # 8 characters, within the 10 character limit
     end
 
     test 'should not save shortened url without url' do
@@ -130,6 +130,42 @@ module DynamicLinks
       DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/ShortenedUrl creation failed/))
       assert_raises ActiveRecord::RecordInvalid do
         DynamicLinks::ShortenedUrl.find_or_create!(@client, nil, @url)
+      end
+    end
+
+    test 'should validate short_url length within configured limit' do
+      # Test with default limit (15 characters)
+      valid_short_url = 'a' * 15 # exactly 15 characters
+      shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: valid_short_url)
+      assert shortened_url.valid?, 'ShortenedUrl with 15 characters should be valid'
+
+      # Test exceeding the limit
+      invalid_short_url = 'a' * 16 # 16 characters (exceeds default limit)
+      shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: invalid_short_url)
+      assert_not shortened_url.valid?, 'ShortenedUrl with 16 characters should be invalid'
+      assert_includes shortened_url.errors[:short_url], 'is too long (maximum is 15 characters)'
+    end
+
+    test 'should respect custom max_shortened_url_length configuration' do
+      # Temporarily change the configuration
+      original_length = DynamicLinks.configuration.max_shortened_url_length
+      
+      begin
+        DynamicLinks.configuration.max_shortened_url_length = 5
+
+        # Test with the new limit
+        valid_short_url = 'a' * 5 # exactly 5 characters
+        shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: valid_short_url)
+        assert shortened_url.valid?, 'ShortenedUrl with 5 characters should be valid with custom limit'
+
+        # Test exceeding the new limit
+        invalid_short_url = 'a' * 6 # 6 characters (exceeds custom limit)
+        shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: invalid_short_url)
+        assert_not shortened_url.valid?, 'ShortenedUrl with 6 characters should be invalid with custom limit'
+        assert_includes shortened_url.errors[:short_url], 'is too long (maximum is 5 characters)'
+      ensure
+        # Restore original configuration
+        DynamicLinks.configuration.max_shortened_url_length = original_length
       end
     end
   end

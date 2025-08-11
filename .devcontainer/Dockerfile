@@ -1,9 +1,10 @@
-FROM node:20
+FROM ruby:3.4.4
 
 ARG TZ
 ENV TZ="$TZ"
 
 ARG CLAUDE_CODE_VERSION=latest
+ARG NODE_VERSION=20
 
 # Install basic development tools and iptables/ipset
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -32,59 +33,51 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libyaml-dev \
   libffi-dev \
   curl \
+  wget \
+  ca-certificates \
   postgresql-client \
   libpq-dev \
   redis-tools  \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install rbenv and ruby 3.4.4
-RUN git clone https://github.com/rbenv/rbenv.git /home/node/.rbenv && \
-  git clone https://github.com/rbenv/ruby-build.git /home/node/.rbenv/plugins/ruby-build && \
-  chown -R node:node /home/node/.rbenv
+# Install Node.js 20.x using NodeSource repository
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
+  apt-get install -y nodejs
 
-# Ensure default node user has access to /usr/local/share
-RUN mkdir -p /usr/local/share/npm-global && \
-  chown -R node:node /usr/local/share
+# Install Yarn
+RUN npm install -g yarn
 
-ARG USERNAME=node
+# Install bundler
+RUN gem install bundler
 
 # Persist bash history.
-RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
-  && mkdir /commandhistory \
-  && touch /commandhistory/.bash_history \
-  && chown -R $USERNAME /commandhistory
+RUN mkdir /commandhistory && \
+  touch /commandhistory/.bash_history
 
 # Set `DEVCONTAINER` environment variable to help with orientation
 ENV DEVCONTAINER=true
 
-# Create workspace and config directories and set permissions
-RUN mkdir -p /workspace /home/node/.claude && \
-  chown -R node:node /workspace /home/node/.claude
+# Create workspace and config directories
+RUN mkdir -p /workspace /root/.claude
 
 WORKDIR /workspace
 
 ARG GIT_DELTA_VERSION=0.18.2
 RUN ARCH=$(dpkg --print-architecture) && \
   wget "https://github.com/dandavison/delta/releases/download/${GIT_DELTA_VERSION}/git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" && \
-  sudo dpkg -i "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" && \
+  dpkg -i "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" && \
   rm "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb"
 
-# Set up non-root user
-USER node
-
-# Install global packages
-ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
-ENV PATH=$PATH:/usr/local/share/npm-global/bin
+# Install global packages (staying as root user)
+ENV NPM_CONFIG_PREFIX=/usr/local
+ENV PATH="/usr/local/bin:$PATH"
 
 # Set the default shell to zsh rather than sh
 ENV SHELL=/bin/zsh
 
 # Set the default editor and visual
-ENV EDITOR nano
-ENV VISUAL nano
-
-# Set up rbenv environment
-ENV PATH="/home/node/.rbenv/bin:/home/node/.rbenv/shims:$PATH"
+ENV EDITOR=nano
+ENV VISUAL=nano
 
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
@@ -97,23 +90,15 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "source /usr/share/doc/fzf/examples/key-bindings.zsh" \
   -a "source /usr/share/doc/fzf/examples/completion.zsh" \
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
-  -a 'export PATH="/home/node/.rbenv/bin:/home/node/.rbenv/shims:$PATH"' \
-  -a 'eval "$(rbenv init -)"' \
   -x
 
-# Install Ruby 3.4.4 using rbenv
-RUN /home/node/.rbenv/bin/rbenv install 3.4.4 && \
-  /home/node/.rbenv/bin/rbenv global 3.4.4 && \
-  /home/node/.rbenv/shims/gem install bundler
-
 # Install Claude
-RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}
+RUN npm config set cache /tmp/npm-cache && \
+  npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}
 
 
 # Copy and set up firewall script
 # # COPY init-firewall.sh /usr/local/bin/
-# USER root
 # RUN chmod +x /usr/local/bin/init-firewall.sh && \
-#   echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/node-firewall && \
-#   chmod 0440 /etc/sudoers.d/node-firewall
-USER node
+#   echo "root ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/root-firewall && \
+#   chmod 0440 /etc/sudoers.d/root-firewall

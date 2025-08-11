@@ -25,6 +25,7 @@ DynamicLinks.configure do |config|
   # New configuration added in PR #88
   config.enable_fallback_mode = false  # When true, falls back to Firebase URL if a short link is not found
   config.firebase_host = "https://example.app.goo.gl"  # Firebase host URL for fallbacks
+  config.max_shortened_url_length = 15  # Maximum length for shortened URL tokens (default: 15)
 end
 ```
 

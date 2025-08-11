@@ -5,7 +5,8 @@ module DynamicLinks
   class Configuration
     attr_reader :shortening_strategy, :enable_rest_api,
                 :async_processing, :redis_counter_config, :cache_store,
-                :enable_fallback_mode, :firebase_host, :allowed_redirect_hosts
+                :enable_fallback_mode, :firebase_host, :allowed_redirect_hosts,
+                :max_shortened_url_length
 
     DEFAULT_SHORTENING_STRATEGY = :md5
     DEFAULT_ENABLE_REST_API = true
@@ -16,6 +17,7 @@ module DynamicLinks
     DEFAULT_ENABLE_FALLBACK_MODE = false
     DEFAULT_FIREBASE_HOST = nil
     DEFAULT_ALLOWED_REDIRECT_HOSTS = [].freeze # Empty array means no host restrictions
+    DEFAULT_MAX_SHORTENED_URL_LENGTH = 15 # Maximum length for shortened URL tokens
 
     # Usage:
     #     DynamicLinks.configure do |config|
@@ -28,6 +30,7 @@ module DynamicLinks
     #       # if you use Memcached
     #       config.cache_store = ActiveSupport::Cache::MemCacheStore.new('localhost:11211')
     #       config.allowed_redirect_hosts = ['example.com', 'www.example.com', 'subdomain.example.com']
+    #       config.max_shortened_url_length = 10 # Maximum length for shortened URL tokens (default: 10)
     #     end
     #
     # @return [Configuration]
@@ -41,6 +44,7 @@ module DynamicLinks
       @enable_fallback_mode = DEFAULT_ENABLE_FALLBACK_MODE
       @firebase_host = DEFAULT_FIREBASE_HOST
       @allowed_redirect_hosts = DEFAULT_ALLOWED_REDIRECT_HOSTS.dup
+      @max_shortened_url_length = DEFAULT_MAX_SHORTENED_URL_LENGTH
     end
 
     def shortening_strategy=(strategy)
@@ -118,6 +122,14 @@ module DynamicLinks
       end
 
       @allowed_redirect_hosts = hosts.map(&:downcase).freeze
+    end
+
+    def max_shortened_url_length=(length)
+      unless length.is_a?(Integer) && length.positive?
+        raise ArgumentError, 'max_shortened_url_length must be a positive integer'
+      end
+
+      @max_shortened_url_length = length
     end
   end
 end

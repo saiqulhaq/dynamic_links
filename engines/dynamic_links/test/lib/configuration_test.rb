@@ -78,5 +78,33 @@ module DynamicLinks
         @config.redis_counter_config = 123
       end
     end
+
+    test 'should set valid max_shortened_url_length' do
+      @config.max_shortened_url_length = 15
+      assert_equal 15, @config.max_shortened_url_length
+    end
+
+    test 'should raise error for invalid max_shortened_url_length' do
+      assert_raises ArgumentError do
+        @config.max_shortened_url_length = 'not a number'
+      end
+
+      assert_raises ArgumentError do
+        @config.max_shortened_url_length = -1
+      end
+
+      assert_raises ArgumentError do
+        @config.max_shortened_url_length = 0
+      end
+
+      assert_raises ArgumentError do
+        @config.max_shortened_url_length = nil
+      end
+    end
+
+    test 'should have default max_shortened_url_length' do
+      assert_equal Configuration::DEFAULT_MAX_SHORTENED_URL_LENGTH, @config.max_shortened_url_length
+      assert_equal 15, @config.max_shortened_url_length
+    end
   end
 end

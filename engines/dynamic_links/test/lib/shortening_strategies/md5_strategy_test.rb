@@ -72,6 +72,21 @@ module DynamicLinks
         assert_kind_of String, short_url
         assert short_url.length >= DynamicLinks::ShorteningStrategies::MD5Strategy::MIN_LENGTH
       end
+
+      test 'should respect max_shortened_url_length configuration' do
+        # Temporarily change the configuration to a smaller value
+        original_length = DynamicLinks.configuration.max_shortened_url_length
+        DynamicLinks.configuration.max_shortened_url_length = 6
+
+        url = 'https://www.example.com/'
+        short_url = @url_shortener.shorten(url)
+
+        # Should be truncated to the maximum length
+        assert_equal 6, short_url.length
+
+        # Restore original configuration
+        DynamicLinks.configuration.max_shortened_url_length = original_length
+      end
     end
   end
 end

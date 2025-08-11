@@ -35,7 +35,7 @@ module DynamicLinks
           counter = conn.incr(REDIS_COUNTER_KEY)
           short_url = base62_encode("#{counter}#{url.hash.abs}".to_i)
           short_url = short_url.ljust(min_length, '0')
-          short_url
+          enforce_max_length(short_url)
         end
       end
     end

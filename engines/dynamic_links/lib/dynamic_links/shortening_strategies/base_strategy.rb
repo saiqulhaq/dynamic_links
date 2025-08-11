@@ -5,7 +5,7 @@ module DynamicLinks
     class BaseStrategy
       MIN_LENGTH = 5
 
-      BASE62_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      BASE62_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.freeze
 
       def shorten(url)
         raise NotImplementedError, 'You must implement the shorten method'

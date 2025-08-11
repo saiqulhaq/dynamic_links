@@ -30,7 +30,7 @@ module DynamicLinks
     #       # if you use Memcached
     #       config.cache_store = ActiveSupport::Cache::MemCacheStore.new('localhost:11211')
     #       config.allowed_redirect_hosts = ['example.com', 'www.example.com', 'subdomain.example.com']
-    #       config.max_shortened_url_length = 10 # Maximum length for shortened URL tokens (default: 10)
+    #       config.max_shortened_url_length = 15  # Maximum length for shortened URL tokens (default: 15)
     #     end
     #
     # @return [Configuration]
@@ -127,6 +127,10 @@ module DynamicLinks
     def max_shortened_url_length=(length)
       unless length.is_a?(Integer) && length.positive?
         raise ArgumentError, 'max_shortened_url_length must be a positive integer'
+      end
+
+      unless length <= 2048
+        raise ArgumentError, 'max_shortened_url_length must be less than or equal to 2048 characters'
       end
 
       @max_shortened_url_length = length

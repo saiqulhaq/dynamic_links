@@ -149,21 +149,24 @@ module DynamicLinks
     test 'should respect custom max_shortened_url_length configuration' do
       # Temporarily change the configuration
       original_length = DynamicLinks.configuration.max_shortened_url_length
-      DynamicLinks.configuration.max_shortened_url_length = 5
+      
+      begin
+        DynamicLinks.configuration.max_shortened_url_length = 5
 
-      # Test with the new limit
-      valid_short_url = 'a' * 5 # exactly 5 characters
-      shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: valid_short_url)
-      assert shortened_url.valid?, 'ShortenedUrl with 5 characters should be valid with custom limit'
+        # Test with the new limit
+        valid_short_url = 'a' * 5 # exactly 5 characters
+        shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: valid_short_url)
+        assert shortened_url.valid?, 'ShortenedUrl with 5 characters should be valid with custom limit'
 
-      # Test exceeding the new limit
-      invalid_short_url = 'a' * 6 # 6 characters (exceeds custom limit)
-      shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: invalid_short_url)
-      assert_not shortened_url.valid?, 'ShortenedUrl with 6 characters should be invalid with custom limit'
-      assert_includes shortened_url.errors[:short_url], 'is too long (maximum is 5 characters)'
-
-      # Restore original configuration
-      DynamicLinks.configuration.max_shortened_url_length = original_length
+        # Test exceeding the new limit
+        invalid_short_url = 'a' * 6 # 6 characters (exceeds custom limit)
+        shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: invalid_short_url)
+        assert_not shortened_url.valid?, 'ShortenedUrl with 6 characters should be invalid with custom limit'
+        assert_includes shortened_url.errors[:short_url], 'is too long (maximum is 5 characters)'
+      ensure
+        # Restore original configuration
+        DynamicLinks.configuration.max_shortened_url_length = original_length
+      end
     end
   end
 end

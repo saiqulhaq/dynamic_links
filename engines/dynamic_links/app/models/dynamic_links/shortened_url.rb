@@ -48,6 +48,7 @@ module DynamicLinks
 
     def short_url_length_within_limit
       max_length = DynamicLinks.configuration.max_shortened_url_length
+      return unless max_length.is_a?(Integer) && max_length.positive?
       return unless short_url.present? && short_url.length > max_length
 
       errors.add(:short_url, "is too long (maximum is #{max_length} characters)")

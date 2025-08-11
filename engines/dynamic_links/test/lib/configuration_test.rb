@@ -100,11 +100,14 @@ module DynamicLinks
       assert_raises ArgumentError do
         @config.max_shortened_url_length = nil
       end
+
+      assert_raises ArgumentError do
+        @config.max_shortened_url_length = 3000  # exceeds 2048 limit
+      end
     end
 
     test 'should have default max_shortened_url_length' do
       assert_equal Configuration::DEFAULT_MAX_SHORTENED_URL_LENGTH, @config.max_shortened_url_length
-      assert_equal 15, @config.max_shortened_url_length
     end
   end
 end

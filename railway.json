@@ -10,15 +10,5 @@
     "healthcheckPath": "/up",
     "healthcheckTimeout": 100,
     "healthcheckInterval": 30
-  },
-  "services": [
-    {
-      "name": "postgres",
-      "image": "postgres:15"
-    },
-    {
-      "name": "redis",
-      "image": "redis:7"
-    }
-  ]
+  }
 }

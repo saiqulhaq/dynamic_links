@@ -6,7 +6,7 @@
   },
   "deploy": {
     "startCommand": "bundle exec rails s -b 0.0.0.0",
-    "releaseCommand": "bundle exec rails db:migrate",
+    "releaseCommand": "bundle exec rails db:prepare",
     "healthcheckPath": "/up",
     "healthcheckTimeout": 100,
     "healthcheckInterval": 30

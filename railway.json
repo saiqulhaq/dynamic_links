@@ -1,0 +1,24 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "bundle exec rails s -b 0.0.0.0 -p $PORT",
+    "releaseCommand": "bundle exec rails db:migrate",
+    "healthcheckPath": "/up",
+    "healthcheckTimeout": 100,
+    "healthcheckInterval": 30
+  },
+  "services": [
+    {
+      "name": "postgres",
+      "image": "postgres:15"
+    },
+    {
+      "name": "redis",
+      "image": "redis:7"
+    }
+  ]
+}

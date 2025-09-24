@@ -17,6 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'production' }}
 
+    env:
+      DOCKER_BUILDKIT: 1
+      RAILS_ENV: production
+      SERVER_HOST: ${{ secrets.SERVER_HOST }}
+      KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,14 +43,9 @@ jobs:
         run: gem install kamal
 
       - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          if [[ -n "${{ secrets.SSH_PRIVATE_KEY }}" ]]; then
-            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
-          fi
-          # Add the server to known hosts
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -50,12 +54,4 @@ jobs:
           password: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
 
       - name: Deploy with Kamal
-        env:
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
-        run: |
-          # Run Kamal deploy
-          kamal deploy
+        run: kamal deploy

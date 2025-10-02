@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  resource :session
+  resources :passwords, param: :token
   mount_avo
   root to: 'up#databases'
 

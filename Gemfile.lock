@@ -112,6 +112,7 @@ GEM
       zeitwerk (>= 2.6.12)
     avo-heroicons (0.1.1)
     base64 (0.3.0)
+    bcrypt (3.1.20)
     benchmark (0.4.1)
     bigdecimal (3.2.3)
     bindex (0.8.1)
@@ -416,6 +417,7 @@ PLATFORMS
 
 DEPENDENCIES
   avo
+  bcrypt (~> 3.1)
   bullet
   capybara
   dalli (>= 3.2.3)

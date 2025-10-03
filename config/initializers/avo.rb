@@ -18,7 +18,7 @@ Avo.configure do |config|
   end
 
   ## == Authentication ==
-  # config.current_user_method = :current_user
+  config.current_user_method = :current_user
   # config.authenticate_with do
   # end
 

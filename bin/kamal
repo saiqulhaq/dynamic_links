@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Kamal wrapper script to set environment variables for local commands
+# Usage: ./kamal_local.sh log -f
+# Usage: ./kamal_local.sh app details
+
+# Set the server host for Kamal configuration
+# export SERVER_HOST="xxx.xxx.xxx.xxx"
+
+# Uncomment and set these if you need them for other Kamal commands
+# export KAMAL_REGISTRY_PASSWORD="your_docker_password"
+# export POSTGRES_PASSWORD="your_postgres_password"
+# export RAILS_MASTER_KEY="your_rails_master_key"
+# export SECRET_KEY_BASE="your_secret_key_base"
+
+# Run kamal with the provided arguments
+docker run -it --rm \
+  -v ${PWD}:/workdir \
+  -v ${SSH_AUTH_SOCK}:/ssh-agent \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -e SSH_AUTH_SOCK=/ssh-agent \
+  -e SERVER_HOST="${SERVER_HOST}" \
+  ghcr.io/basecamp/kamal:latest "$@"

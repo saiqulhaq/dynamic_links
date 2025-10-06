@@ -10,19 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_02_112633) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_02_112741) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
 
   create_table "dynamic_links_analytics_link_clicks", force: :cascade do |t|
-    t.string "short_url", null: false
-    t.text "original_url", null: false
-    t.integer "client_id", null: false
-    t.inet "ip_address", null: false
     t.datetime "clicked_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.jsonb "metadata", default: {}, null: false
+    t.integer "client_id", null: false
     t.datetime "created_at", null: false
+    t.inet "ip_address", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.text "original_url", null: false
+    t.string "short_url", null: false
     t.datetime "updated_at", null: false
     t.index "((metadata ->> 'referrer'::text))", name: "idx_link_clicks_referrer"
     t.index "((metadata ->> 'referrer'::text))", name: "idx_link_clicks_referrer_not_null", where: "(((metadata ->> 'referrer'::text) IS NOT NULL) AND ((metadata ->> 'referrer'::text) <> ''::text))"
@@ -43,12 +43,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_112633) do
   end
 
   create_table "dynamic_links_clients", force: :cascade do |t|
-    t.string "name", null: false
     t.string "api_key", null: false
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.string "hostname", null: false
+    t.string "name", null: false
     t.string "scheme", default: "https", null: false
+    t.datetime "updated_at", null: false
     t.index ["api_key"], name: "index_dynamic_links_clients_on_api_key", unique: true
     t.index ["hostname"], name: "index_dynamic_links_clients_on_hostname", unique: true
     t.index ["name"], name: "index_dynamic_links_clients_on_name", unique: true
@@ -56,31 +56,31 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_112633) do
 
   create_table "dynamic_links_shortened_urls", force: :cascade do |t|
     t.bigint "client_id", null: false
-    t.string "url", limit: 2083, null: false
-    t.string "short_url", limit: 20, null: false
-    t.datetime "expires_at"
     t.datetime "created_at", null: false
+    t.datetime "expires_at"
+    t.string "short_url", limit: 20, null: false
     t.datetime "updated_at", null: false
+    t.string "url", limit: 2083, null: false
     t.index ["client_id", "short_url"], name: "index_dynamic_links_shortened_urls_on_client_id_and_short_url", unique: true
     t.index ["client_id"], name: "index_dynamic_links_shortened_urls_on_client_id"
   end
 
   create_table "sessions", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.string "ip_address"
-    t.string "user_agent"
     t.datetime "created_at", null: false
+    t.string "ip_address"
     t.datetime "updated_at", null: false
+    t.string "user_agent"
+    t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
+    t.bigint "client_id"
+    t.datetime "created_at", null: false
     t.string "email_address", null: false
     t.string "password_digest", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.integer "role", limit: 2
-    t.bigint "client_id"
+    t.datetime "updated_at", null: false
     t.index ["client_id"], name: "index_users_on_client_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end

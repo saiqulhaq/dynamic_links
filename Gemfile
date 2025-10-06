@@ -5,10 +5,12 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '3.4.4'
 
+gem 'dotenv', groups: %i[development test]
+
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem 'rails', '~> 8.1.0.beta1'
 
-gem "bcrypt", "~> 3.1"
+gem 'bcrypt', '~> 3.1'
 
 # Efficient serialization [https://github.com/msgpack/msgpack-ruby]
 gem 'msgpack', '>= 1.7.0'
@@ -51,9 +53,6 @@ require_elastic_apm = ENV.fetch('ELASTIC_APM_ENABLED', 'false').downcase == 'tru
 gem 'elastic-apm', require: require_elastic_apm
 
 group :development do
-  # Detect N+1 queries and unused eager loading
-  gem 'bullet'
-
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem 'web-console'
 
@@ -65,6 +64,9 @@ group :development do
 end
 
 group :development, :test do
+  # Detect N+1 queries and unused eager loading
+  gem 'bullet', github: 'saiqulhaq/bullet', branch: 'feat/support-rails81'
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem 'debug', platforms: %i[mri mingw x64_mingw], require: 'debug/prelude'
 

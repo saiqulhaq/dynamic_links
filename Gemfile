@@ -12,7 +12,7 @@ gem 'rails', '~> 8.1.0.beta1'
 gem 'msgpack', '>= 1.7.0'
 
 # An improved asset pipeline for Rails [https://github.com/rails/propshaft]
-gem 'propshaft', '~> 1.1'
+gem 'propshaft', '~> 1.3'
 
 # Use postgresql as the database for Active Record
 gem 'pg', '~> 1.1'

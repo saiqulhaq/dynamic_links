@@ -7,8 +7,8 @@ ruby '3.4.4'
 
 gem 'dotenv', groups: %i[development test]
 
-# Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'rails', '~> 8.1.0.beta1'
+gem 'rails', github: 'rails/rails', branch: 'main'
+# gem 'rails', '~> 8.1.0.beta1'
 
 gem 'bcrypt', '~> 3.1'
 
@@ -65,7 +65,7 @@ end
 
 group :development, :test do
   # Detect N+1 queries and unused eager loading
-  gem 'bullet', github: 'saiqulhaq/bullet', branch: 'feat/support-rails81'
+  gem 'bullet', github: 'flyerhzm/bullet'
 
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem 'debug', platforms: %i[mri mingw x64_mingw], require: 'debug/prelude'

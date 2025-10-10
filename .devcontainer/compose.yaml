@@ -10,6 +10,9 @@ services:
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
+    depends_on:
+      - postgres
+      - redis
 
     env_file:
       - ../.env
@@ -63,33 +66,33 @@ services:
     volumes:
       - "redis:/data"
 
-  oauth2-proxy:
-    image: "quay.io/oauth2-proxy/oauth2-proxy:v7.6.0"
-    env_file:
-      - ../.env
-    deploy:
-      resources:
-        limits:
-          cpus: "${DOCKER_OAUTH2_PROXY_CPUS:-0}"
-          memory: "${DOCKER_OAUTH2_PROXY_MEMORY:-0}"
-    environment:
-      OAUTH2_PROXY_PROVIDER: google
-      OAUTH2_PROXY_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
-      OAUTH2_PROXY_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
-      OAUTH2_PROXY_COOKIE_SECRET: "${OAUTH2_PROXY_COOKIE_SECRET:-}"
-      OAUTH2_PROXY_REDIRECT_URL: "${OAUTH2_PROXY_REDIRECT_URL:-http://localhost:4181/oauth2/callback}"
-      OAUTH2_PROXY_UPSTREAMS: "${OAUTH2_PROXY_UPSTREAMS:-http://rails-app:3000}"
-      OAUTH2_PROXY_EMAIL_DOMAINS: "*"
-      OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
-      OAUTH2_PROXY_SET_XAUTHREQUEST: true
-      OAUTH2_PROXY_PASS_ACCESS_TOKEN: true
-      OAUTH2_PROXY_PASS_USER_HEADERS: true
-      OAUTH2_PROXY_SET_AUTHORIZATION_HEADER: true
-      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: false
-    ports:
-      - "${DOCKER_OAUTH2_PROXY_PORT_FORWARD:-127.0.0.1:4181}:4180"
-    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
-    stop_grace_period: "3s"
+  # oauth2-proxy:
+  #   image: "quay.io/oauth2-proxy/oauth2-proxy:v7.6.0"
+  #   env_file:
+  #     - ../.env
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "${DOCKER_OAUTH2_PROXY_CPUS:-0}"
+  #         memory: "${DOCKER_OAUTH2_PROXY_MEMORY:-0}"
+  #   environment:
+  #     OAUTH2_PROXY_PROVIDER: google
+  #     OAUTH2_PROXY_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+  #     OAUTH2_PROXY_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+  #     OAUTH2_PROXY_COOKIE_SECRET: "${OAUTH2_PROXY_COOKIE_SECRET:-}"
+  #     OAUTH2_PROXY_REDIRECT_URL: "${OAUTH2_PROXY_REDIRECT_URL:-http://localhost:4181/oauth2/callback}"
+  #     OAUTH2_PROXY_UPSTREAMS: "${OAUTH2_PROXY_UPSTREAMS:-http://rails-app:3000}"
+  #     OAUTH2_PROXY_EMAIL_DOMAINS: "*"
+  #     OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
+  #     OAUTH2_PROXY_SET_XAUTHREQUEST: true
+  #     OAUTH2_PROXY_PASS_ACCESS_TOKEN: true
+  #     OAUTH2_PROXY_PASS_USER_HEADERS: true
+  #     OAUTH2_PROXY_SET_AUTHORIZATION_HEADER: true
+  #     OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: false
+  #   ports:
+  #     - "${DOCKER_OAUTH2_PROXY_PORT_FORWARD:-127.0.0.1:4181}:4180"
+  #   restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+  #   stop_grace_period: "3s"
 
 volumes:
   postgres:

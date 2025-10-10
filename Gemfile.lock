@@ -1,7 +1,6 @@
 GIT
-  remote: https://github.com/saiqulhaq/bullet.git
-  revision: ec6e3eaa10dff84d9818cd20ac2927442d5f3fbc
-  branch: feat/support-rails81
+  remote: https://github.com/flyerhzm/bullet.git
+  revision: 1d8e90e942c9a127046b2c56b826d71663191823
   specs:
     bullet (8.0.8)
       activesupport (>= 3.0.0)

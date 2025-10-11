@@ -38,6 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   postgresql-client \
   libpq-dev \
   redis-tools  \
+  watchman \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 20.x using NodeSource repository

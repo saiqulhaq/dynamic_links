@@ -18,7 +18,7 @@ Avo.configure do |config|
   end
 
   ## == Authentication ==
-  config.current_user_method = :current_user
+  # config.current_user_method = :current_user
   # config.authenticate_with do
   # end
 
@@ -63,7 +63,6 @@ Avo.configure do |config|
 
   ## == Response messages dismiss time ==
   # config.alert_dismiss_time = 5000
-
 
   ## == Number of search results to display ==
   # config.search_results_count = 8
@@ -141,17 +140,17 @@ Avo.configure do |config|
   # end
 
   ## == Menus ==
-  config.main_menu = -> {
-    section "Dashboards", icon: "heroicons/outline/chart-bar" do
+  config.main_menu = lambda {
+    section 'Dashboards', icon: 'heroicons/outline/chart-bar' do
       all_dashboards
     end
 
-    section "Dynamic Links", icon: "heroicons/outline/link" do
+    section 'Dynamic Links', icon: 'heroicons/outline/link' do
       resource :dynamic_links_client
       resource :dynamic_links_shortened_url
     end
 
-    section "Tools", icon: "heroicons/outline/wrench" do
+    section 'Tools', icon: 'heroicons/outline/wrench' do
       all_tools
     end
   }

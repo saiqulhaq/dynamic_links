@@ -6,7 +6,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '3.4.4'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'rails', '~> 8.1.0.beta1'
+gem 'rails', '~> 8.1.0.rc1'
 
 # Efficient serialization [https://github.com/msgpack/msgpack-ruby]
 gem 'msgpack', '>= 1.7.0'

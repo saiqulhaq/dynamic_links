@@ -91,4 +91,4 @@ end
 gem 'dynamic_links', path: 'engines/dynamic_links'
 gem 'dynamic_links_analytics', path: 'engines/dynamic_links_analytics'
 gem 'nanoid'
-gem 'rack-attack', '~> 6.7'
+gem 'rack-attack', '~> 6.8'

@@ -221,7 +221,7 @@ GEM
     minitest (5.26.1)
     mocha (2.7.1)
       ruby2_keywords (>= 0.0.5)
-    mock_redis (0.52.0)
+    mock_redis (0.53.0)
       redis (~> 5)
     msgpack (1.8.0)
     nanoid (2.0.0)

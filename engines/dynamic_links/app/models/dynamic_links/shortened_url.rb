@@ -21,11 +21,17 @@ module DynamicLinks
   class ShortenedUrl < ApplicationRecord
     include DynamicLinksAnalytics::AnalyticsAssociation if defined?(DynamicLinksAnalytics::AnalyticsAssociation)
 
+    # SMS-safe character set (Base62: 0-9, A-Z, a-z)
+    # Excludes underscore, hyphen, and other characters that may cause
+    # issues with SMS encoding (GSM 7-bit) or URL interpretation
+    SMS_SAFE_PATTERN = /\A[0-9A-Za-z]+\z/
+
     belongs_to :client
 
     validates :url, presence: true
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
     validate :short_url_length_within_limit
+    validate :short_url_uses_safe_characters
 
     def self.find_or_create!(client, short_url, url)
       transaction do
@@ -52,6 +58,13 @@ module DynamicLinks
       return unless short_url.present? && short_url.length > max_length
 
       errors.add(:short_url, "is too long (maximum is #{max_length} characters)")
+    end
+
+    def short_url_uses_safe_characters
+      return unless short_url.present?
+      return if short_url.match?(SMS_SAFE_PATTERN)
+
+      errors.add(:short_url, 'must contain only alphanumeric characters (0-9, A-Z, a-z) for SMS compatibility')
     end
   end
 end

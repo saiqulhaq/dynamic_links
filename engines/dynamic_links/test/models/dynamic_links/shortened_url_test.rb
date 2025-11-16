@@ -149,7 +149,7 @@ module DynamicLinks
     test 'should respect custom max_shortened_url_length configuration' do
       # Temporarily change the configuration
       original_length = DynamicLinks.configuration.max_shortened_url_length
-      
+
       begin
         DynamicLinks.configuration.max_shortened_url_length = 5
 
@@ -167,6 +167,66 @@ module DynamicLinks
         # Restore original configuration
         DynamicLinks.configuration.max_shortened_url_length = original_length
       end
+    end
+
+    test 'should validate short_url contains only SMS-safe characters' do
+      # Valid: alphanumeric only (Base62)
+      valid_short_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: 'abc123XYZ')
+      assert valid_short_url.valid?, 'ShortenedUrl with alphanumeric characters should be valid'
+
+      # Invalid: contains underscore
+      invalid_with_underscore = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: 'abc_123')
+      assert_not invalid_with_underscore.valid?, 'ShortenedUrl with underscore should be invalid'
+      assert_includes invalid_with_underscore.errors[:short_url],
+                      'must contain only alphanumeric characters (0-9, A-Z, a-z) for SMS compatibility'
+
+      # Invalid: contains hyphen
+      invalid_with_hyphen = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: 'abc-123')
+      assert_not invalid_with_hyphen.valid?, 'ShortenedUrl with hyphen should be invalid'
+      assert_includes invalid_with_hyphen.errors[:short_url],
+                      'must contain only alphanumeric characters (0-9, A-Z, a-z) for SMS compatibility'
+
+      # Invalid: contains special characters
+      invalid_with_special = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: 'abc@123')
+      assert_not invalid_with_special.valid?, 'ShortenedUrl with special characters should be invalid'
+      assert_includes invalid_with_special.errors[:short_url],
+                      'must contain only alphanumeric characters (0-9, A-Z, a-z) for SMS compatibility'
+    end
+
+    test 'should reject short_urls with GSM 7-bit problematic characters' do
+      problematic_chars = ['_', '-', '~', '^', '{', '}', '[', ']', '\\', '|', '!', '@', '#', '$', '%', '&', '*', '+',
+                           '=']
+
+      problematic_chars.each do |char|
+        short_url_with_char = "abc#{char}123"
+        shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: short_url_with_char)
+        assert_not shortened_url.valid?, "ShortenedUrl with '#{char}' should be invalid"
+        assert_includes shortened_url.errors[:short_url], 'must contain only alphanumeric characters (0-9, A-Z, a-z) for SMS compatibility',
+                        "Expected validation error for character '#{char}'"
+      end
+    end
+
+    test 'should accept all Base62 characters (0-9, A-Z, a-z)' do
+      base62_samples = [
+        '0123456789',      # 10 chars - all digits
+        'ABCDEFGHIJKLM',   # 13 chars - uppercase letters
+        'abcdefghijklm',   # 13 chars - lowercase letters
+        '0aB9zZ',          # 6 chars - mixed
+        'MixedCase123'     # 13 chars - mixed case with numbers
+      ]
+
+      base62_samples.each do |sample|
+        shortened_url = DynamicLinks::ShortenedUrl.new(client: @client, url: "#{@url}/#{sample}", short_url: sample)
+        assert shortened_url.valid?,
+               "ShortenedUrl with Base62 string '#{sample}' should be valid. Errors: #{shortened_url.errors.full_messages}"
+      end
+    end
+
+    test 'validation prevents legacy short_urls with underscores from being created' do
+      # This ensures new records with underscores cannot be saved
+      legacy_style_url = DynamicLinks::ShortenedUrl.new(client: @client, url: @url, short_url: '_Fscw')
+      assert_not legacy_style_url.valid?, 'Legacy style short_url with underscore should not be valid'
+      assert_not legacy_style_url.save, 'Should not be able to save short_url with underscore'
     end
   end
 end

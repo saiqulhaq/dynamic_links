@@ -220,7 +220,7 @@ GEM
       actionpack (>= 6.0.0, < 8.1)
     mini_mime (1.1.5)
     minitest (5.26.1)
-    mocha (2.7.1)
+    mocha (3.0.0)
       ruby2_keywords (>= 0.0.5)
     mock_redis (0.52.0)
       redis (~> 5)

@@ -32,11 +32,13 @@ module DynamicLinks
     validates :short_url, presence: true, uniqueness: { scope: :client_id }
     validate :short_url_length_within_limit
     validate :short_url_uses_safe_characters
+    validate :expires_at_must_be_future
 
-    def self.find_or_create!(client, short_url, url)
+    def self.find_or_create!(client, short_url, url, expires_at: nil)
       transaction do
         record = find_or_create_by!(client: client, short_url: short_url) do |record|
           record.url = url
+          record.expires_at = expires_at if expires_at.present?
         end
         record
       end
@@ -65,6 +67,13 @@ module DynamicLinks
       return if short_url.match?(SMS_SAFE_PATTERN)
 
       errors.add(:short_url, 'must contain only alphanumeric characters (0-9, A-Z, a-z) for SMS compatibility')
+    end
+
+    def expires_at_must_be_future
+      return if expires_at.blank?
+      return if expires_at > Time.current
+
+      errors.add(:expires_at, 'must be in the future')
     end
   end
 end

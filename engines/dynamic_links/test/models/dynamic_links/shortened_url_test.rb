@@ -120,6 +120,88 @@ module DynamicLinks
       assert_equal existing_record, found_record
     end
 
+    test 'should create shortened url with expires_at' do
+      expires_at = Time.zone.now + 1.day
+      shortened_url = DynamicLinks::ShortenedUrl.create!(
+        client: @client,
+        url: @url,
+        short_url: 'exp123',
+        expires_at: expires_at
+      )
+      assert_equal expires_at.to_i, shortened_url.expires_at.to_i
+    end
+
+    test 'find_or_create! should create new record with expires_at' do
+      expires_at = Time.zone.now + 7.days
+      result = DynamicLinks::ShortenedUrl.find_or_create!(@client, @short_url, @url, expires_at: expires_at)
+
+      assert_not_nil result
+      assert_equal @client, result.client
+      assert_equal @url, result.url
+      assert_equal @short_url, result.short_url
+      assert_not_nil result.expires_at
+      assert_equal expires_at.to_i, result.expires_at.to_i
+    end
+
+    test 'expired? should return true for expired url' do
+      shortened_url = DynamicLinks::ShortenedUrl.create!(
+        client: @client,
+        url: @url,
+        short_url: 'expired',
+        expires_at: 1.day.ago
+      )
+      assert shortened_url.expired?, 'Expected shortened_url to be expired'
+    end
+
+    test 'expired? should return false for non-expired url' do
+      shortened_url = DynamicLinks::ShortenedUrl.create!(
+        client: @client,
+        url: @url,
+        short_url: 'notexp',
+        expires_at: 1.day.from_now
+      )
+      assert_not shortened_url.expired?, 'Expected shortened_url to not be expired'
+    end
+
+    test 'expired? should return false for url without expires_at' do
+      shortened_url = DynamicLinks::ShortenedUrl.create!(
+        client: @client,
+        url: @url,
+        short_url: 'noexp'
+      )
+      assert_not shortened_url.expired?, 'Expected shortened_url without expires_at to not be expired'
+    end
+
+    test 'should not allow expires_at in the past' do
+      shortened_url = DynamicLinks::ShortenedUrl.new(
+        client: @client,
+        url: @url,
+        short_url: 'pastexp',
+        expires_at: 1.day.ago
+      )
+      assert_not shortened_url.valid?
+      assert_includes shortened_url.errors[:expires_at], 'must be in the future'
+    end
+
+    test 'should allow expires_at in the future' do
+      shortened_url = DynamicLinks::ShortenedUrl.new(
+        client: @client,
+        url: @url,
+        short_url: 'futureexp',
+        expires_at: 1.day.from_now
+      )
+      assert shortened_url.valid?
+    end
+
+    test 'should allow nil expires_at' do
+      shortened_url = DynamicLinks::ShortenedUrl.new(
+        client: @client,
+        url: @url,
+        short_url: 'noexpiry'
+      )
+      assert shortened_url.valid?
+    end
+
     test 'find_or_create! should create new record if not exists' do
       assert_difference 'DynamicLinks::ShortenedUrl.count', 1 do
         DynamicLinks::ShortenedUrl.find_or_create!(@client, @short_url, @url)

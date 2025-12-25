@@ -69,5 +69,39 @@ module DynamicLinks
         @shortener.shorten_async(@client, @url)
       end
     end
+
+    test 'shorten should create a shortened URL with expires_at' do
+      expires_at = Time.zone.now + 1.day
+      @strategy.stubs(:shorten).returns(@short_url)
+      @strategy.stubs(:always_growing?).returns(true)
+      @storage.stubs(:create!).returns(ShortenedUrl.new)
+
+      result = @shortener.shorten(@client, @url, expires_at: expires_at)
+
+      assert_match @short_url, result
+      assert_equal "#{@client.scheme}://#{@client.hostname}/#{@short_url}", result
+    end
+
+    test 'shorten should handle expires_at as string' do
+      expires_at = (Time.zone.now + 1.day).iso8601
+      @strategy.stubs(:shorten).returns(@short_url)
+      @strategy.stubs(:always_growing?).returns(true)
+      @storage.stubs(:create!).returns(ShortenedUrl.new)
+
+      result = @shortener.shorten(@client, @url, expires_at: expires_at)
+
+      assert_match @short_url, result
+    end
+
+    test 'shorten_async should enqueue a job with expires_at' do
+      lock_key = 'lock_key'
+      expires_at = Time.zone.now + 1.day
+      @locker.stubs(:generate_lock_key).returns(lock_key)
+      @locker.stubs(:lock_if_absent).yields
+      @strategy.stubs(:shorten).returns(@short_url)
+      @async_worker.expects(:perform_later).with(@client, @url, @short_url, lock_key, expires_at)
+
+      @shortener.shorten_async(@client, @url, expires_at: expires_at)
+    end
   end
 end

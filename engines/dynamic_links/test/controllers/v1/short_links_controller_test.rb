@@ -171,6 +171,80 @@ module DynamicLinks
         assert_response :forbidden
         assert_includes response.body, 'REST API feature is disabled'
       end
+
+      test 'should create a shortened URL with expires_at' do
+        url = 'https://example.com'
+        api_key = @client.api_key
+        expires_at = (Time.zone.now + 1.day).iso8601
+        expected_short_link = "#{@client.scheme}://#{@client.hostname}/shortened_url"
+        expected_response = {
+          shortLink: expected_short_link,
+          previewLink: "#{expected_short_link}?preview=true",
+          warning: []
+        }.as_json
+
+        DynamicLinks.stub :generate_short_url, expected_response do
+          post '/v1/shortLinks', params: { url: url, api_key: api_key, expires_at: expires_at }
+
+          assert_response :created
+          assert_equal 'application/json; charset=utf-8', @response.content_type
+          assert_equal expected_response, JSON.parse(@response.body)
+        end
+      end
+
+      test 'should reject invalid expires_at format' do
+        url = 'https://example.com'
+        api_key = @client.api_key
+        invalid_expires_at = 'not-a-date'
+
+        post '/v1/shortLinks', params: { url: url, api_key: api_key, expires_at: invalid_expires_at }
+
+        assert_response :bad_request
+        body = JSON.parse(@response.body)
+        assert_includes body['error'], 'Invalid expires_at format'
+      end
+
+      test 'should create short URL with expires_at in find_or_create' do
+        DynamicLinks.configuration.enable_rest_api = true
+
+        url = "https://example.com/new-with-expiry-#{SecureRandom.hex(4)}"
+        client = @client
+        expires_at = (Time.zone.now + 7.days).iso8601
+
+        post '/v1/shortLinks/findOrCreate', params: { url: url, api_key: client.api_key, expires_at: expires_at }
+
+        assert_response :created
+        body = JSON.parse(response.body)
+        assert_match(/http/, body['shortLink'])
+        assert_match(/\?preview=true/, body['previewLink'])
+      end
+
+      test 'should reject invalid expires_at format in find_or_create' do
+        DynamicLinks.configuration.enable_rest_api = true
+
+        url = 'https://example.com/test'
+        invalid_expires_at = 'invalid-date-format'
+
+        post '/v1/shortLinks/findOrCreate',
+             params: { url: url, api_key: @client.api_key, expires_at: invalid_expires_at }
+
+        assert_response :bad_request
+        body = JSON.parse(response.body)
+        assert_includes body['error'], 'Invalid expires_at format'
+      end
+
+      test 'should reject expires_at in the past' do
+        DynamicLinks.configuration.enable_rest_api = true
+
+        url = "https://example.com/past-expiry-#{SecureRandom.hex(4)}"
+        past_expires_at = (Time.zone.now - 1.day).iso8601
+
+        post '/v1/shortLinks', params: { url: url, api_key: @client.api_key, expires_at: past_expires_at }
+
+        assert_response :internal_server_error
+        body = JSON.parse(response.body)
+        assert_includes body['error'], 'An error occurred while processing your request'
+      end
     end
   end
 end

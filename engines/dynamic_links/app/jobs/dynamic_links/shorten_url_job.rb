@@ -6,15 +6,15 @@ module DynamicLinks
   class ShortenUrlJob < ApplicationJob
     queue_as :default
 
-    def perform(client, url, short_url, lock_key)
+    def perform(client, url, short_url, lock_key, expires_at = nil)
       locker = DynamicLinks::Async::Locker.new
       strategy = StrategyFactory.get_strategy(DynamicLinks.configuration.shortening_strategy)
 
       begin
         if strategy.always_growing?
-          storage.create!(client: client, url: url, short_url: short_url)
+          storage.create!(client: client, url: url, short_url: short_url, expires_at: expires_at)
         else
-          storage.find_or_create!(client, short_url, url)
+          storage.find_or_create!(client, short_url, url, expires_at: expires_at)
         end
         locker.unlock(lock_key)
         DynamicLinks::Logger.log_info("Lock key #{lock_key} deleted after ShortenUrlJob")

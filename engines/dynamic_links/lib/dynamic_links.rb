@@ -52,20 +52,20 @@ module DynamicLinks
     end
   end
 
-  def self.shorten_url(url, client, async: DynamicLinks.configuration.async_processing)
+  def self.shorten_url(url, client, async: DynamicLinks.configuration.async_processing, expires_at: nil)
     raise InvalidURIError, 'Invalid URL' unless Validator.valid_url?(url)
 
     shortener = Shortener.new
     if async
-      shortener.shorten_async(client, url)
+      shortener.shorten_async(client, url, expires_at: expires_at)
     else
-      shortener.shorten(client, url)
+      shortener.shorten(client, url, expires_at: expires_at)
     end
   end
 
   # mimic Firebase Dynamic Links API
-  def self.generate_short_url(original_url, client)
-    short_link = shorten_url(original_url, client)
+  def self.generate_short_url(original_url, client, expires_at: nil)
+    short_link = shorten_url(original_url, client, expires_at: expires_at)
 
     {
       shortLink: short_link,

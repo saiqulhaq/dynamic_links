@@ -11,6 +11,7 @@ module DynamicLinks
       def create
         url = params.require(:url)
         api_key = params.require(:api_key)
+        expires_at = params[:expires_at]
 
         # Validate API key format
         unless valid_api_key?(api_key)
@@ -31,8 +32,14 @@ module DynamicLinks
           return
         end
 
+        # Validate expires_at if provided
+        if expires_at.present? && !valid_expires_at?(expires_at)
+          render json: { error: 'Invalid expires_at format. Use ISO 8601 format (e.g., 2025-12-31T23:59:59Z)' }, status: :bad_request
+          return
+        end
+
         with_tenant_database(client) do
-          render json: DynamicLinks.generate_short_url(url, client), status: :created
+          render json: DynamicLinks.generate_short_url(url, client, expires_at: expires_at), status: :created
         end
       rescue DynamicLinks::InvalidURIError
         render json: { error: 'Invalid URL' }, status: :bad_request
@@ -78,6 +85,7 @@ module DynamicLinks
       def find_or_create
         url = params.require(:url)
         api_key = params.require(:api_key)
+        expires_at = params[:expires_at]
 
         unless valid_api_key?(api_key)
           render json: { error: 'Invalid API key' }, status: :unauthorized
@@ -96,6 +104,12 @@ module DynamicLinks
           return
         end
 
+        # Validate expires_at if provided
+        if expires_at.present? && !valid_expires_at?(expires_at)
+          render json: { error: 'Invalid expires_at format. Use ISO 8601 format (e.g., 2025-12-31T23:59:59Z)' }, status: :bad_request
+          return
+        end
+
         with_tenant_database(client) do
           short_link = DynamicLinks.find_short_link(url, client)
 
@@ -106,7 +120,7 @@ module DynamicLinks
               warning: []
             }, status: :ok
           else
-            render json: DynamicLinks.generate_short_url(url, client), status: :created
+            render json: DynamicLinks.generate_short_url(url, client, expires_at: expires_at), status: :created
           end
         end
       rescue ActionController::ParameterMissing
@@ -199,6 +213,16 @@ module DynamicLinks
 
         # Use the enhanced validator
         DynamicLinks::Validator.valid_url?(url)
+      end
+
+      def valid_expires_at?(expires_at)
+        return false if expires_at.blank?
+
+        # Try to parse as datetime
+        Time.zone.parse(expires_at)
+        true
+      rescue ArgumentError, TypeError
+        false
       end
     end
   end

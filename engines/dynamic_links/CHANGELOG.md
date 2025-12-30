@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-12-30
+
+### Removed
+
+- **Rack Attack Integration**: Removed rack-attack gem and related configuration
+  - Removed `rack-attack` gem dependency from Gemfile
+  - Removed `config/initializers/rack_attack.rb` initializer
+  - Removed rate limiting configuration and documentation
+  - Removed `RACK_ATTACK_TRUSTED_IPS` environment variable
+  - Applications requiring rate limiting should implement their own solution at the infrastructure level (e.g., API Gateway, nginx, Kubernetes Ingress)
+
 ## [0.5.0] - 2025-11-16
 
 ### Fixed

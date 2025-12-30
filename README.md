@@ -111,7 +111,7 @@ To shorten a link via the REST API, send a POST request to `http://localhost:300
 ```json
 {
   "api_key": "foo",
-  "url": "https://github.com/rack/rack-attack"
+  "url": "https://example.com/your-long-url"
 }
 ```
 
@@ -194,10 +194,6 @@ See the [dynamic_links README](../dynamic_links/README.md) for all available opt
 - For `:nanoid` strategy: add `gem 'nanoid', '~> 2.0'`
 - For `:redis_counter` strategy: ensure Redis is running and add `gem 'connection_pool'`
 
----
-
-To configure rate limiting, edit `config/initializers/rack_attack.rb`. See https://github.com/rack/rack-attack#throttling
-
 ## Events and Analytics
 
 The `dynamic_links` engine publishes Rails instrumentation events for tracking link usage. For detailed information about events, analytics integration, and available analytics engines, see the [dynamic_links engine documentation](engines/dynamic_links/README.md#events-and-analytics-integration).
@@ -264,7 +260,6 @@ All configuration is managed through environment variables. Copy `.env.example` 
 
 - `ALLOWED_HOSTS` - Comma-separated list of allowed hostnames for DNS rebinding protection (default: `example.com,*.example.com`)
 - `TRUSTED_PROXIES` - Comma-separated list of CIDR ranges for trusted proxies (default: empty, configure for Kubernetes/Docker networks)
-- `RACK_ATTACK_TRUSTED_IPS` - Comma-separated list of IP addresses with higher rate limits (default: empty)
 
 ### Kubernetes/Docker Deployment
 
@@ -272,7 +267,6 @@ For Kubernetes deployment with ConfigMap, configure these variables:
 
 - Set `ALLOWED_HOSTS` to your domain(s), e.g., `myapp.com,*.myapp.com`
 - Set `TRUSTED_PROXIES` to your cluster's CIDR ranges, e.g., `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`
-- Optionally set `RACK_ATTACK_TRUSTED_IPS` for specific IPs that need higher rate limits
 
 ## Contributing
 

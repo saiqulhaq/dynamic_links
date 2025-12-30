@@ -39,7 +39,7 @@ gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 # gem "image_processing", "~> 1.2"
 
 # Execute jobs in the background [https://github.com/mperham/sidekiq]
-gem 'sidekiq', '~> 8.0'
+gem 'sidekiq', '~> 8.1'
 
 # Admin interface [https://avohq.io]
 gem 'avo'

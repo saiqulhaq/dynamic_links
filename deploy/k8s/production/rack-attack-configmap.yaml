@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rails-dynamic-links-rack-attack
+  namespace: cosmos-public
+data:
+  rack_attack.rb: |
+    # frozen_string_literal: true
+
+    # Safelist trusted IPs (loaded from RACK_ATTACK_TRUSTED_IPS env var).
+    # These addresses bypass all throttle checks.
+    trusted_ips = ENV.fetch('RACK_ATTACK_TRUSTED_IPS', '').split(',').map(&:strip).reject(&:empty?)
+    trusted_ips.each do |ip|
+      Rack::Attack.safelist("trusted/#{ip}") { |req| req.ip == ip }
+    end
+
+    # Default throttle: 60 requests per second per IP for all other clients.
+    Rack::Attack.throttle('req/ip', limit: 60, period: 1) do |req|
+      req.ip unless trusted_ips.include?(req.ip)
+    end
+
+    # Return 429 JSON on throttle.
+    Rack::Attack.throttled_responder = lambda do |_req|
+      [429, { 'Content-Type' => 'application/json' }, ['{"error":"Too Many Requests"}']]
+    end

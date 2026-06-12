@@ -44,6 +44,9 @@ gem 'sidekiq', '~> 8.0'
 # Admin interface [https://avohq.io]
 gem 'avo'
 
+# Rate limiting middleware [https://github.com/rack/rack-attack]
+gem 'rack-attack'
+
 # Application Performance Monitoring (conditionally loaded based on configuration)
 require_elastic_apm = ENV.fetch('ELASTIC_APM_ENABLED', 'false').downcase == 'true'
 gem 'elastic-apm', require: require_elastic_apm

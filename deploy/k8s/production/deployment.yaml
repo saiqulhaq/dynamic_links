@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rails-dynamic-links
+  namespace: cosmos-public
+  labels:
+    app: rails-dynamic-links
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: rails-dynamic-links
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: rails-dynamic-links
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: rails-dynamic-links
+          image: registry.digitalocean.com/hh-staging/dynamic-links-app:0.5.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: RAILS_LOG_TO_STDOUT
+              value: "true"
+            - name: RAILS_SERVE_STATIC_FILES
+              value: "true"
+          envFrom:
+            - configMapRef:
+                name: rails-dynamic-links-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          volumeMounts:
+            - name: rack-attack-config
+              mountPath: /app/config/initializers/rack_attack.rb
+              subPath: rack_attack.rb
+      volumes:
+        - name: rack-attack-config
+          configMap:
+            name: rails-dynamic-links-rack-attack

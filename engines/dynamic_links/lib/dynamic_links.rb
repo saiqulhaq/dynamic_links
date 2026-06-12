@@ -65,13 +65,45 @@ module DynamicLinks
 
   # mimic Firebase Dynamic Links API
   def self.generate_short_url(original_url, client, expires_at: nil)
-    short_link = shorten_url(original_url, client, expires_at: expires_at)
+    short_link = idempotent_short_link(original_url, client, expires_at: expires_at)
 
     {
       shortLink: short_link,
       previewLink: "#{short_link}?preview=true",
       warning: []
     }
+  end
+
+  # If `original_url` is itself a short link of `client` (or any client),
+  # return the existing short link instead of creating a new one.
+  # This prevents accidental chains like A -> short(B) -> short(short(B)).
+  def self.idempotent_short_link(original_url, client, expires_at: nil)
+    existing = find_existing_short_link_for_url(original_url)
+    return existing if existing
+
+    shorten_url(original_url, client, expires_at: expires_at)
+  end
+
+  # Returns the full short link string (scheme://host/short_code) if `url`
+  # matches a known short link of any client, otherwise nil.
+  def self.find_existing_short_link_for_url(url)
+    return nil if url.blank?
+
+    uri = URI.parse(url)
+    return nil unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+    return nil if uri.host.blank?
+
+    short_code = uri.path.to_s.sub(%r{\A/}, '')
+    return nil if short_code.blank?
+    return nil if short_code.include?('/')
+
+    record = DynamicLinks::ShortenedUrl.find_by(short_url: short_code)
+    return nil unless record
+
+    owner = record.client
+    "#{owner.scheme}://#{owner.hostname}/#{record.short_url}"
+  rescue URI::InvalidURIError
+    nil
   end
 
   def self.resolve_short_url(short_link)

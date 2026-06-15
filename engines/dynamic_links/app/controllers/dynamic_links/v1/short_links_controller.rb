@@ -178,12 +178,12 @@ module DynamicLinks
         end
 
         unless url.is_a?(String) && url.present?
-          render json: { error: 'Invalid url' }, status: :bad_request
+          render json: { error: 'url must be a string' }, status: :bad_request
           return nil
         end
 
         unless api_key.is_a?(String) && api_key.present?
-          render json: { error: 'Invalid api_key' }, status: :bad_request
+          render json: { error: 'Invalid API key' }, status: :unauthorized
           return nil
         end
 

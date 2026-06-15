@@ -79,14 +79,14 @@ module DynamicLinks
         post '/v1/shortLinks', params: { url: { malicious: 'hash' }, api_key: @client.api_key }
         assert_response :bad_request
         body = JSON.parse(response.body)
-        assert_includes body['error'], 'Invalid url'
+        assert_includes body['error'], 'url must be a string'
       end
 
-      test 'create returns 400 when api_key is a Hash instead of String' do
+      test 'create returns 401 when api_key is a Hash instead of String' do
         post '/v1/shortLinks', params: { url: 'https://example.com', api_key: { stolen: 'data' } }
-        assert_response :bad_request
+        assert_response :unauthorized
         body = JSON.parse(response.body)
-        assert_includes body['error'], 'Invalid api_key'
+        assert_includes body['error'], 'Invalid API key'
       end
 
       test 'find_or_create returns 409 conflict on collision' do

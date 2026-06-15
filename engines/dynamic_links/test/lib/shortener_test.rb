@@ -45,7 +45,7 @@ module DynamicLinks
       @strategy.stubs(:shorten).returns('collide1', 'collide2', 'unique1')
       @strategy.stubs(:always_growing?).returns(true)
       invalid = ActiveRecord::RecordInvalid.new(ShortenedUrl.new)
-      @storage.stubs(:create!).raises(invalid, invalid, ShortenedUrl.new)
+      @storage.stubs(:create!).raises(invalid).then.raises(invalid).then.returns(ShortenedUrl.new)
 
       result = @shortener.shorten(@client, @url)
 
@@ -68,7 +68,7 @@ module DynamicLinks
       @strategy.stubs(:shorten).returns('collide1', 'unique1')
       @strategy.stubs(:always_growing?).returns(false)
       invalid = ActiveRecord::RecordInvalid.new(ShortenedUrl.new)
-      @storage.stubs(:find_or_create!).raises(invalid, ShortenedUrl.new)
+      @storage.stubs(:find_or_create!).raises(invalid).then.returns(ShortenedUrl.new)
 
       result = @shortener.shorten(@client, @url)
 
@@ -89,7 +89,7 @@ module DynamicLinks
       @locker.stubs(:generate_lock_key).returns(lock_key)
       @locker.stubs(:lock_if_absent).yields
       @strategy.stubs(:shorten).returns(@short_url)
-      @async_worker.expects(:perform_later).with(@client, @url, @short_url, lock_key)
+      @async_worker.expects(:perform_later).with(@client, @url, @short_url, lock_key, nil)
 
       @shortener.shorten_async(@client, @url)
     end

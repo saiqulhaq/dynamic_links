@@ -8,6 +8,15 @@ default: &default
   port: "<%= ENV.fetch('POSTGRES_PORT') { 5432 } %>"
   # http://guides.rubyonrails.org/configuring.html#database-pooling
   pool: "<%= ENV.fetch('RAILS_MAX_THREADS') { 5 } %>"
+  # Fail fast when the network to Aiven is unreachable. Without this, a
+  # network partition hangs threads indefinitely and (with pool=1) takes
+  # the entire pod offline. ENV override allows tightening in dev.
+  connect_timeout: "<%= ENV.fetch('POSTGRES_CONNECT_TIMEOUT') { 5 } %>"
+  # Abort any query that takes longer than the configured threshold so a
+  # slow sequential scan or runaway query does not block the single Puma
+  # worker. Value is milliseconds. Set to 0 to disable (not recommended).
+  variables:
+    statement_timeout: "<%= ENV.fetch('POSTGRES_STATEMENT_TIMEOUT_MS') { 5000 } %>"
 
 development:
   primary:

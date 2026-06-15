@@ -9,9 +9,10 @@ module DynamicLinks
       before_action :validate_http_method
 
       def create
-        url = params.require(:url)
-        api_key = params.require(:api_key)
-        expires_at = params[:expires_at]
+        params_tuple = extract_short_link_params
+        return if params_tuple.nil?
+
+        url, api_key, expires_at = params_tuple
 
         # Validate API key format
         unless valid_api_key?(api_key)
@@ -45,9 +46,18 @@ module DynamicLinks
         render json: { error: 'Invalid URL' }, status: :bad_request
       rescue ActionController::ParameterMissing
         render json: { error: 'Missing required parameters' }, status: :bad_request
+      rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
+        DynamicLinks::Logger.log_error(e, context: 'Short URL collision')
+        render json: { error: 'Short URL generation conflict, please retry' }, status: :conflict
+      rescue ActiveRecord::ConnectionTimeoutError, ActiveRecord::ConnectionNotEstablished, ActiveRecord::AdapterTimeout => e
+        DynamicLinks::Logger.log_error(e, context: 'Database connection error')
+        render json: { error: 'Service temporarily unavailable' }, status: :service_unavailable
       rescue StandardError => e
-        DynamicLinks::Logger.log_error(e)
-        render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
+        DynamicLinks::Logger.log_error(e, context: 'create short link')
+        render json: {
+          error: 'An error occurred while processing your request',
+          error_class: e.class.name
+        }, status: :internal_server_error
       end
 
       def expand
@@ -67,6 +77,11 @@ module DynamicLinks
 
         with_tenant_database(client) do
           short_link = params.require(:short_url)
+          unless short_link.is_a?(String)
+            render json: { error: 'Invalid short_url' }, status: :bad_request
+            return
+          end
+
           full_url = DynamicLinks.resolve_short_url(short_link)
 
           if full_url
@@ -77,15 +92,22 @@ module DynamicLinks
         end
       rescue ActionController::ParameterMissing
         render json: { error: 'Missing required parameters' }, status: :bad_request
+      rescue ActiveRecord::ConnectionTimeoutError, ActiveRecord::ConnectionNotEstablished, ActiveRecord::AdapterTimeout => e
+        DynamicLinks::Logger.log_error(e, context: 'Database connection error')
+        render json: { error: 'Service temporarily unavailable' }, status: :service_unavailable
       rescue StandardError => e
-        DynamicLinks::Logger.log_error(e)
-        render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
+        DynamicLinks::Logger.log_error(e, context: 'expand short link')
+        render json: {
+          error: 'An error occurred while processing your request',
+          error_class: e.class.name
+        }, status: :internal_server_error
       end
 
       def find_or_create
-        url = params.require(:url)
-        api_key = params.require(:api_key)
-        expires_at = params[:expires_at]
+        params_tuple = extract_short_link_params
+        return if params_tuple.nil?
+
+        url, api_key, expires_at = params_tuple
 
         unless valid_api_key?(api_key)
           render json: { error: 'Invalid API key' }, status: :unauthorized
@@ -125,12 +147,53 @@ module DynamicLinks
         end
       rescue ActionController::ParameterMissing
         render json: { error: 'Missing required parameters' }, status: :bad_request
+      rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
+        DynamicLinks::Logger.log_error(e, context: 'Short URL collision')
+        render json: { error: 'Short URL generation conflict, please retry' }, status: :conflict
+      rescue ActiveRecord::ConnectionTimeoutError, ActiveRecord::ConnectionNotEstablished, ActiveRecord::AdapterTimeout => e
+        DynamicLinks::Logger.log_error(e, context: 'Database connection error')
+        render json: { error: 'Service temporarily unavailable' }, status: :service_unavailable
       rescue StandardError => e
-        DynamicLinks::Logger.log_error(e)
-        render json: { error: 'An error occurred while processing your request' }, status: :internal_server_error
+        DynamicLinks::Logger.log_error(e, context: 'find_or_create short link')
+        render json: {
+          error: 'An error occurred while processing your request',
+          error_class: e.class.name
+        }, status: :internal_server_error
       end
 
       private
+
+      # Pull and type-check the standard short-link params.
+      # Returns [url, api_key, expires_at] when valid, or nil when the
+      # request should be short-circuited with a 400 response (already
+      # rendered). Callers MUST `return` immediately if this returns nil.
+      def extract_short_link_params
+        url = params[:url]
+        api_key = params[:api_key]
+        expires_at = params[:expires_at]
+
+        if params[:api_key].nil? && params[:url].nil?
+          render json: { error: 'Missing required parameters' }, status: :bad_request
+          return nil
+        end
+
+        unless url.is_a?(String) && url.present?
+          render json: { error: 'Invalid url' }, status: :bad_request
+          return nil
+        end
+
+        unless api_key.is_a?(String) && api_key.present?
+          render json: { error: 'Invalid api_key' }, status: :bad_request
+          return nil
+        end
+
+        if expires_at.present? && !expires_at.is_a?(String)
+          render json: { error: 'Invalid expires_at' }, status: :bad_request
+          return nil
+        end
+
+        [url, api_key, expires_at]
+      end
 
       def check_rest_api_enabled
         return if DynamicLinks.configuration.enable_rest_api
@@ -147,7 +210,8 @@ module DynamicLinks
         end
 
         # Also check parameter sizes
-        return unless params[:url] && params[:url].length > 2083
+        url_param = params[:url]
+        return unless url_param.is_a?(String) && url_param.length > 2083
 
         render json: { error: 'URL too long' }, status: :content_too_large
         nil

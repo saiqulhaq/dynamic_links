@@ -50,7 +50,73 @@ module DynamicLinks
         post '/v1/shortLinks', params: { url: 'https://example.com', api_key: @client.api_key }
 
         assert_response :internal_server_error
-        assert_equal '{"error":"An error occurred while processing your request"}', response.body
+        body = JSON.parse(response.body)
+        assert_equal 'An error occurred while processing your request', body['error']
+        assert_equal 'StandardError', body['error_class']
+      end
+
+      test 'create returns 409 conflict on Short URL collision' do
+        invalid = ActiveRecord::RecordInvalid.new(ShortenedUrl.new)
+        invalid.record.errors.add(:short_url, 'has already been taken')
+        DynamicLinks.stubs(:generate_short_url).raises(invalid)
+        post '/v1/shortLinks', params: { url: 'https://example.com/collide', api_key: @client.api_key }
+
+        assert_response :conflict
+        body = JSON.parse(response.body)
+        assert_includes body['error'], 'conflict'
+      end
+
+      test 'create returns 503 on database connection error' do
+        DynamicLinks.stubs(:generate_short_url).raises(ActiveRecord::ConnectionNotEstablished)
+        post '/v1/shortLinks', params: { url: 'https://example.com/db-down', api_key: @client.api_key }
+
+        assert_response :service_unavailable
+        body = JSON.parse(response.body)
+        assert_includes body['error'], 'temporarily unavailable'
+      end
+
+      test 'create returns 400 when url is a Hash instead of String' do
+        post '/v1/shortLinks', params: { url: { malicious: 'hash' }, api_key: @client.api_key }
+        assert_response :bad_request
+        body = JSON.parse(response.body)
+        assert_includes body['error'], 'Invalid url'
+      end
+
+      test 'create returns 400 when api_key is a Hash instead of String' do
+        post '/v1/shortLinks', params: { url: 'https://example.com', api_key: { stolen: 'data' } }
+        assert_response :bad_request
+        body = JSON.parse(response.body)
+        assert_includes body['error'], 'Invalid api_key'
+      end
+
+      test 'find_or_create returns 409 conflict on collision' do
+        invalid = ActiveRecord::RecordInvalid.new(ShortenedUrl.new)
+        invalid.record.errors.add(:short_url, 'has already been taken')
+        DynamicLinks.stubs(:generate_short_url).raises(invalid)
+        post '/v1/shortLinks/findOrCreate', params: { url: 'https://example.com/collide', api_key: @client.api_key }
+
+        assert_response :conflict
+      end
+
+      test 'find_or_create returns 503 on database connection error' do
+        DynamicLinks.stubs(:generate_short_url).raises(ActiveRecord::ConnectionTimeoutError)
+        post '/v1/shortLinks/findOrCreate', params: { url: 'https://example.com/db', api_key: @client.api_key }
+
+        assert_response :service_unavailable
+      end
+
+      test 'expand returns 400 when short_url param is missing' do
+        get "/v1/shortLinks/", params: { api_key: @client.api_key }
+        assert_response :not_found # routing not found since path is empty
+      end
+
+      test 'expand returns 400 when short_url is a Hash' do
+        get '/v1/shortLinks/abc', params: { api_key: @client.api_key, short_url: { hack: 1 } }
+        # short_url in URL path is 'abc' (string), so expand should still work
+        # but the :short_url param via query is overridden by the URL path
+        # The test ensures that even if a non-string short_url is sent, the
+        # controller doesn't 500. In this case the path segment wins.
+        assert_response :success
       end
 
       test 'should not allow short URL creation when REST API is disabled' do

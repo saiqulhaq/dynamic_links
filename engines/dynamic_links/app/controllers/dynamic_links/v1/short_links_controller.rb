@@ -163,6 +163,11 @@ module DynamicLinks
 
       private
 
+      # Default lifetime for short links when the caller does not pass
+      # `expires_at`. After this window the redirect stops working and
+      # `find_or_create` will mint a fresh short code for the same URL.
+      DEFAULT_EXPIRES_IN = 3.months
+
       # Pull and type-check the standard short-link params.
       # Returns [url, api_key, expires_at] when valid, or nil when the
       # request should be short-circuited with a 400 response (already
@@ -170,7 +175,7 @@ module DynamicLinks
       def extract_short_link_params
         url = params[:url]
         api_key = params[:api_key]
-        expires_at = params[:expires_at]
+        expires_at = params[:expires_at].presence || DEFAULT_EXPIRES_IN.from_now.iso8601
 
         if params[:api_key].nil? && params[:url].nil?
           render json: { error: 'Missing required parameters' }, status: :bad_request
@@ -282,8 +287,11 @@ module DynamicLinks
       def valid_expires_at?(expires_at)
         return false if expires_at.blank?
 
-        # Try to parse as datetime
-        Time.zone.parse(expires_at)
+        # Strict ISO 8601 parsing so we reject malformed strings
+        # that `Time.zone.parse` silently coerces to nil/now.
+        parsed = Time.iso8601(expires_at)
+        return false if parsed <= Time.current
+
         true
       rescue ArgumentError, TypeError
         false

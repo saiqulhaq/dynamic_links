@@ -110,13 +110,14 @@ module DynamicLinks
         assert_response :not_found # routing not found since path is empty
       end
 
-      test 'expand returns 400 when short_url is a Hash' do
+      test 'expand does not 500 when short_url param is a Hash' do
         get '/v1/shortLinks/abc', params: { api_key: @client.api_key, short_url: { hack: 1 } }
         # short_url in URL path is 'abc' (string), so expand should still work
         # but the :short_url param via query is overridden by the URL path
         # The test ensures that even if a non-string short_url is sent, the
-        # controller doesn't 500. In this case the path segment wins.
-        assert_response :success
+        # controller doesn't 500. The path segment wins, so we get a clean
+        # 404 (no record for 'abc') rather than a 500.
+        assert_response :not_found
       end
 
       test 'should not allow short URL creation when REST API is disabled' do
@@ -307,9 +308,59 @@ module DynamicLinks
 
         post '/v1/shortLinks', params: { url: url, api_key: @client.api_key, expires_at: past_expires_at }
 
-        assert_response :internal_server_error
+        assert_response :bad_request
+        body = JSON.parse(@response.body)
+        assert_includes body['error'], 'Invalid expires_at format'
+      end
+
+      test 'create defaults expires_at to 3 months from now when not provided' do
+        DynamicLinks.configuration.enable_rest_api = true
+
+        url = "https://example.com/default-expiry-#{SecureRandom.hex(4)}"
+
+        post '/v1/shortLinks', params: { url: url, api_key: @client.api_key }
+
+        assert_response :created
+        record = DynamicLinks::ShortenedUrl.find_by(url: url, client_id: @client.id)
+        assert_not_nil record, 'expected ShortenedUrl to be persisted'
+        expected = 3.months.from_now
+        assert_in_delta expected.to_f, record.expires_at.to_f, 60,
+                        "expires_at should default to ~3 months from now, got #{record.expires_at}"
+      end
+
+      test 'find_or_create defaults expires_at to 3 months from now when not provided' do
+        DynamicLinks.configuration.enable_rest_api = true
+
+        url = "https://example.com/find-or-create-default-expiry-#{SecureRandom.hex(4)}"
+
+        post '/v1/shortLinks/findOrCreate', params: { url: url, api_key: @client.api_key }
+
+        assert_response :created
+        record = DynamicLinks::ShortenedUrl.find_by(url: url, client_id: @client.id)
+        assert_not_nil record
+        expected = 3.months.from_now
+        assert_in_delta expected.to_f, record.expires_at.to_f, 60
+      end
+
+      test 'find_or_create mints a new short URL when the existing one is expired' do
+        DynamicLinks.configuration.enable_rest_api = true
+
+        url = "https://example.com/recyclable-#{SecureRandom.hex(4)}"
+        original_short_url = "expired#{SecureRandom.hex(2)}"
+        expired = DynamicLinks::ShortenedUrl.new(
+          client: @client,
+          url: url,
+          short_url: original_short_url,
+          expires_at: 1.day.ago
+        )
+        expired.save(validate: false)
+
+        post '/v1/shortLinks/findOrCreate', params: { url: url, api_key: @client.api_key }
+
+        assert_response :created
         body = JSON.parse(response.body)
-        assert_includes body['error'], 'An error occurred while processing your request'
+        refute_equal "https://#{@client.hostname}/#{original_short_url}", body['shortLink'],
+                     'find_or_create should mint a fresh short URL once the existing one expires'
       end
     end
   end

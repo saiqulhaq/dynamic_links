@@ -113,6 +113,11 @@ module DynamicLinks
   def self.find_short_link(long_url, client)
     short_link = DynamicLinks::ShortenedUrl.find_by(url: long_url, client_id: client.id)
     return unless short_link
+    # Treat an expired short link as not-found so `find_or_create` mints
+    # a fresh short code for the same long URL once the previous one
+    # has passed its `expires_at`. Lets shortlinks be "reused" after
+    # the default 3-month lifetime.
+    return if short_link.expired?
 
     {
       short_url: "#{client.scheme}://#{client.hostname}/#{short_link.short_url}",

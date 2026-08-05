@@ -25,7 +25,7 @@ module DynamicLinks
       @strategy.stubs(:always_growing?).returns(true)
       @job.stubs(:storage).returns(@storage)
 
-      @storage.expects(:create!).with(client: @client, url: @url, short_url: "#{@short_url}11")
+      @storage.expects(:create!).with(client: @client, url: @url, short_url: "#{@short_url}11", expires_at: nil)
       @job.perform(@client, @url, "#{@short_url}11", @lock_key)
     end
 
@@ -33,7 +33,7 @@ module DynamicLinks
       @strategy.stubs(:always_growing?).returns(false)
       @job.stubs(:storage).returns(@storage)
 
-      @storage.expects(:find_or_create!).with(@client, "#{@short_url}12", @url)
+      @storage.expects(:find_or_create!).with(@client, "#{@short_url}12", @url, expires_at: nil)
       @job.perform(@client, @url, "#{@short_url}12", @lock_key)
     end
 
@@ -41,7 +41,7 @@ module DynamicLinks
       @strategy.stubs(:always_growing?).returns(true)
       @job.stubs(:storage).returns(@storage)
 
-      @storage.expects(:create!).with(client: @client, url: @url, short_url: "#{@short_url}13")
+      @storage.expects(:create!).with(client: @client, url: @url, short_url: "#{@short_url}13", expires_at: nil)
       @job.perform(@client, @url, "#{@short_url}13", @lock_key)
       refute @locker.locked?(@lock_key)
     end

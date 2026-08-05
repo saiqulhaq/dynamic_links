@@ -41,6 +41,40 @@ module DynamicLinks
       assert_equal "#{@client.scheme}://#{@client.hostname}/#{@short_url}", result
     end
 
+    test 'shorten retries on short_url collision and succeeds on a later attempt' do
+      @strategy.stubs(:shorten).returns('collide1', 'collide2', 'unique1')
+      @strategy.stubs(:always_growing?).returns(true)
+      invalid = ActiveRecord::RecordInvalid.new(ShortenedUrl.new)
+      @storage.stubs(:create!).raises(invalid).then.raises(invalid).then.returns(ShortenedUrl.new)
+
+      result = @shortener.shorten(@client, @url)
+
+      assert_equal "#{@client.scheme}://#{@client.hostname}/unique1", result
+    end
+
+    test 'shorten raises after max attempts when collisions persist' do
+      @strategy.stubs(:shorten).returns('a', 'b', 'c')
+      @strategy.stubs(:always_growing?).returns(true)
+      invalid = ActiveRecord::RecordInvalid.new(ShortenedUrl.new)
+      @storage.stubs(:create!).raises(invalid)
+      DynamicLinks::Logger.stubs(:log_error)
+
+      assert_raises(ActiveRecord::RecordInvalid) do
+        @shortener.shorten(@client, @url)
+      end
+    end
+
+    test 'shorten retries find_or_create on RecordInvalid when not always_growing' do
+      @strategy.stubs(:shorten).returns('collide1', 'unique1')
+      @strategy.stubs(:always_growing?).returns(false)
+      invalid = ActiveRecord::RecordInvalid.new(ShortenedUrl.new)
+      @storage.stubs(:find_or_create!).raises(invalid).then.returns(ShortenedUrl.new)
+
+      result = @shortener.shorten(@client, @url)
+
+      assert_equal "#{@client.scheme}://#{@client.hostname}/unique1", result
+    end
+
     test 'shorten should handle exceptions and log errors' do
       @strategy.stubs(:shorten).raises(ShorteningFailed.new('shortening failed'))
       DynamicLinks::Logger.expects(:log_error).with(regexp_matches(/Error shortening URL/))
@@ -55,7 +89,7 @@ module DynamicLinks
       @locker.stubs(:generate_lock_key).returns(lock_key)
       @locker.stubs(:lock_if_absent).yields
       @strategy.stubs(:shorten).returns(@short_url)
-      @async_worker.expects(:perform_later).with(@client, @url, @short_url, lock_key)
+      @async_worker.expects(:perform_later).with(@client, @url, @short_url, lock_key, nil)
 
       @shortener.shorten_async(@client, @url)
     end

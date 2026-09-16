@@ -147,6 +147,19 @@ module DynamicLinks
         assert_match(/http/, body['shortLink'])
       end
 
+      test 'should create or find percent-encoded Unicode path URL' do
+        DynamicLinks.configuration.enable_rest_api = true
+
+        url = 'https://web.hungryhub.com/en/restaurants/bitelist/%E0%B9%81%E0%B8%96%E0%B8%A7%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99-prykwr/web'
+
+        post '/v1/shortLinks/findOrCreate', params: { url: url, api_key: @client.api_key }
+
+        assert_response :created
+        body = JSON.parse(response.body)
+        assert_match(/http/, body['shortLink'])
+        assert_match(/\?preview=true/, body['previewLink'])
+      end
+
       test 'should return bad request for invalid URL' do
         DynamicLinks.configuration.enable_rest_api = true
 

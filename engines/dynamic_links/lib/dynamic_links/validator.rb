@@ -40,7 +40,7 @@ module DynamicLinks
       decoded_url = CGI.unescape(url)
       return false if decoded_url.include?("\r") || decoded_url.include?("\n")
 
-      uri = URI.parse(decoded_url)
+      uri = URI.parse(url)
 
       # Only allow HTTP and HTTPS protocols
       return false unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)

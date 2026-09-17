@@ -47,8 +47,14 @@ module DynamicLinks
       rescue ActionController::ParameterMissing
         render json: { error: 'Missing required parameters' }, status: :bad_request
       rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
-        DynamicLinks::Logger.log_error(e, context: 'Short URL collision')
-        render json: { error: 'Short URL generation conflict, please retry' }, status: :conflict
+        if short_code_collision?(e)
+          DynamicLinks::Logger.log_error(e, context: 'Short URL collision')
+          render json: { error: 'Short URL generation conflict, please retry' }, status: :conflict
+        else
+          # Other validation errors (invalid expires_at, bad short_code
+          # format, etc.) must surface as 500, not as misleading 409.
+          raise e
+        end
       rescue ActiveRecord::ConnectionTimeoutError, ActiveRecord::ConnectionNotEstablished, ActiveRecord::AdapterTimeout => e
         DynamicLinks::Logger.log_error(e, context: 'Database connection error')
         render json: { error: 'Service temporarily unavailable' }, status: :service_unavailable
@@ -148,8 +154,12 @@ module DynamicLinks
       rescue ActionController::ParameterMissing
         render json: { error: 'Missing required parameters' }, status: :bad_request
       rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
-        DynamicLinks::Logger.log_error(e, context: 'Short URL collision')
-        render json: { error: 'Short URL generation conflict, please retry' }, status: :conflict
+        if short_code_collision?(e)
+          DynamicLinks::Logger.log_error(e, context: 'Short URL collision')
+          render json: { error: 'Short URL generation conflict, please retry' }, status: :conflict
+        else
+          raise e
+        end
       rescue ActiveRecord::ConnectionTimeoutError, ActiveRecord::ConnectionNotEstablished, ActiveRecord::AdapterTimeout => e
         DynamicLinks::Logger.log_error(e, context: 'Database connection error')
         render json: { error: 'Service temporarily unavailable' }, status: :service_unavailable
@@ -163,11 +173,6 @@ module DynamicLinks
 
       private
 
-      # Default lifetime for short links when the caller does not pass
-      # `expires_at`. After this window the redirect stops working and
-      # `find_or_create` will mint a fresh short code for the same URL.
-      DEFAULT_EXPIRES_IN = 3.months
-
       # Pull and type-check the standard short-link params.
       # Returns [url, api_key, expires_at] when valid, or nil when the
       # request should be short-circuited with a 400 response (already
@@ -175,7 +180,7 @@ module DynamicLinks
       def extract_short_link_params
         url = params[:url]
         api_key = params[:api_key]
-        expires_at = params[:expires_at].presence || DEFAULT_EXPIRES_IN.from_now.iso8601
+        expires_at = params[:expires_at]
 
         if params[:api_key].nil? && params[:url].nil?
           render json: { error: 'Missing required parameters' }, status: :bad_request
@@ -295,6 +300,21 @@ module DynamicLinks
         true
       rescue ArgumentError, TypeError
         false
+      end
+
+      # Distinguish a short-code uniqueness collision from other
+      # validation failures so we don't return a misleading 409 for
+      # unrelated errors (invalid expires_at, bad short_code format,
+      # etc.). Only RecordNotUnique or RecordInvalid scoped to
+      # :short_url uniqueness is a true collision.
+      def short_code_collision?(error)
+        return true if error.is_a?(ActiveRecord::RecordNotUnique)
+
+        return false unless error.is_a?(ActiveRecord::RecordInvalid)
+
+        Array(error.record&.errors&.[](:short_url)).any? do |msg|
+          msg.to_s.include?('taken') || msg.to_s.include?('uniqueness')
+        end
       end
     end
   end

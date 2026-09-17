@@ -68,5 +68,45 @@ module DynamicLinks
 
       assert_equal "https://#{https_client.hostname}/secure1", result[:shortLink]
     end
+
+    test 'does NOT treat an unrelated site URL as our short link' do
+      existing = ShortenedUrl.create!(
+        client: @client,
+        url: 'https://example.com/target',
+        short_url: 'collide0'
+      )
+
+      # A foreign site happens to share a path that matches our short
+      # code. Without the host check this would incorrectly return
+      # our short link for an unrelated URL.
+      result = DynamicLinks.generate_short_url(
+        "https://another-site.example/#{existing.short_url}",
+        @client
+      )
+
+      refute_equal "#{@client.scheme}://#{@client.hostname}/#{existing.short_url}", result[:shortLink],
+                   'must not resolve foreign URLs as our short links'
+    end
+
+    test 'does NOT treat mismatched scheme as our short link' do
+      http_client = DynamicLinks::Client.create!(
+        name: 'HTTP', api_key: 'http_key', hostname: 'plain.example.com', scheme: 'http'
+      )
+      existing = ShortenedUrl.create!(
+        client: http_client,
+        url: 'https://target.example.com/page',
+        short_url: 'schemismatch'
+      )
+
+      # The client is http-only, but the input URL is https — the
+      # scheme must match before we resolve.
+      result = DynamicLinks.generate_short_url(
+        "https://#{http_client.hostname}/#{existing.short_url}",
+        http_client
+      )
+
+      refute_equal "http://#{http_client.hostname}/#{existing.short_url}", result[:shortLink],
+                   'must not resolve URL whose scheme does not match the stored client'
+    end
   end
 end

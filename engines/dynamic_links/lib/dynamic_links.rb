@@ -100,7 +100,14 @@ module DynamicLinks
     record = DynamicLinks::ShortenedUrl.find_by(short_url: short_code)
     return nil unless record
 
+    # Guard against treating an unrelated site's URL as our short link.
+    # `abc1234` may live on our domain, but `https://other-site/abc1234`
+    # is not the same target — the host (and scheme) must match the
+    # stored client's host before we resolve to an existing short link.
     owner = record.client
+    return nil unless uri.host.casecmp(owner.hostname).zero?
+    return nil unless uri.scheme.casecmp(owner.scheme).zero?
+
     "#{owner.scheme}://#{owner.hostname}/#{record.short_url}"
   rescue URI::InvalidURIError
     nil
@@ -113,11 +120,6 @@ module DynamicLinks
   def self.find_short_link(long_url, client)
     short_link = DynamicLinks::ShortenedUrl.find_by(url: long_url, client_id: client.id)
     return unless short_link
-    # Treat an expired short link as not-found so `find_or_create` mints
-    # a fresh short code for the same long URL once the previous one
-    # has passed its `expires_at`. Lets shortlinks be "reused" after
-    # the default 3-month lifetime.
-    return if short_link.expired?
 
     {
       short_url: "#{client.scheme}://#{client.hostname}/#{short_link.short_url}",

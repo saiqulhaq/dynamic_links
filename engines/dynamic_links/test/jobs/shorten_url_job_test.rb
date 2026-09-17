@@ -58,5 +58,61 @@ module DynamicLinks
 
       assert @locker.locked?(@lock_key)
     end
+
+    test 'perform retries on short URL collision and mints a new code on success' do
+      @strategy.stubs(:always_growing?).returns(true)
+      @job.stubs(:storage).returns(@storage)
+      # First strategy.shorten returns the initial code; after the
+      # collision the job asks the strategy for a fresh code, and the
+      # second create! succeeds.
+      @strategy.stubs(:shorten).returns('newcode99')
+      @storage.stubs(:create!)
+        .with(client: @client, url: @url, short_url: "#{@short_url}14", expires_at: nil)
+        .raises(duplicate_short_url_error)
+      @storage.expects(:create!)
+        .with(client: @client, url: @url, short_url: 'newcode99', expires_at: nil)
+        .returns(true)
+
+      @job.perform(@client, @url, "#{@short_url}14", @lock_key)
+      refute @locker.locked?(@lock_key)
+    end
+
+    test 'perform re-raises after max collision attempts' do
+      @strategy.stubs(:always_growing?).returns(true)
+      @job.stubs(:storage).returns(@storage)
+      @strategy.stubs(:shorten).returns('retry1', 'retry2', 'retry3')
+      @storage.stubs(:create!).raises(duplicate_short_url_error)
+      DynamicLinks::Logger.stubs(:log_error)
+
+      assert_raises(ActiveRecord::RecordInvalid) do
+        @job.perform(@client, @url, "#{@short_url}15", @lock_key)
+      end
+    end
+
+    test 'perform does NOT retry on non-collision RecordInvalid' do
+      @strategy.stubs(:always_growing?).returns(true)
+      @job.stubs(:storage).returns(@storage)
+      @strategy.stubs(:shorten).returns("#{@short_url}16")
+      record = DynamicLinks::ShortenedUrl.new
+      record.errors.add(:expires_at, 'must be in the future')
+      invalid = ActiveRecord::RecordInvalid.new(record)
+      @storage.stubs(:create!).raises(invalid)
+      DynamicLinks::Logger.stubs(:log_error)
+
+      assert_raises(ActiveRecord::RecordInvalid) do
+        @job.perform(@client, @url, "#{@short_url}16", @lock_key)
+      end
+    end
+
+    private
+
+    # RecordInvalid with the :short_url uniqueness message — the same
+    # shape Rails raises for the model's `validates :short_url,
+    # uniqueness: { scope: :client_id }` constraint.
+    def duplicate_short_url_error
+      record = DynamicLinks::ShortenedUrl.new
+      record.errors.add(:short_url, 'has already been taken')
+      ActiveRecord::RecordInvalid.new(record)
+    end
   end
 end

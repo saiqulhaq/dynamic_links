@@ -313,54 +313,17 @@ module DynamicLinks
         assert_includes body['error'], 'Invalid expires_at format'
       end
 
-      test 'create defaults expires_at to 3 months from now when not provided' do
+      test 'create defaults expires_at to nil when not provided' do
         DynamicLinks.configuration.enable_rest_api = true
 
-        url = "https://example.com/default-expiry-#{SecureRandom.hex(4)}"
+        url = "https://example.com/no-expiry-#{SecureRandom.hex(4)}"
 
         post '/v1/shortLinks', params: { url: url, api_key: @client.api_key }
 
         assert_response :created
         record = DynamicLinks::ShortenedUrl.find_by(url: url, client_id: @client.id)
         assert_not_nil record, 'expected ShortenedUrl to be persisted'
-        expected = 3.months.from_now
-        assert_in_delta expected.to_f, record.expires_at.to_f, 60,
-                        "expires_at should default to ~3 months from now, got #{record.expires_at}"
-      end
-
-      test 'find_or_create defaults expires_at to 3 months from now when not provided' do
-        DynamicLinks.configuration.enable_rest_api = true
-
-        url = "https://example.com/find-or-create-default-expiry-#{SecureRandom.hex(4)}"
-
-        post '/v1/shortLinks/findOrCreate', params: { url: url, api_key: @client.api_key }
-
-        assert_response :created
-        record = DynamicLinks::ShortenedUrl.find_by(url: url, client_id: @client.id)
-        assert_not_nil record
-        expected = 3.months.from_now
-        assert_in_delta expected.to_f, record.expires_at.to_f, 60
-      end
-
-      test 'find_or_create mints a new short URL when the existing one is expired' do
-        DynamicLinks.configuration.enable_rest_api = true
-
-        url = "https://example.com/recyclable-#{SecureRandom.hex(4)}"
-        original_short_url = "expired#{SecureRandom.hex(2)}"
-        expired = DynamicLinks::ShortenedUrl.new(
-          client: @client,
-          url: url,
-          short_url: original_short_url,
-          expires_at: 1.day.ago
-        )
-        expired.save(validate: false)
-
-        post '/v1/shortLinks/findOrCreate', params: { url: url, api_key: @client.api_key }
-
-        assert_response :created
-        body = JSON.parse(response.body)
-        refute_equal "https://#{@client.hostname}/#{original_short_url}", body['shortLink'],
-                     'find_or_create should mint a fresh short URL once the existing one expires'
+        assert_nil record.expires_at, "expires_at should be nil by default, got #{record.expires_at}"
       end
     end
   end

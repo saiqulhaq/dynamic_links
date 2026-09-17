@@ -37,6 +37,11 @@ module DynamicLinks
         end
         URI::Generic.build({ scheme: client.scheme, host: client.hostname, path: "/#{short_url}" }).to_s
       rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
+        # Only retry when the failure is a short-code uniqueness
+        # collision. Other validation errors (invalid expires_at, bad
+        # short_code format, etc.) must NOT be retried as collisions.
+        raise e unless short_code_collision?(e)
+
         DynamicLinks::Logger.log_error("Short URL collision on attempt #{attempts}/#{max_attempts} for client #{client&.id}: #{e.message}")
         raise e if attempts >= max_attempts
         retry
@@ -80,6 +85,24 @@ module DynamicLinks
     rescue ArgumentError, TypeError => e
       DynamicLinks::Logger.log_error("Error parsing expires_at: #{e.message}")
       nil
+    end
+
+    # Distinguish a short-code uniqueness collision from other
+    # validation failures so we don't retry unrelated errors.
+    # - RecordNotUnique: PG-level unique constraint hit (race)
+    # - RecordInvalid: only when :short_url carries the
+    #   "has already been taken" message from `validates :short_url,
+    #   uniqueness: { scope: :client_id }`. Other RecordInvalid errors
+    #   (e.g. invalid expires_at, bad short_code characters) are NOT
+    #   collisions and must propagate without retry.
+    def short_code_collision?(error)
+      return true if error.is_a?(ActiveRecord::RecordNotUnique)
+
+      return false unless error.is_a?(ActiveRecord::RecordInvalid)
+
+      Array(error.record&.errors&.[](:short_url)).any? do |msg|
+        msg.to_s.include?('taken') || msg.to_s.include?('uniqueness')
+      end
     end
   end
 end

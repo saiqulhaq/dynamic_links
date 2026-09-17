@@ -29,7 +29,7 @@ module DynamicLinks
       test 'shorten returns a string of at least 5 characters' do
         url = 'https://example.com'
         result = @url_shortener.shorten(url)
-        assert result.length >= 5
+        assert result.length >= DynamicLinks::ShorteningStrategies::MD5Strategy::MIN_LENGTH
       end
 
       test 'shorten returns a string of at least 7 characters' do

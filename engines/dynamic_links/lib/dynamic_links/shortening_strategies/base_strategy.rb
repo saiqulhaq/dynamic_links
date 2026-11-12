@@ -3,7 +3,7 @@
 module DynamicLinks
   module ShorteningStrategies
     class BaseStrategy
-      MIN_LENGTH = 5
+      MIN_LENGTH = 7
 
       BASE62_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.freeze
 

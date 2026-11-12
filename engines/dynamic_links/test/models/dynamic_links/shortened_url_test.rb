@@ -144,12 +144,13 @@ module DynamicLinks
     end
 
     test 'expired? should return true for expired url' do
-      shortened_url = DynamicLinks::ShortenedUrl.create!(
+      shortened_url = DynamicLinks::ShortenedUrl.new(
         client: @client,
         url: @url,
         short_url: 'expired',
         expires_at: 1.day.ago
       )
+      shortened_url.save(validate: false)
       assert shortened_url.expired?, 'Expected shortened_url to be expired'
     end
 

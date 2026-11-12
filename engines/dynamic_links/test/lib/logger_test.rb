@@ -28,5 +28,18 @@ module DynamicLinks
 
       DynamicLinks::Logger.log_error(message)
     end
+
+    test 'log_error should format exception objects with class and message' do
+      ex = StandardError.new('boom')
+      @rails_logger.expects(:error).with(regexp_matches(/StandardError: boom/))
+
+      DynamicLinks::Logger.log_error(ex)
+    end
+
+    test 'log_error should include context when provided' do
+      @rails_logger.expects(:error).with(regexp_matches(/Shortener: StandardError: boom/))
+
+      DynamicLinks::Logger.log_error(StandardError.new('boom'), context: 'Shortener')
+    end
   end
 end
